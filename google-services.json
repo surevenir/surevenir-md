@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "127690311822",
+    "project_id": "surevenir",
+    "storage_bucket": "surevenir.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:127690311822:android:082ad3a2248dbae58361df",
+        "android_client_info": {
+          "package_name": "com.capstone.surevenir"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "127690311822-bl26422gb24n7998uipgof6h2io1s3lq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.capstone.surevenir",
+            "certificate_hash": "6ed2db0f31bda335a3f5b0cb040de249ccd2d965"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzZqrBD1oCTkhyTsSf9TWQnxTqHy9VbRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

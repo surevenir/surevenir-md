@@ -1,6 +1,5 @@
-package com.capstone.survenir.ui.splash
+package com.capstone.surevenir.ui.splash
 
-import android.window.SplashScreen
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -13,20 +12,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.capstone.survenir.R
-import com.capstone.survenir.ui.theme.CustomFontFamily
-import com.capstone.survenir.ui.theme.MyAppTheme
+import com.capstone.surevenir.R
+import com.capstone.surevenir.ui.theme.CustomFontFamily
+import com.capstone.surevenir.ui.theme.MyAppTheme
 import kotlinx.coroutines.delay
 
 @Composable

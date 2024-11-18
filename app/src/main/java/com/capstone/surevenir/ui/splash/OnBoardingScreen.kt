@@ -1,4 +1,4 @@
-package com.capstone.survenir.ui.splash
+package com.capstone.surevenir.ui.splash
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -27,9 +27,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.capstone.survenir.R
-import com.capstone.survenir.model.OnboardingPage
+import com.capstone.surevenir.R
+import com.capstone.surevenir.model.OnboardingPage
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator

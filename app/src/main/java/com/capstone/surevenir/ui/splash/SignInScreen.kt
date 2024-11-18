@@ -1,5 +1,6 @@
-package com.capstone.survenir.ui.splash
+package com.capstone.surevenir.ui.splash
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -49,13 +51,25 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.capstone.survenir.R
+import com.capstone.surevenir.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+
+private const val GOOGLE_SIGN_IN_CODE = 1001
 
 @Composable
 fun SignInScreen(navController: NavController){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val googleSignInClient = GoogleSignIn.getClient(
+        context,
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+    )
 
     Column (modifier = Modifier
         .fillMaxSize()
@@ -150,7 +164,6 @@ fun SignInScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Sign in button
         Button(
             onClick = { /* Handle sign in */ },
             modifier = Modifier
@@ -183,8 +196,11 @@ fun SignInScreen(navController: NavController){
         )
 
         Spacer(modifier = Modifier.height(20.dp))
+        Button(onClick = {
+            val signInIntent = googleSignInClient.signInIntent
+            (context as Activity).startActivityForResult(signInIntent, GOOGLE_SIGN_IN_CODE)
 
-        Button(onClick = { /*TODO*/ },
+        },
             modifier = Modifier
                 .width(500.dp)
                 .border(0.2.dp, Color.Black, RoundedCornerShape(40.dp))

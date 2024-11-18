@@ -1,4 +1,4 @@
-package com.capstone.survenir.model
+package com.capstone.surevenir.model
 
 import androidx.annotation.DrawableRes
 

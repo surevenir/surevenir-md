@@ -1,4 +1,4 @@
-package com.capstone.survenir.ui.splash
+package com.capstone.surevenir.ui.splash
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,10 +45,24 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.capstone.survenir.R
+import androidx.compose.ui.platform.LocalContext
+import com.capstone.surevenir.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
 @Composable
 fun SignUpScreen(navController: NavController){
+
+    val context = LocalContext.current
+
+    val googleSignInClient = GoogleSignIn.getClient(
+        context,
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+    )
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -152,7 +166,6 @@ fun SignUpScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Sign in button
         Button(
             onClick = { /* Handle sign in */ },
             modifier = Modifier
@@ -169,7 +182,6 @@ fun SignUpScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(25.dp))
 
-        // Sign up text
         Text(
             text = buildAnnotatedString {
                 withStyle(style = SpanStyle(color = Color(0xFFF707B81))){

@@ -1,4 +1,4 @@
-package com.capstone.survenir
+package com.capstone.surevenir
 
 import org.junit.Test
 
