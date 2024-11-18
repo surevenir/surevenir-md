@@ -1,14 +1,15 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
-    namespace = "com.capstone.survenir"
+    namespace = "com.capstone.surevenir"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.capstone.survenir"
+        applicationId = "com.capstone.surevenir"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -45,10 +46,13 @@ android {
 }
 
 dependencies {
-    implementation("androidx.compose.material:material-icons-extended:1.0.5")
-    implementation ("com.google.accompanist:accompanist-pager:0.23.1")
-    implementation ("androidx.compose.material3:material3:1.3.1")
-    implementation ("com.google.accompanist:accompanist-pager-indicators:0.23.1")
+    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+    implementation ("com.google.android.gms:play-services-auth:21.2.0")
+    implementation ("com.google.firebase:firebase-auth-ktx")
+    implementation(libs.androidx.material.icons.extended)
+    implementation (libs.accompanist.pager)
+    implementation (libs.androidx.material3)
+    implementation (libs.accompanist.pager.indicators)
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.material)
