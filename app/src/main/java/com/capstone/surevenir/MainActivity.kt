@@ -1,6 +1,7 @@
 
 package com.capstone.surevenir
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,13 +10,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.capstone.surevenir.helper.UserPreferences
+import com.capstone.surevenir.ui.splash.FavoritesScreen
+import com.capstone.surevenir.ui.splash.ForgotPassword
 import com.capstone.surevenir.ui.splash.Home
 import com.capstone.surevenir.ui.splash.OnBoardingScreen
+import com.capstone.surevenir.ui.splash.ProfileScreen
+import com.capstone.surevenir.ui.splash.ScanScreen
+import com.capstone.surevenir.ui.splash.ShopScreen
 import com.capstone.surevenir.ui.splash.SignInScreen
 import com.capstone.surevenir.ui.splash.SignUpScreen
 import com.capstone.surevenir.ui.splash.SplashScreen
@@ -24,10 +34,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var navController: NavController
+    private lateinit var navController: NavHostController
 
     companion object {
         private const val GOOGLE_SIGN_IN_CODE = 1001
@@ -37,13 +48,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyAppTheme {
-                Surface(modifier = Modifier.fillMaxSize(),
-                ) {
-                  MainScreen()
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    navController = rememberNavController()
+                    MainScreen(navController)
                 }
             }
         }
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -52,7 +64,7 @@ class MainActivity : ComponentActivity() {
             try {
                 val account = task.getResult(ApiException::class.java)
                 println("Google Sign-In Success: ${account.displayName}")
-                firebaseAuthWithGoogle(account.idToken!!, navController)
+                firebaseAuthWithGoogle(account.idToken!!, navController, this)
             } catch (e: ApiException) {
                 println("Google Sign-In failed: ${e.statusCode}")
                 println("Error message: ${e.message}")
@@ -65,31 +77,42 @@ class MainActivity : ComponentActivity() {
 
 
 
-private fun firebaseAuthWithGoogle(idToken: String, navController: NavController) {
+private fun firebaseAuthWithGoogle(idToken: String, navController: NavHostController, context: Context) {
+
+
     val credential = GoogleAuthProvider.getCredential(idToken, null)
     FirebaseAuth.getInstance().signInWithCredential(credential)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                println("Sign-In Successful")
-                navController.navigate("home")
+                val user = task.result?.user
+                val token = user?.uid // Ambil UID pengguna sebagai token
+
+                // Simpan login state dan token ke DataStore
+                val userPreferences = UserPreferences(context)
+                (context as ComponentActivity).lifecycleScope.launch {
+                    userPreferences.saveLoginState(isLoggedIn = true, token = token ?: "", email = user?.email ?: "")
+                }
+
+                // Navigasi ke Home
+                navController.navigate("home") {
+                    popUpTo("splash") { inclusive = true }
+                }
             } else {
                 println("Sign-In Failed: ${task.exception?.message}")
+                task.exception?.printStackTrace()
             }
         }
 }
 
 
 @Composable
-fun MainScreen() {
-    val navController = rememberNavController()
-
+fun MainScreen(navController: NavHostController) {
     NavHost(navController, startDestination = "splash") {
         composable("splash") {
-            SplashScreen {
-                navController.navigate("onboarding") {
-                    popUpTo("splash") { inclusive = true }
-                }
-            }
+            SplashScreen(
+                navigateToHome = { navController.navigate("home") { popUpTo("splash") { inclusive = true } } },
+                navigateToSignIn = { navController.navigate("signIn") { popUpTo("splash") { inclusive = true } } }
+            )
         }
         composable("onboarding") {
             OnBoardingScreen(navController = navController)
@@ -100,10 +123,18 @@ fun MainScreen() {
         composable("signIn") {
             SignInScreen(navController = navController)
         }
-        composable("signUp") { SignUpScreen(navController = navController) }
+        composable("forgotPassword") {
+            ForgotPassword(navController = navController)
+        }
+        composable("signUp") { SignUpScreen(navController = navController)
+        }
+        composable("shop") { ShopScreen(navController) }
+        composable("scan") { ScanScreen(navController) }
+        composable("favorites") { FavoritesScreen(navController) }
+        composable("profile") { ProfileScreen(navController) }
     }
-
 }
+
 
 
 

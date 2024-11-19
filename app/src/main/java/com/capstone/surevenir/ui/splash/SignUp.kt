@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -47,26 +50,31 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
 import com.capstone.surevenir.R
+import com.capstone.surevenir.ui.CustomPasswordField
+import com.capstone.surevenir.ui.CustomTextField
+import com.capstone.surevenir.ui.SuccessDialog
+import com.capstone.surevenir.ui.isValidEmail
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SignUpScreen(navController: NavController){
 
-    val context = LocalContext.current
-
-    val googleSignInClient = GoogleSignIn.getClient(
-        context,
-        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
-    )
-
+    val auth = FirebaseAuth.getInstance() // Instance FirebaseAuth
+    val showDialog = remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var nameError by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    SuccessDialog(navController, showDialog)
+
 
     Column (modifier = Modifier
         .fillMaxSize()
@@ -112,118 +120,131 @@ fun SignUpScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        TextField(
+        // TextField untuk Name
+        CustomTextField(
             value = name,
-            onValueChange = { name = it },
-            label = { Text("Name") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFFE9E9EC)),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            onValueChange = {
+                name = it
+                nameError = if (name.isEmpty()) "Name is required" else ""
+            },
+            label = "Name",
+            isError = nameError.isNotEmpty(),
+            errorMessage = nameError
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        TextField(
+// TextField untuk Email
+        CustomTextField(
             value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFFE9E9EC)),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            onValueChange = {
+                email = it
+                emailError = if (email.isEmpty()) "Email is required" else if (!isValidEmail(email)) "Invalid email format" else ""
+            },
+            label = "Email",
+            isError = emailError.isNotEmpty(),
+            errorMessage = emailError
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        TextField(
-            value = password,
-            onValueChange = {password = it},
-            label = { Text(text = "Password") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(Color(0xFFE9E9EC)),
-            singleLine = true,
-            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                val image = if (passwordVisibility) {
-                    Icons.Filled.Visibility
-                } else {
-                    Icons.Filled.VisibilityOff
-                }
-                IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
-                    Icon(imageVector = image, contentDescription = null)
-                }
-            }
+// TextField untuk Password
+        CustomPasswordField(
+            password = password,
+            onPasswordChange = {
+                password = it
+                passwordError = if (password.isEmpty()) "Password is required" else if (password.length < 8) "Password must be more than 8 chars." else ""
+            },
+            passwordVisibility = passwordVisibility,
+            onVisibilityChange = { passwordVisibility = !passwordVisibility },
+            isError = passwordError.isNotEmpty(),
+            errorMessage = passwordError
         )
+
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         Button(
-            onClick = { /* Handle sign in */ },
+            onClick = {
+                nameError = if (name.isEmpty()) "Name is required" else ""
+                emailError = if (email.isEmpty()) "Email is required" else if (!isValidEmail(email)) "Invalid email format" else ""
+                passwordError = if (password.isEmpty()) "Password is required" else if (password.length < 8) "Password must be more than 8 chars." else ""
+
+                if (nameError.isEmpty() && emailError.isEmpty() && passwordError.isEmpty()) {
+                    isLoading = true
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener {
+                            isLoading = false
+                            if (it.isSuccessful) {
+                                showDialog.value = true
+                            } else {
+                                // Tampilkan error dari Firebase
+                                errorMessage = it.exception?.message.toString()
+                            }
+                        }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(20.dp),
+            enabled = !isLoading
         ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(text = "Sign Up", fontFamily = sfui_semibold)
+            }
+        }
+
+/// Tampilkan error di atas tombol jika ada
+        if (errorMessage.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp)) // Memberi jarak dari elemen sebelumnya
             Text(
-                text = "Sign Up",
-                fontFamily = sfui_semibold,
+                text = errorMessage,
+                color = Color.Red, // Warna merah untuk teks error
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 8.dp), // Tambahkan padding jika diperlukan
+                style = MaterialTheme.typography.bodySmall // Atur gaya teks agar sesuai
             )
         }
+
+        Spacer(modifier = Modifier.height(8.dp)) // Memberi jarak sebelum tombol
+
 
         Spacer(modifier = Modifier.height(25.dp))
 
-        Text(
-            text = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = Color(0xFFF707B81))){
-                    append("Already have an account? ")
-                }
-                withStyle(style = SpanStyle(color = Color(0xFFFFA726))){
-                    append("Sign in")
-                }
-            },
-            fontSize = 15.sp,
-            fontFamily = sfui_text,
-            style = MaterialTheme.typography.bodySmall,
+
+        Row(
             modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+        ) {
+            Text(
+                text = "Already have an account? ",
+                fontSize = 15.sp,
+                fontFamily = sfui_text,
+                color = Color(0xFFF707B81),
+                style = MaterialTheme.typography.bodySmall,)
+            Text(
+                text = "Sign in",
+                fontSize = 15.sp,
+                fontFamily = sfui_text,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFFFFA726),
+                modifier = Modifier.clickable {
+                    navController.navigate("signIn")
+                }
+            )
+        }
+
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        Text(
-            text = "Or sign up with",
-            color = Color(0xFFF707B81),
-            fontSize = 15.sp,
-            fontFamily = sfui_text,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-        )
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Button(onClick = { /*TODO*/ },
-            modifier = Modifier
-                .width(500.dp)
-                .border(0.2.dp, Color.Black, RoundedCornerShape(40.dp))
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo_google),
-                contentDescription = "Login Google",
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Continue with Google", color = Color.Black)
-        }
     }
 }

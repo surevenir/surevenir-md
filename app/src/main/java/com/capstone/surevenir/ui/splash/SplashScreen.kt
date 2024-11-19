@@ -14,87 +14,72 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.capstone.surevenir.R
+import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.ui.theme.CustomFontFamily
 import com.capstone.surevenir.ui.theme.MyAppTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @Composable
-fun SplashScreen(navigateToNextScreen: () -> Unit) {
+fun SplashScreen(navigateToHome: () -> Unit, navigateToSignIn: () -> Unit) {
+    val context = LocalContext.current
+    val userPreferences = UserPreferences(context)
+    var isLoggedIn by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
 
-    val alpha = remember { Animatable(0f) }
-
-
+    // Mengumpulkan status login dari DataStore
     LaunchedEffect(Unit) {
-        alpha.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 1500)
-        )
-        delay(2000)
-        navigateToNextScreen()
+        userPreferences.isLoggedIn.collect { loginState ->
+            isLoggedIn = loginState
+            isLoading = false
+        }
     }
 
+    // Navigasi setelah proses SplashScreen selesai
+    LaunchedEffect(isLoading) {
+        if (!isLoading) {
+            if (isLoggedIn) {
+                navigateToHome() // Navigasi ke Home jika user sudah login
+            } else {
+                navigateToSignIn() // Navigasi ke Sign In jika belum login
+            }
+        }
+    }
+
+    // Tampilan SplashScreen
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8E7DA)), // Warna latar belakang mirip seperti pada gambar
+            .background(Color(0xFFF8E7DA)),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(id = R.drawable.logosure), // Ganti dengan ID logo Anda
+                painter = painterResource(id = R.drawable.logosure),
                 contentDescription = "Logo",
-                modifier = Modifier.size(100.dp) // Sesuaikan ukuran logo
+                modifier = Modifier.size(100.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp)) // Jarak antara logo dan teks
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "SureVenir",
-                fontFamily = CustomFontFamily,
+                fontFamily = sfui_semibold,
                 style = MaterialTheme.typography.h4,
                 color = Color.Black,
             )
         }
     }
 }
-
-@Composable
-fun SplashScreenTextPrev() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFFFFFF)), // Warna latar belakang mirip seperti pada gambar
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(
-                painter = painterResource(id = R.drawable.logosure), // Ganti dengan ID logo Anda
-                contentDescription = "Logo",
-                modifier = Modifier.size(100.dp) // Sesuaikan ukuran logo
-            )
-            Spacer(modifier = Modifier.height(16.dp)) // Jarak antara logo dan teks
-            Text(
-                text = "SureVenir",
-                fontFamily = CustomFontFamily,
-                style = MaterialTheme.typography.h4,
-                color = Color.Black,
-            )
-        }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun SplashScreenPreview() {
-    MyAppTheme {
-        SplashScreenTextPrev()
-    }
-}
-

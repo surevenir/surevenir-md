@@ -19,11 +19,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,40 +36,39 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.capstone.surevenir.R
 
 @Composable
-fun Home(navController: NavController){
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFCEFE3)) // Warna latar belakang halaman
-            .padding(horizontal = 16.dp)
-    ) {
-        // Top Bar
-        TopBar()
+fun Home(navController: NavController) {
+    Scaffold(
+        bottomBar = { BottomNavigationBar(navController) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFFCEFE3))
+                .padding(padding)
+                .padding(horizontal = 16.dp)
+        ) {
+            TopBar()
 
-        // Hero Section
-        HeroSection()
+            HeroSection()
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Scan History Section
-        SectionTitle(title = "Scan History", seeAllAction = { /* Handle See All */ })
-        ScanHistoryList()
+            SectionTitle(title = "Scan History", seeAllAction = { /* Handle See All */ })
+            ScanHistoryList()
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // All Products Section
-        SectionTitle(title = "All Products", seeAllAction = { /* Handle See All */ })
-        ProductGrid()
-
-        // Bottom Navigation
-        Spacer(modifier = Modifier.weight(1f))
-        BottomNavigationBar()
+            SectionTitle(title = "All Products", seeAllAction = { /* Handle See All */ })
+            ProductGrid()
+        }
     }
 }
+
 
 @Composable
 fun TopBar() {
@@ -77,14 +79,12 @@ fun TopBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Logo
         Image(
             painter = painterResource(id = R.drawable.logo), // Ganti dengan logo Anda
             contentDescription = "Logo",
             modifier = Modifier.size(32.dp)
         )
 
-        // Location
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = "Your Location", style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.width(8.dp))
@@ -103,11 +103,10 @@ fun HeroSection() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFFFA726)) // Warna background banner
+            .background(Color(0xFFFFA726))
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Gambar souvenir
             Image(
                 painter = painterResource(id = R.drawable.souvenir_image), // Ganti dengan gambar
                 contentDescription = "Souvenir",
@@ -116,7 +115,6 @@ fun HeroSection() {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Teks
             Column {
                 Text(
                     text = "Find The Souvenir",
@@ -162,7 +160,7 @@ fun SectionTitle(title: String, seeAllAction: () -> Unit) {
 @Composable
 fun ScanHistoryList() {
     LazyRow {
-        items(5) { // Ganti dengan data asli
+        items(5) {
             Box(
                 modifier = Modifier
                     .width(160.dp)
@@ -173,7 +171,7 @@ fun ScanHistoryList() {
             ) {
                 Column {
                     Image(
-                        painter = painterResource(id = R.drawable.product_image), // Ganti dengan gambar produk
+                        painter = painterResource(id = R.drawable.product_image),
                         contentDescription = "Product Image",
                         modifier = Modifier.height(100.dp)
                     )
@@ -197,7 +195,7 @@ fun ProductGrid() {
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(8.dp)
     ) {
-        items(10) { // Ganti dengan data asli
+        items(10) {
             Box(
                 modifier = Modifier
                     .padding(8.dp)
@@ -207,7 +205,7 @@ fun ProductGrid() {
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(
-                        painter = painterResource(id = R.drawable.product_image), // Ganti dengan gambar
+                        painter = painterResource(id = R.drawable.product_image),
                         contentDescription = "Product Image",
                         modifier = Modifier.height(100.dp)
                     )
@@ -225,23 +223,45 @@ fun ProductGrid() {
 }
 
 @Composable
-fun BottomNavigationBar() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White),
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically
+fun BottomNavigationBar(navController: NavController) {
+    val items = listOf(
+        BottomNavItem.Home,
+        BottomNavItem.Shop,
+        BottomNavItem.Scan,
+        BottomNavItem.Favorites,
+        BottomNavItem.Profile
+    )
+
+    BottomNavigation(
+        backgroundColor = Color.White,
+        contentColor = Color.Black
     ) {
-        Icon(painter = painterResource(id = R.drawable.ic_home), contentDescription = "Home")
-        Icon(painter = painterResource(id = R.drawable.ic_shop), contentDescription = "Shop")
-        Icon(painter = painterResource(id = R.drawable.ic_scan), contentDescription = "Scan")
-        Icon(painter = painterResource(id = R.drawable.ic_favorite), contentDescription = "Favorites")
-        Icon(painter = painterResource(id = R.drawable.ic_profile), contentDescription = "Profile")
+        items.forEach { item ->
+            BottomNavigationItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = item.icon),
+                        contentDescription = item.title,
+                        modifier = Modifier.size(18.dp) // Ukuran kecil untuk ikon
+                    )
+                },
+                label = { Text(text = item.title, fontSize = 10.sp) }, // Font lebih kecil
+                selected = false,
+                onClick = {
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                alwaysShowLabel = true
+            )
+        }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

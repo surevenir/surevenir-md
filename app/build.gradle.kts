@@ -46,6 +46,10 @@ android {
 }
 
 dependencies {
+    implementation("com.airbnb.android:lottie-compose:6.0.0")
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     implementation ("com.google.android.gms:play-services-auth:21.2.0")
     implementation ("com.google.firebase:firebase-auth-ktx")
@@ -55,7 +59,6 @@ dependencies {
     implementation (libs.accompanist.pager.indicators)
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.ui)
-    implementation(libs.androidx.material)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
