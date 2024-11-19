@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -41,12 +42,17 @@ import androidx.navigation.compose.rememberNavController
 import com.capstone.surevenir.R
 import com.capstone.surevenir.ui.CustomTextField
 import com.capstone.surevenir.ui.isValidEmail
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ForgotPassword(navController: NavController){
     var email by remember { mutableStateOf("") }
     var emailErrorMessage by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+
+
+    val auth = FirebaseAuth.getInstance()
 
     Column (modifier = Modifier
         .fillMaxSize()
@@ -97,7 +103,9 @@ fun ForgotPassword(navController: NavController){
             value = email,
             onValueChange = {
                 email = it
-                emailErrorMessage = if (email.isEmpty()) "Email is required" else if (!isValidEmail(email)) "Invalid email format" else ""
+                emailErrorMessage = if (email.isEmpty()) "Email is required"
+                else if (!isValidEmail(email)) "Invalid email format"
+                else ""
             },
             label = "Email",
             isError = emailErrorMessage.isNotEmpty(),
@@ -109,56 +117,72 @@ fun ForgotPassword(navController: NavController){
         Spacer(modifier = Modifier.height(16.dp))
 
         // Sign in button
+        // Tombol Reset Password
         Button(
-            onClick = { showDialog = true },
+            onClick = {
+                emailErrorMessage = if (email.isEmpty()) "Email is required"
+                else if (!isValidEmail(email)) "Invalid email format"
+                else ""
+
+                if (emailErrorMessage.isEmpty()) {
+                    isLoading = true // Mulai animasi loading
+                    auth.sendPasswordResetEmail(email)
+                        .addOnCompleteListener { task ->
+                            isLoading = false // Selesai animasi loading
+                            if (task.isSuccessful) {
+                                showDialog = true
+                            } else {
+                                emailErrorMessage = task.exception?.message ?: "Failed to send reset email"
+                            }
+                        }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp),
-
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(20.dp),
+            enabled = !isLoading // Nonaktifkan tombol jika sedang loading
         ) {
-            Text(
-                text = "Reset Password",
-                fontFamily = sfui_semibold,
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(text = "Reset Password", fontFamily = sfui_semibold)
+            }
         }
 
+
+        // Dialog Konfirmasi
         if (showDialog) {
             AlertDialog(
-                onDismissRequest = { showDialog = false },
+                onDismissRequest = {
+                    showDialog = false
+                },
                 confirmButton = {
-                    TextButton(onClick = { showDialog = false }) {
-                        Text("Done")
+                    TextButton(onClick = {
+                        showDialog = false
                         navController.navigate("signIn")
+                    }) {
+                        Text("Done")
                     }
                 },
-                title = { /* No title */ },
                 text = {
-
                     Column(
-                        modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = "Check your email", fontSize = 20.sp, fontFamily = sfui_semibold)
                         Text(
-                            text = "Check your email",
-                            fontFamily = sfui_semibold, // Ganti dengan font Anda
-                            fontSize = 20.sp,
-                            color = Color.Black
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "We have send password recovery instruction to your email",
-                            fontFamily = sfui_text, // Ganti dengan font Anda
+                            text = "We have sent password recovery instructions to your email.",
+                            fontFamily = sfui_text,
                             color = Color.Gray,
                             textAlign = TextAlign.Center
                         )
                     }
-                },
-                shape = RoundedCornerShape(16.dp),
-                backgroundColor = Color.White
+                }
             )
         }
     }
