@@ -30,7 +30,7 @@ private val LightColorPalette = lightColors(
 )
 
 val CustomFontFamily = FontFamily(
-    Font(R.font.poppinssemibold, FontWeight.Normal) // Sesuaikan dengan nama font Anda
+    Font(R.font.poppinssemibold, FontWeight.Normal)
 )
 
 val Typography = Typography(
@@ -57,17 +57,14 @@ fun MyAppTheme(
         LightColorPalette
     }
 
-    // Mengontrol Status Bar dan Navigation Bar
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = !darkTheme
 
     SideEffect {
-        // Mengatur warna Status Bar
         systemUiController.setStatusBarColor(
             color = colors.secondaryVariant,
             darkIcons = useDarkIcons
         )
-        // Mengatur warna Navigation Bar (opsional)
         systemUiController.setNavigationBarColor(
             color = colors.secondaryVariant,
             darkIcons = useDarkIcons

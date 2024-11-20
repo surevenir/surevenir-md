@@ -98,7 +98,6 @@ fun ForgotPassword(navController: NavController){
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // TextField untuk Email
         CustomTextField(
             value = email,
             onValueChange = {
@@ -116,8 +115,6 @@ fun ForgotPassword(navController: NavController){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Sign in button
-        // Tombol Reset Password
         Button(
             onClick = {
                 emailErrorMessage = if (email.isEmpty()) "Email is required"
@@ -125,10 +122,10 @@ fun ForgotPassword(navController: NavController){
                 else ""
 
                 if (emailErrorMessage.isEmpty()) {
-                    isLoading = true // Mulai animasi loading
+                    isLoading = true
                     auth.sendPasswordResetEmail(email)
                         .addOnCompleteListener { task ->
-                            isLoading = false // Selesai animasi loading
+                            isLoading = false
                             if (task.isSuccessful) {
                                 showDialog = true
                             } else {
@@ -142,7 +139,7 @@ fun ForgotPassword(navController: NavController){
                 .height(55.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
             shape = RoundedCornerShape(20.dp),
-            enabled = !isLoading // Nonaktifkan tombol jika sedang loading
+            enabled = !isLoading
         ) {
             if (isLoading) {
                 CircularProgressIndicator(
@@ -156,7 +153,6 @@ fun ForgotPassword(navController: NavController){
         }
 
 
-        // Dialog Konfirmasi
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = {

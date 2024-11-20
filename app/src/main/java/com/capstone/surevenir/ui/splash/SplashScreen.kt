@@ -41,7 +41,6 @@ fun SplashScreen(navigateToHome: () -> Unit, navigateToSignIn: () -> Unit) {
     var isLoggedIn by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
 
-    // Mengumpulkan status login dari DataStore
     LaunchedEffect(Unit) {
         userPreferences.isLoggedIn.collect { loginState ->
             isLoggedIn = loginState
@@ -49,18 +48,16 @@ fun SplashScreen(navigateToHome: () -> Unit, navigateToSignIn: () -> Unit) {
         }
     }
 
-    // Navigasi setelah proses SplashScreen selesai
     LaunchedEffect(isLoading) {
         if (!isLoading) {
             if (isLoggedIn) {
-                navigateToHome() // Navigasi ke Home jika user sudah login
+                navigateToHome()
             } else {
-                navigateToSignIn() // Navigasi ke Sign In jika belum login
+                navigateToSignIn()
             }
         }
     }
 
-    // Tampilan SplashScreen
     Box(
         modifier = Modifier
             .fillMaxSize()

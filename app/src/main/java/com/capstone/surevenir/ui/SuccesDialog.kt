@@ -36,7 +36,6 @@ fun SuccessDialog(navController: NavController, showDialog: MutableState<Boolean
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Teks Dialog
                     Text(
                         text = "Sign Up Successful!",
                         fontSize = 18.sp,
@@ -46,7 +45,7 @@ fun SuccessDialog(navController: NavController, showDialog: MutableState<Boolean
                     Button(
                         onClick = {
                             showDialog.value = false
-                            navController.navigate("signIn") // Navigasi ke halaman login
+                            navController.navigate("signIn")
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00))
                     ) {

@@ -85,15 +85,13 @@ private fun firebaseAuthWithGoogle(idToken: String, navController: NavHostContro
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val user = task.result?.user
-                val token = user?.uid // Ambil UID pengguna sebagai token
+                val token = user?.uid
 
-                // Simpan login state dan token ke DataStore
                 val userPreferences = UserPreferences(context)
                 (context as ComponentActivity).lifecycleScope.launch {
                     userPreferences.saveLoginState(isLoggedIn = true, token = token ?: "", email = user?.email ?: "")
                 }
 
-                // Navigasi ke Home
                 navController.navigate("home") {
                     popUpTo("splash") { inclusive = true }
                 }

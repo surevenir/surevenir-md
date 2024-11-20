@@ -46,6 +46,8 @@ android {
 }
 
 dependencies {
+    implementation ("com.google.accompanist:accompanist-pager:0.30.1")
+    implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
     implementation("com.airbnb.android:lottie-compose:6.0.0")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")

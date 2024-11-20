@@ -78,7 +78,7 @@ fun SignInScreen(navController: NavController){
     var isError by remember { mutableStateOf(false) }
     var isGoogleLoading by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    val auth = FirebaseAuth.getInstance() // Firebase Auth instance
+    val auth = FirebaseAuth.getInstance()
     val googleSignInClient = GoogleSignIn.getClient(
         context,
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -92,23 +92,6 @@ fun SignInScreen(navController: NavController){
         .padding(16.dp)) {
         Spacer(modifier = Modifier.height(40.dp))
 
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE7E7E9))
-                .clickable(onClick = { /* Handle back action */ }),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.arrow),
-                contentDescription = "Back",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clickable(onClick = ({navController.popBackStack() }))
-            )
-
-        }
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -132,7 +115,6 @@ fun SignInScreen(navController: NavController){
         Spacer(modifier = Modifier.height(20.dp))
 
 
-// TextField untuk Email
         CustomTextField(
             value = email,
             onValueChange = {
@@ -173,11 +155,9 @@ fun SignInScreen(navController: NavController){
 
         Button(
             onClick = {
-                // Reset pesan error
                 emailErrorMessage = if (email.isEmpty()) "Email is required" else if (!isValidEmail(email)) "Invalid email format" else ""
                 passwordErrorMessage = if (password.isEmpty()) "Password is required" else if (password.length < 8) "Password must be more than 8 chars." else ""
 
-                // Jika validasi lolos
                 if (emailErrorMessage.isEmpty() && passwordErrorMessage.isEmpty()) {
                     isLoading = true
                     auth.signInWithEmailAndPassword(email, password)
@@ -187,18 +167,15 @@ fun SignInScreen(navController: NavController){
                                 val user = task.result?.user
                                 val token = user?.uid
 
-                                // Simpan login state
                                 val userPreferences = UserPreferences(context)
                                 (context as ComponentActivity).lifecycleScope.launch {
                                     userPreferences.saveLoginState(isLoggedIn = true, token = token ?: "", email = email)
                                 }
 
-                                // Navigasi ke home
                                 navController.navigate("home") {
                                     popUpTo("signIn") { inclusive = true }
                                 }
                             } else {
-                                // Tampilkan error dari Firebase
                                 emailErrorMessage = task.exception?.message ?: "Login failed"
                             }
                         }
@@ -248,7 +225,7 @@ fun SignInScreen(navController: NavController){
 
         Button(
             onClick = {
-                isGoogleLoading = true // Tampilkan loading
+                isGoogleLoading = true
                 val signInIntent = googleSignInClient.signInIntent
                 (context as Activity).startActivityForResult(signInIntent, GOOGLE_SIGN_IN_CODE)
             },

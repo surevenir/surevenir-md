@@ -120,7 +120,6 @@ fun SignUpScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // TextField untuk Name
         CustomTextField(
             value = name,
             onValueChange = {
@@ -134,7 +133,6 @@ fun SignUpScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(10.dp))
 
-// TextField untuk Email
         CustomTextField(
             value = email,
             onValueChange = {
@@ -148,7 +146,6 @@ fun SignUpScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(10.dp))
 
-// TextField untuk Password
         CustomPasswordField(
             password = password,
             onPasswordChange = {
@@ -178,7 +175,6 @@ fun SignUpScreen(navController: NavController){
                             if (it.isSuccessful) {
                                 showDialog.value = true
                             } else {
-                                // Tampilkan error dari Firebase
                                 errorMessage = it.exception?.message.toString()
                             }
                         }
@@ -202,20 +198,19 @@ fun SignUpScreen(navController: NavController){
             }
         }
 
-/// Tampilkan error di atas tombol jika ada
         if (errorMessage.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(16.dp)) // Memberi jarak dari elemen sebelumnya
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = errorMessage,
-                color = Color.Red, // Warna merah untuk teks error
+                color = Color.Red,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(horizontal = 8.dp), // Tambahkan padding jika diperlukan
-                style = MaterialTheme.typography.bodySmall // Atur gaya teks agar sesuai
+                    .padding(horizontal = 8.dp),
+                style = MaterialTheme.typography.bodySmall
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp)) // Memberi jarak sebelum tombol
+        Spacer(modifier = Modifier.height(8.dp))
 
 
         Spacer(modifier = Modifier.height(25.dp))

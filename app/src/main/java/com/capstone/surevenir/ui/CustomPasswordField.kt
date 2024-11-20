@@ -33,7 +33,7 @@ fun CustomPasswordField(
         TextField(
             value = password,
             onValueChange = {
-                if (it.length <= 20) { // Batas panjang maksimal opsional
+                if (it.length <= 20) {
                     onPasswordChange(it)
                 }
             },
@@ -54,13 +54,13 @@ fun CustomPasswordField(
                 }
             },
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFE9E9EC), // Warna latar belakang saat fokus
-                unfocusedContainerColor = Color(0xFFE9E9EC), // Warna latar belakang saat tidak fokus
-                focusedIndicatorColor = Color.Transparent, // Hilangkan garis bawah saat fokus
-                unfocusedIndicatorColor = Color.Transparent, // Hilangkan garis bawah saat tidak fokus
-                cursorColor = Color.Black, // Warna kursor
-                focusedLabelColor = Color.Gray, // Warna label saat fokus
-                unfocusedLabelColor = Color.LightGray // Warna label saat tidak fokus
+                focusedContainerColor = Color(0xFFE9E9EC),
+                unfocusedContainerColor = Color(0xFFE9E9EC),
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = Color.Black,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.LightGray
             ),
             isError = isError
         )
