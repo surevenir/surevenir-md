@@ -7,8 +7,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,8 +20,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.capstone.surevenir.helper.UserPreferences
+import com.capstone.surevenir.ui.splash.BottomNavigationBar
 import com.capstone.surevenir.ui.splash.FavoritesScreen
 import com.capstone.surevenir.ui.splash.ForgotPassword
 import com.capstone.surevenir.ui.splash.Home
@@ -29,6 +34,7 @@ import com.capstone.surevenir.ui.splash.ShopScreen
 import com.capstone.surevenir.ui.splash.SignInScreen
 import com.capstone.surevenir.ui.splash.SignUpScreen
 import com.capstone.surevenir.ui.splash.SplashScreen
+import com.capstone.surevenir.ui.splash.StickyTopBar
 import com.capstone.surevenir.ui.theme.MyAppTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
@@ -105,33 +111,68 @@ private fun firebaseAuthWithGoogle(idToken: String, navController: NavHostContro
 
 @Composable
 fun MainScreen(navController: NavHostController) {
-    NavHost(navController, startDestination = "splash") {
-        composable("splash") {
-            SplashScreen(
-                navigateToHome = { navController.navigate("home") { popUpTo("splash") { inclusive = true } } },
-                navigateToSignIn = { navController.navigate("signIn") { popUpTo("splash") { inclusive = true } } }
-            )
+    // Mendapatkan rute saat ini
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    Scaffold(
+        topBar = { StickyTopBar() },
+        bottomBar = {
+            // Tampilkan BottomNavigationBar hanya untuk rute tertentu
+            if (currentRoute in listOf(
+                    "home",
+                    "shop",
+                    "scan",
+                    "favorites",
+                    "profile"
+                )
+            ) {
+                BottomNavigationBar(navController)
+            }
         }
-        composable("onboarding") {
-            OnBoardingScreen(navController = navController)
+    ) { padding ->
+        NavHost(
+            navController = navController,
+            startDestination = "splash",
+            modifier = Modifier.padding(padding)
+        ) {
+            composable("splash") {
+                SplashScreen(
+                    navigateToHome = { navController.navigate("home") { popUpTo("splash") { inclusive = true } } },
+                    navigateToSignIn = { navController.navigate("signIn") { popUpTo("splash") { inclusive = true } } }
+                )
+            }
+            composable("onboarding") {
+                OnBoardingScreen(navController = navController)
+            }
+            composable("home") {
+                Home(navController = navController)
+            }
+            composable("signIn") {
+                SignInScreen(navController = navController)
+            }
+            composable("forgotPassword") {
+                ForgotPassword(navController = navController)
+            }
+            composable("signUp") {
+                SignUpScreen(navController = navController)
+            }
+            composable("shop") {
+                ShopScreen(navController)
+            }
+            composable("scan") {
+                ScanScreen(navController)
+            }
+            composable("favorites") {
+                FavoritesScreen(navController)
+            }
+            composable("profile") {
+                ProfileScreen(navController)
+            }
         }
-        composable("home") {
-            Home(navController = navController)
-        }
-        composable("signIn") {
-            SignInScreen(navController = navController)
-        }
-        composable("forgotPassword") {
-            ForgotPassword(navController = navController)
-        }
-        composable("signUp") { SignUpScreen(navController = navController)
-        }
-        composable("shop") { ShopScreen(navController) }
-        composable("scan") { ScanScreen(navController) }
-        composable("favorites") { FavoritesScreen(navController) }
-        composable("profile") { ProfileScreen(navController) }
     }
 }
+
 
 
 

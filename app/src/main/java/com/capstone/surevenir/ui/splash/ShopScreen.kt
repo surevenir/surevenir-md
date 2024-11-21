@@ -19,7 +19,6 @@ import androidx.navigation.NavHostController
 @Composable
 fun ShopScreen(navController: NavHostController) {
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
     ) { padding ->
         Column(
             modifier = Modifier

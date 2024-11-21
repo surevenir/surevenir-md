@@ -65,8 +65,6 @@ import kotlinx.coroutines.yield
 @Composable
 fun Home(navController: NavController) {
     Scaffold(
-        topBar = { StickyTopBar() },
-        bottomBar = { BottomNavigationBar(navController) }
     ) { padding ->
 
         Spacer(modifier = Modifier.height(16.dp))
