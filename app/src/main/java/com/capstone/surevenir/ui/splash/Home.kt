@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,9 +54,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.capstone.surevenir.R
 import com.capstone.surevenir.components.ProductCard
 import com.capstone.surevenir.components.ScanHistoryCard
+import com.capstone.surevenir.model.BottomNavItem
 import com.capstone.surevenir.model.Product
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPagerIndicator
@@ -341,28 +344,64 @@ fun HeroSection(imageRes: Int) {
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
-        BottomNavItem.Home,
-        BottomNavItem.Shop,
-        BottomNavItem.Scan,
-        BottomNavItem.Favorites,
-        BottomNavItem.Profile
+        BottomNavItem(
+            title = "Home",
+            iconActive = R.drawable.ic_home_selected,
+            iconInactive = R.drawable.ic_home,
+            route = "home"
+        ),
+        BottomNavItem(
+            title = "Shop",
+            iconActive = R.drawable.ic_shop_selected,
+            iconInactive = R.drawable.ic_shop,
+            route = "shop"
+        ),
+        BottomNavItem(
+            title = "Scan",
+            iconActive = R.drawable.ic_scan_selected,
+            iconInactive = R.drawable.ic_scan,
+            route = "scan"
+        ),
+        BottomNavItem(
+            title = "Favorites",
+            iconActive = R.drawable.ic_favorite_selected,
+            iconInactive = R.drawable.ic_favorite,
+            route = "favorites"
+        ),
+        BottomNavItem(
+            title = "Profile",
+            iconActive = R.drawable.ic_profile_selected,
+            iconInactive = R.drawable.ic_profile,
+            route = "profile"
+        )
     )
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     BottomNavigation(
-        backgroundColor = Color.White,
-        contentColor = Color.Black
+        backgroundColor = Color.White // Tetap atur warna latar belakang
     ) {
         items.forEach { item ->
             BottomNavigationItem(
                 icon = {
-                    Icon(
-                        painter = painterResource(id = item.icon),
+                    // Gunakan Image untuk mempertahankan warna asli PNG
+                    Image(
+                        painter = painterResource(
+                            id = if (currentRoute == item.route) item.iconActive else item.iconInactive
+                        ),
                         contentDescription = item.title,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(24.dp) // Ukuran ikon
                     )
                 },
-                label = { Text(text = item.title, fontSize = 10.sp) },
-                selected = false,
+                label = {
+                    Text(
+                        text = item.title,
+                        fontSize = 10.sp,
+                        color = if (currentRoute == item.route) Color(0xFFCC5B14) else Color.Gray
+                    )
+                },
+                selected = currentRoute == item.route,
                 onClick = {
                     navController.navigate(item.route) {
                         popUpTo(navController.graph.startDestinationId) {
@@ -377,6 +416,8 @@ fun BottomNavigationBar(navController: NavController) {
         }
     }
 }
+
+
 
 
 @Preview(showBackground = true)

@@ -116,7 +116,9 @@ fun MainScreen(navController: NavHostController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
-        topBar = { StickyTopBar() },
+        topBar = {
+            StickyTopBar()
+                 },
         bottomBar = {
             // Tampilkan BottomNavigationBar hanya untuk rute tertentu
             if (currentRoute in listOf(
