@@ -23,6 +23,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.capstone.surevenir.helper.UserPreferences
+import com.capstone.surevenir.ui.splash.AllCategoryScreen
+import com.capstone.surevenir.ui.splash.AllHistory
+import com.capstone.surevenir.ui.splash.AllProductScreen
+import com.capstone.surevenir.ui.splash.AllShopScreen
 import com.capstone.surevenir.ui.splash.BottomNavigationBar
 import com.capstone.surevenir.ui.splash.FavoritesScreen
 import com.capstone.surevenir.ui.splash.ForgotPassword
@@ -33,6 +37,7 @@ import com.capstone.surevenir.ui.splash.ScanScreen
 import com.capstone.surevenir.ui.splash.ShopScreen
 import com.capstone.surevenir.ui.splash.SignInScreen
 import com.capstone.surevenir.ui.splash.SignUpScreen
+import com.capstone.surevenir.ui.splash.SingleProductScreen
 import com.capstone.surevenir.ui.splash.SplashScreen
 import com.capstone.surevenir.ui.splash.StickyTopBar
 import com.capstone.surevenir.ui.theme.MyAppTheme
@@ -117,10 +122,18 @@ fun MainScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            StickyTopBar()
-                 },
+            if (currentRoute in listOf(
+                    "home",
+                    "shop",
+                    "scan",
+                    "favorites",
+                    "profile"
+                )
+            ) {
+                StickyTopBar()
+            }
+        },
         bottomBar = {
-            // Tampilkan BottomNavigationBar hanya untuk rute tertentu
             if (currentRoute in listOf(
                     "home",
                     "shop",
@@ -171,12 +184,24 @@ fun MainScreen(navController: NavHostController) {
             composable("profile") {
                 ProfileScreen(navController)
             }
+            composable("allShop") {
+                AllShopScreen(navController)
+            }
+            composable("allProduct") {
+                AllProductScreen(navController)
+            }
+            composable("allCategory") {
+                AllCategoryScreen(navController)
+            }
+            composable("allHistory") {
+                AllHistory(navController)
+            }
+            composable("singleProduct") {
+                SingleProductScreen(navController)
+            }
         }
     }
 }
-
-
-
 
 
 @Preview(showBackground = true)

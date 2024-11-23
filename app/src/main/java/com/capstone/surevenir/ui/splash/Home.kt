@@ -127,12 +127,13 @@ fun Home(navController: NavController) {
                                 .padding(horizontal = 16.dp)
                         )
                         Text(
-                            text = "See All",
+                            text = "See All History",
                             fontSize = 20.sp,
                             fontFamily = sfui_semibold,
                             color = Color(0xFFCC5B14),
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
+                                .clickable { navController.navigate("allHistory") }
                         )
                     }
 
@@ -160,12 +161,13 @@ fun Home(navController: NavController) {
                                 .padding(horizontal = 16.dp)
                         )
                         Text(
-                            text = "See All",
+                            text = "See All Products",
                             fontSize = 20.sp,
                             fontFamily = sfui_semibold,
                             color = Color(0xFFCC5B14),
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
+                                .clickable{ navController.navigate("allProduct") }
                         )
                     }
                     }

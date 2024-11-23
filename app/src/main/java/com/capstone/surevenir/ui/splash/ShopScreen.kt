@@ -89,12 +89,16 @@ fun ShopScreen(navController: NavHostController) {
                 }
 
                 item {
-                    SectionHeader(title = "Categories", actionText = "All Categories")
+                    SectionHeader(title = "Categories", actionText = "All Categories", navController)
                 }
                 item {
                     val categoryList = listOf(
                         Category(R.drawable.cat_art, "Art"),
                         Category(R.drawable.cat_furniture, "Furniture"),
+                        Category(R.drawable.cat_furniture, "Furniture"),
+                        Category(R.drawable.cat_furniture, "Furniture"),
+                        Category(R.drawable.cat_toy, "Toy"),
+                        Category(R.drawable.cat_toy, "Toy"),
                         Category(R.drawable.cat_toy, "Toy"),
                         Category(R.drawable.cat_spice, "Spice")
                     )
@@ -104,7 +108,7 @@ fun ShopScreen(navController: NavHostController) {
                 }
 
                 item {
-                    SectionHeader(title = "Shops", actionText = "All Shops")
+                    SectionHeader(title = "Shops", actionText = "All Shops", navController)
                     Spacer(modifier = Modifier.height(10.dp))
 
                 }
@@ -120,7 +124,7 @@ fun ShopScreen(navController: NavHostController) {
                 }
 
                 item {
-                    SectionHeader(title = "Popular Products", actionText = "See All")
+                    SectionHeader(title = "Popular Products", actionText = "All Products", navController)
                 }
                 item {
                     val popularProducts = listOf(
@@ -153,7 +157,7 @@ fun ShopScreen(navController: NavHostController) {
 
 
 @Composable
-fun SectionHeader(title: String, actionText: String) {
+fun SectionHeader(title: String, actionText: String, navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -168,7 +172,19 @@ fun SectionHeader(title: String, actionText: String) {
             text = actionText,
             fontSize = 20.sp,
             fontFamily = sfui_semibold,
-            color = Color(0xFFCC5B14)
+            color = Color(0xFFCC5B14),
+            modifier = Modifier
+                .clickable {
+                    if (actionText == "All Shops"){
+                        navController.navigate("allShop")
+                    }
+                    else if (actionText == "All Categories"){
+                        navController.navigate("allCategory")
+                    }
+                    else if (actionText == "All Products"){
+                        navController.navigate("allProduct")
+                    }
+                }
         )
     }
 }
