@@ -93,7 +93,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+//sa
 }
 
 
@@ -121,6 +121,7 @@ private fun firebaseAuthWithGoogle(idToken: String, navController: NavHostContro
                 task.exception?.printStackTrace()
             }
         }
+    s?
 }
 
 
