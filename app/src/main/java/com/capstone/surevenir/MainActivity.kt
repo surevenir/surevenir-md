@@ -37,7 +37,9 @@ import com.capstone.surevenir.ui.splash.ScanScreen
 import com.capstone.surevenir.ui.splash.ShopScreen
 import com.capstone.surevenir.ui.splash.SignInScreen
 import com.capstone.surevenir.ui.splash.SignUpScreen
+import com.capstone.surevenir.ui.splash.SingleCategoryScreen
 import com.capstone.surevenir.ui.splash.SingleProductScreen
+import com.capstone.surevenir.ui.splash.SingleShopScreen
 import com.capstone.surevenir.ui.splash.SplashScreen
 import com.capstone.surevenir.ui.splash.StickyTopBar
 import com.capstone.surevenir.ui.theme.MyAppTheme
@@ -198,6 +200,12 @@ fun MainScreen(navController: NavHostController) {
             }
             composable("singleProduct") {
                 SingleProductScreen(navController)
+            }
+            composable("singleShop") {
+                SingleShopScreen(navController)
+            }
+            composable("singleCategory") {
+                SingleCategoryScreen(navController)
             }
         }
     }

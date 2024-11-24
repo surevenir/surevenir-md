@@ -102,7 +102,7 @@ fun ShopScreen(navController: NavHostController) {
                         Category(R.drawable.cat_toy, "Toy"),
                         Category(R.drawable.cat_spice, "Spice")
                     )
-                    CategorySection(categories = categoryList)
+                    CategorySection(categories = categoryList, navController)
                     Spacer(modifier = Modifier.height(10.dp))
 
                 }
@@ -118,7 +118,7 @@ fun ShopScreen(navController: NavHostController) {
                         Shop(R.drawable.shop, "Ketut Art", "Ubud", 10),
                         Shop(R.drawable.shop, "Ketut Art", "Ubud", 10)
                     )
-                    ShopSection(shops = shopList)
+                    ShopSection(shops = shopList, navController)
                     Spacer(modifier = Modifier.height(16.dp))
 
                 }
@@ -224,7 +224,7 @@ fun PopolarProductSection(popularProduct: List<Product>) {
 
 
 @Composable
-fun ShopSection(shops: List<Shop>) {
+fun ShopSection(shops: List<Shop>, navController: NavHostController) {
     LazyRow(
     )
     {
@@ -240,13 +240,14 @@ fun ShopSection(shops: List<Shop>) {
                     .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp)) 
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.White)
+                    .clickable { navController.navigate("singleShop") }
             )
         }
     }
 }
 
 @Composable
-fun CategorySection(categories: List<Category>) {
+fun CategorySection(categories: List<Category>, navController: NavHostController) {
     LazyRow (
     ){
         items(categories) { category ->
@@ -260,6 +261,7 @@ fun CategorySection(categories: List<Category>) {
                     modifier = Modifier
                         .size(80.dp)
                         .padding(5.dp)
+                        .clickable { navController.navigate("singleCategory") }
                         .clip(RoundedCornerShape(8.dp))
                 )
                 Text(

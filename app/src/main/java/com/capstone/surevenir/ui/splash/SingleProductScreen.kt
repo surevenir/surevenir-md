@@ -491,7 +491,10 @@ fun SingleProductScreen(navController: NavHostController) {
 
 @Composable
 fun ProductSectionSix(popularProduct: List<Product>) {
-    Column {
+    Column (
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp)
+    ){
         popularProduct.chunked(2).forEach { rowProducts ->
             Row(
                 modifier = Modifier
