@@ -1,5 +1,14 @@
 package com.capstone.surevenir.ui.splash
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,34 +22,36 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,7 +60,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,10 +70,11 @@ import com.capstone.surevenir.components.ProductCard
 import com.capstone.surevenir.components.ScanHistoryCard
 import com.capstone.surevenir.model.BottomNavItem
 import com.capstone.surevenir.model.Product
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPagerIndicator
+import com.capstone.surevenir.ui.camera.ComposeFileProvider
+import com.capstone.surevenir.ui.camera.ImageCaptureVM
+import com.capstone.surevenir.ui.camera.PermissionUtils
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.launch
 
 @Composable
 fun Home(navController: NavController) {
@@ -106,6 +117,7 @@ fun Home(navController: NavController) {
                         "Authentic and beautiful souvenir for your home decor.",
                         "IDR 50.000 - 150.000"
                     ),
+//                    sa
                     Product(
                         R.drawable.product_image,
                         "Handicraft",
@@ -359,12 +371,6 @@ fun BottomNavigationBar(navController: NavController) {
             route = "shop"
         ),
         BottomNavItem(
-            title = "Scan",
-            iconActive = R.drawable.ic_scan_selected,
-            iconInactive = R.drawable.ic_scan,
-            route = "scan"
-        ),
-        BottomNavItem(
             title = "Favorites",
             iconActive = R.drawable.ic_favorite_selected,
             iconInactive = R.drawable.ic_favorite,
@@ -381,45 +387,194 @@ fun BottomNavigationBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    BottomNavigation(
-        backgroundColor = Color.White // Tetap atur warna latar belakang
-    ) {
-        items.forEach { item ->
-            BottomNavigationItem(
-                icon = {
-                    // Gunakan Image untuk mempertahankan warna asli PNG
-                    Image(
-                        painter = painterResource(
-                            id = if (currentRoute == item.route) item.iconActive else item.iconInactive
-                        ),
-                        contentDescription = item.title,
-                        modifier = Modifier.size(24.dp) // Ukuran ikon
-                    )
-                },
-                label = {
-                    Text(
-                        text = item.title,
-                        fontSize = 10.sp,
-                        color = if (currentRoute == item.route) Color(0xFFCC5B14) else Color.Gray
-                    )
-                },
-                selected = currentRoute == item.route,
-                onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+    Box {
+        BottomNavigation(
+            backgroundColor = Color.White,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            items.forEachIndexed { index, item ->
+                if (index == 2) {
+                    // Add space for FAB
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                BottomNavigationItem(
+                    icon = {
+                        Image(
+                            painter = painterResource(
+                                id = if (currentRoute == item.route) item.iconActive else item.iconInactive
+                            ),
+                            contentDescription = item.title,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = item.title,
+                            fontSize = 10.sp,
+                            color = if (currentRoute == item.route) Color(0xFFCC5B14) else Color.Gray
+                        )
+                    },
+                    selected = currentRoute == item.route,
+                    onClick = {
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                alwaysShowLabel = true
-            )
+                    },
+                    alwaysShowLabel = true,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }
 
+@Composable
+fun FloatingButtonWithIntent(
+    navController: NavController,
+    imageCaptureViewModel: ImageCaptureVM
+) {
+    var isExtended by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (!allGranted) {
+            Toast.makeText(
+                context,
+                "Permissions required to use camera and access gallery",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            scope.launch {
+                navController.navigate("preview") {
+                    popUpTo("home") { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            imageCaptureViewModel.setImageUri(it)
+            scope.launch {
+                navController.navigate("preview") {
+                    popUpTo("home") { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        }
+    }
+
+    Box {
+        // Extended FAB Menu
+        AnimatedVisibility(
+            visible = isExtended,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+            modifier = Modifier
+                .offset(y =(-100).dp)
+                .align(Alignment.BottomEnd)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Camera Button
+                Button(
+                    onClick = {
+                        isExtended = false
+                        if (PermissionUtils.hasRequiredPermissions(context)) {
+                            val uri = ComposeFileProvider.getImageUri(context)
+                            imageCaptureViewModel.setImageUri(uri)
+                            cameraLauncher.launch(uri)
+                        } else {
+                            launcher.launch(PermissionUtils.getRequiredPermissions())
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color(0xFFED8A00),
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .widthIn(min = 180.dp, max = 240.dp)
+                        .align(Alignment.End),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = "Camera",
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Camera")
+                }
+
+                // Gallery Button
+                Button(
+                    onClick = {
+                        isExtended = false
+                        if (PermissionUtils.hasRequiredPermissions(context)) {
+                            galleryLauncher.launch("image/*")
+                        } else {
+                            launcher.launch(PermissionUtils.getRequiredPermissions())
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color(0xFFED8A00),
+                        contentColor = Color.White // White text
+                    ),
+                    modifier = Modifier
+                        .widthIn(min = 180.dp, max = 240.dp)
+                        .align(Alignment.End),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = "Gallery",
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Gallery")
+                }
+            }
+        }
+
+        // Main FAB
+        FloatingActionButton(
+            onClick = { isExtended = !isExtended },
+            containerColor = Color(0xFFED8A00),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(16.dp)
+                .offset(y = 20.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_scan),
+                contentDescription = "Scan",
+                tint = Color.White,
+                modifier = Modifier.size(30.dp)
+            )
+        }
+    }
+}
 
 
 @Preview(showBackground = true)
