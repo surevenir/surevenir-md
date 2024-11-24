@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
         private const val GOOGLE_SIGN_IN_CODE = 1001
     }
 
+//
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
