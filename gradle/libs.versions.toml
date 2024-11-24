@@ -1,6 +1,7 @@
 [versions]
 accompanistPager = "0.23.1"
 agp = "8.6.0"
+coil = "2.4.0"
 firebaseBom = "33.6.0"
 kotlin = "1.9.25"
 coreKtx = "1.13.1"
@@ -32,6 +33,7 @@ androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiToolingPreview" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "ui" }
 androidx-ui-tooling-preview-v150 = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
+coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 google-firebase-auth = { module = "com.google.firebase:firebase-auth" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
