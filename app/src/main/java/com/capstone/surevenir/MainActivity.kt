@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.FabPosition
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -23,25 +25,30 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.capstone.surevenir.helper.UserPreferences
+import com.capstone.surevenir.ui.camera.ImageCaptureVM
+import com.capstone.surevenir.ui.camera.PreviewScreen
 import com.capstone.surevenir.ui.splash.AllCategoryScreen
 import com.capstone.surevenir.ui.splash.AllHistory
 import com.capstone.surevenir.ui.splash.AllProductScreen
 import com.capstone.surevenir.ui.splash.AllShopScreen
 import com.capstone.surevenir.ui.splash.BottomNavigationBar
 import com.capstone.surevenir.ui.splash.FavoritesScreen
+import com.capstone.surevenir.ui.splash.FloatingButtonWithIntent
 import com.capstone.surevenir.ui.splash.ForgotPassword
 import com.capstone.surevenir.ui.splash.Home
 import com.capstone.surevenir.ui.splash.OnBoardingScreen
 import com.capstone.surevenir.ui.splash.ProfileScreen
+import com.capstone.surevenir.ui.splash.ResultScreen
 import com.capstone.surevenir.ui.splash.ScanScreen
 import com.capstone.surevenir.ui.splash.ShopScreen
 import com.capstone.surevenir.ui.splash.SignInScreen
 import com.capstone.surevenir.ui.splash.SignUpScreen
-import com.capstone.surevenir.ui.splash.SingleCategoryScreen
 import com.capstone.surevenir.ui.splash.SingleProductScreen
-import com.capstone.surevenir.ui.splash.SingleShopScreen
 import com.capstone.surevenir.ui.splash.SplashScreen
 import com.capstone.surevenir.ui.splash.StickyTopBar
+import com.capstone.surevenir.ui.splash.profile.AccountCenterScreen
+import com.capstone.surevenir.ui.splash.profile.EditProfileScreen
+import com.capstone.surevenir.ui.splash.profile.SettingsScreen
 import com.capstone.surevenir.ui.theme.MyAppTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
@@ -122,32 +129,31 @@ fun MainScreen(navController: NavHostController) {
     // Mendapatkan rute saat ini
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val imageCaptureViewModel: ImageCaptureVM = viewModel()
 
     Scaffold(
         topBar = {
-            if (currentRoute in listOf(
-                    "home",
-                    "shop",
-                    "scan",
-                    "favorites",
-                    "profile"
-                )
-            ) {
+            if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile")) {
                 StickyTopBar()
             }
         },
         bottomBar = {
-            if (currentRoute in listOf(
-                    "home",
-                    "shop",
-                    "scan",
-                    "favorites",
-                    "profile"
-                )
-            ) {
+            if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile")) {
                 BottomNavigationBar(navController)
             }
-        }
+        },
+        floatingActionButton = {
+            // Only show FAB on main screens
+            if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile")) {
+                FloatingButtonWithIntent(
+                    navController = navController,
+                    imageCaptureViewModel = imageCaptureViewModel
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+        isFloatingActionButtonDocked = true
+
     ) { padding ->
         NavHost(
             navController = navController,
@@ -202,11 +208,28 @@ fun MainScreen(navController: NavHostController) {
             composable("singleProduct") {
                 SingleProductScreen(navController)
             }
-            composable("singleShop") {
-                SingleShopScreen(navController)
+            composable("preview") {
+                PreviewScreen(
+                    navController = navController,
+                    imageCaptureViewModel = imageCaptureViewModel
+                )
             }
-            composable("singleCategory") {
-                SingleCategoryScreen(navController)
+            composable("result") {
+                ResultScreen(
+                    navController = navController,
+                    imageCaptureViewModel = imageCaptureViewModel
+                )
+            }
+            composable("accountCenter") {
+                AccountCenterScreen(navController)
+            }
+
+            composable("editProfile") {
+                EditProfileScreen(navController)
+            }
+
+            composable("settings") {
+                SettingsScreen(navController)
             }
         }
     }
