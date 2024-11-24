@@ -117,6 +117,7 @@ fun Home(navController: NavController) {
                         "Authentic and beautiful souvenir for your home decor.",
                         "IDR 50.000 - 150.000"
                     ),
+//                    sa
                     Product(
                         R.drawable.product_image,
                         "Handicraft",
