@@ -30,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -43,8 +44,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -98,7 +102,7 @@ fun ShopScreen(navController: NavHostController) {
                         Category(R.drawable.cat_toy, "Toy"),
                         Category(R.drawable.cat_spice, "Spice")
                     )
-                    CategorySection(categories = categoryList)
+                    CategorySection(categories = categoryList, navController)
                     Spacer(modifier = Modifier.height(10.dp))
 
                 }
@@ -114,7 +118,7 @@ fun ShopScreen(navController: NavHostController) {
                         Shop(R.drawable.shop, "Ketut Art", "Ubud", 10),
                         Shop(R.drawable.shop, "Ketut Art", "Ubud", 10)
                     )
-                    ShopSection(shops = shopList)
+                    ShopSection(shops = shopList, navController)
                     Spacer(modifier = Modifier.height(16.dp))
 
                 }
@@ -220,7 +224,7 @@ fun PopolarProductSection(popularProduct: List<Product>) {
 
 
 @Composable
-fun ShopSection(shops: List<Shop>) {
+fun ShopSection(shops: List<Shop>, navController: NavHostController) {
     LazyRow(
     )
     {
@@ -233,16 +237,17 @@ fun ShopSection(shops: List<Shop>) {
                 modifier = Modifier
                     .width(200.dp)
                     .padding(end = 10.dp)
-                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp)) 
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.White)
+                    .clickable { navController.navigate("singleShop") }
             )
         }
     }
 }
 
 @Composable
-fun CategorySection(categories: List<Category>) {
+fun CategorySection(categories: List<Category>, navController: NavHostController) {
     LazyRow (
     ){
         items(categories) { category ->
@@ -256,6 +261,7 @@ fun CategorySection(categories: List<Category>) {
                     modifier = Modifier
                         .size(80.dp)
                         .padding(5.dp)
+                        .clickable { navController.navigate("singleCategory") }
                         .clip(RoundedCornerShape(8.dp))
                 )
                 Text(
@@ -272,49 +278,49 @@ fun CategorySection(categories: List<Category>) {
 fun ShowSearchBar(onSearch: (String) -> Unit, onFilterClick: () -> Unit) {
     var query by remember { mutableStateOf("") }
 
-        Column (
-            modifier = Modifier.padding(1.dp)
-        ){
-            TextField(
-                value = query,
-                onValueChange = { query = it },
-                label = { Text("Search Souvenir") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp)),
-                singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.icon_filter),
-                        contentDescription = "Filter Icon",
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .clickable {
-                                onFilterClick()
-                            }
-                    )
-                },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFE9E9EC),
-                    unfocusedContainerColor = Color(0xFFE9E9EC),
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = Color.Black,
-                    focusedLabelColor = Color.Gray,
-                    unfocusedLabelColor = Color.LightGray
-                ),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Search,
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        onSearch(query)
-                    }
+    Column (
+        modifier = Modifier.padding(1.dp)
+    ){
+        TextField(
+            value = query,
+            onValueChange = { query = it },
+            label = { Text("Search Souvenir") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp)),
+            singleLine = true,
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.icon_filter),
+                    contentDescription = "Filter Icon",
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .clickable {
+                            onFilterClick()
+                        }
                 )
+            },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFFE9E9EC),
+                unfocusedContainerColor = Color(0xFFE9E9EC),
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = Color.Black,
+                focusedLabelColor = Color.Gray,
+                unfocusedLabelColor = Color.LightGray
+            ),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search,
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    onSearch(query)
+                }
             )
-        }
+        )
     }
+}
 
 
 @Composable

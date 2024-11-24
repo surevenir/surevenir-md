@@ -95,13 +95,13 @@ fun AllShopScreen(navController: NavHostController) {
         }
 
         // Grid of shops
-        ShopSectionAll(shops = shopList)
+        ShopSectionAll(shops = shopList, navController)
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ShopSectionAll(shops: List<Shop>) {
+fun ShopSectionAll(shops: List<Shop>, navController: NavHostController) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(1), // Gunakan "columns" sebagai pengganti "cells"
         modifier = Modifier
@@ -123,6 +123,7 @@ fun ShopSectionAll(shops: List<Shop>) {
                     .clip(RoundedCornerShape(8.dp)) // Pastikan bentuk tetap sesuai
                     .background(Color.White)
                     .padding(8.dp) // Jarak dalam untuk konten
+                    .clickable { navController.navigate("singleShop") }
             )
         }
     }
