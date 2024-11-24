@@ -301,3 +301,8 @@ val sfui_semibold = FontFamily(
 val sfui_text = FontFamily(
     Font(R.font.poppinslight, FontWeight.Normal)
 )
+
+val sfui_med = FontFamily(
+    Font(R.font.poppinsmedium, FontWeight.Medium)
+)
+
