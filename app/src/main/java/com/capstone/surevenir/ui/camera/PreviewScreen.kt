@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.capstone.surevenir.R
-import com.capstone.surevenir.ui.splash.sfui_semibold
+import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import kotlinx.coroutines.launch
 
 @Composable
