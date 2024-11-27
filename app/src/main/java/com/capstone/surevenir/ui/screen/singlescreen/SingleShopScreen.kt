@@ -35,14 +35,12 @@ import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 @Composable
 fun SingleShopScreen(navController: NavHostController) {
 
-    // Use LazyColumn to make the content scrollable
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     )
     {
-        // Header
         item {
             Row(
                 modifier = Modifier
@@ -89,22 +87,20 @@ fun SingleShopScreen(navController: NavHostController) {
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Gambar Toko
                 Image(
                     painter = painterResource(id = R.drawable.shop),
                     contentDescription = "Shop Image",
                     modifier = Modifier
-                        .size(150.dp) // Ukuran gambar sesuai contoh
+                        .size(150.dp)
                         .background(Color.White)
                 )
 
-                Spacer(modifier = Modifier.width(12.dp)) // Jarak antara gambar dan teks
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Nama Toko
                     Text(
                         text = "Made Art Shop",
                         fontFamily = sfui_semibold,
@@ -114,13 +110,12 @@ fun SingleShopScreen(navController: NavHostController) {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Informasi Barang
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.icon_souvenir), // Ikon untuk jumlah item
+                            painter = painterResource(id = R.drawable.icon_souvenir),
                             contentDescription = "Items Icon",
                             tint = Color(0xFFCC5B14),
                             modifier = Modifier.size(30.dp)
@@ -138,12 +133,11 @@ fun SingleShopScreen(navController: NavHostController) {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Lokasi
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.icon_location), // Ikon untuk lokasi
+                            painter = painterResource(id = R.drawable.icon_location),
                             contentDescription = "Location Icon",
                             tint = Color(0xFFCC5B14),
                             modifier = Modifier.size(30.dp)
@@ -163,9 +157,9 @@ fun SingleShopScreen(navController: NavHostController) {
             Spacer(
                 modifier = Modifier
                     .padding(top = 15.dp, end = 20.dp, start = 20.dp)
-                    .fillMaxWidth() // Memenuhi lebar layar
-                    .height(0.4.dp) // Tinggi garis
-                    .background(Color.Gray) // Warna garis
+                    .fillMaxWidth()
+                    .height(0.4.dp)
+                    .background(Color.Gray)
             )
         }
 

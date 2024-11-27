@@ -55,7 +55,6 @@ fun ProfileScreen(navController: NavHostController) {
                     .padding(paddingValues),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Background Image
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -89,7 +88,6 @@ fun ProfileScreen(navController: NavHostController) {
                     }
                 }
 
-                // Profile Name and Email
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "Audry Jenner",
@@ -104,7 +102,6 @@ fun ProfileScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                // Buttons
                 MenuButton(
                     icon = Icons.Default.Email,
                     text = "Account Center",

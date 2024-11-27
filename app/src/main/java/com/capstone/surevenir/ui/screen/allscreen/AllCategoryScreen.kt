@@ -60,7 +60,6 @@ fun AllCategoryScreen(navController: NavHostController) {
             .background(Color.White)
             .padding(16.dp)
     ) {
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -92,7 +91,6 @@ fun AllCategoryScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Grid of Categories
         CategorySectionAll(categories = categoryList)
     }
 }
@@ -101,12 +99,12 @@ fun AllCategoryScreen(navController: NavHostController) {
 @Composable
 fun CategorySectionAll(categories: List<Category>) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(4), // 4 items per row
+        columns = GridCells.Fixed(4),
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp), // Space between rows
-        horizontalArrangement = Arrangement.spacedBy(16.dp) // Space between columns
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(categories) { category ->
             Column(

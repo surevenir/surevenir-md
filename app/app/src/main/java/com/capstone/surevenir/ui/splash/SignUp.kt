@@ -61,7 +61,7 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun SignUpScreen(navController: NavController){
 
-    val auth = FirebaseAuth.getInstance() // Instance FirebaseAuth
+    val auth = FirebaseAuth.getInstance()
     val showDialog = remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var nameError by remember { mutableStateOf("") }

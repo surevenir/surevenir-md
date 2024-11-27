@@ -48,7 +48,6 @@ fun EditProfileScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .height(200.dp)
         ) {
-            // Profile Picture Section
             Box(
                 modifier = Modifier
                     .size(120.dp)

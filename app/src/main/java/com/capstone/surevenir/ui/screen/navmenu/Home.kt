@@ -117,7 +117,6 @@ fun Home(navController: NavController) {
                         "Authentic and beautiful souvenir for your home decor.",
                         "IDR 50.000 - 150.000"
                     ),
-//                    sa
                     Product(
                         R.drawable.product_image,
                         "Handicraft",
@@ -394,7 +393,6 @@ fun BottomNavigationBar(navController: NavController) {
         ) {
             items.forEachIndexed { index, item ->
                 if (index == 2) {
-                    // Add space for FAB
                     Spacer(modifier = Modifier.weight(1f))
                 }
 
@@ -485,7 +483,6 @@ fun FloatingButtonWithIntent(
     }
 
     Box {
-        // Extended FAB Menu
         AnimatedVisibility(
             visible = isExtended,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
@@ -497,7 +494,6 @@ fun FloatingButtonWithIntent(
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Camera Button
                 Button(
                     onClick = {
                         isExtended = false
@@ -527,7 +523,6 @@ fun FloatingButtonWithIntent(
                     Text("Camera")
                 }
 
-                // Gallery Button
                 Button(
                     onClick = {
                         isExtended = false
@@ -557,7 +552,6 @@ fun FloatingButtonWithIntent(
             }
         }
 
-        // Main FAB
         FloatingActionButton(
             onClick = { isExtended = !isExtended },
             containerColor = Color(0xFFED8A00),

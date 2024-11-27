@@ -61,7 +61,6 @@ fun FavoritesScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -82,7 +81,6 @@ fun FavoritesScreen(navController: NavHostController) {
             )
         }
 
-        // Filter Chips
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -101,7 +99,6 @@ fun FavoritesScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Favorite Items List
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -129,7 +126,6 @@ fun FavoriteItemCard(item: FavoriteItem, navController: NavHostController) {
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Product Image
             AsyncImage(
                 model = item.imageUrl,
                 contentDescription = item.title,
@@ -139,7 +135,6 @@ fun FavoriteItemCard(item: FavoriteItem, navController: NavHostController) {
                 contentScale = ContentScale.Crop
             )
 
-            // Product Details
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)

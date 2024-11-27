@@ -1,5 +1,7 @@
 package com.capstone.surevenir.data.network.response
 
+import com.google.gson.annotations.SerializedName
+
 data class UserResponse(
 	val statusCode: Int? = null,
 	val data: Data? = null,
@@ -22,5 +24,19 @@ data class Data(
 	val username: String? = null,
 	val longitude: String? = null,
 	val updatedAt: String? = null
+)
+
+data class CreateUserRequest(
+	val id: String,
+	@SerializedName("full_name") val fullName: String,
+	val username: String,
+	val email: String,
+	val password: String? = null,
+	val phone: String? = null,
+	val role: String = "USER",
+	val provider: String = "EMAIL",
+	val longitude: String? = null,
+	val latitude: String? = null,
+	val address: String? = null
 )
 

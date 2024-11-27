@@ -15,13 +15,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.ui.camera.ImageCaptureVM
 import com.capstone.surevenir.ui.camera.PreviewScreen
@@ -50,12 +53,16 @@ import com.capstone.surevenir.ui.screen.profile.AccountCenterScreen
 import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
 import com.capstone.surevenir.ui.screen.profile.SettingsScreen
 import com.capstone.surevenir.ui.theme.MyAppTheme
+import com.capstone.surevenir.ui.viewmodel.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.UUID
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var navController: NavHostController
@@ -64,7 +71,6 @@ class MainActivity : ComponentActivity() {
         private const val GOOGLE_SIGN_IN_CODE = 1001
     }
 
-//
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -81,11 +87,9 @@ class MainActivity : ComponentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == GOOGLE_SIGN_IN_CODE) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
-                val account = task.getResult(ApiException::class.java)
-                println("Google Sign-In Success: ${account.displayName}")
-                firebaseAuthWithGoogle(account.idToken!!, navController, this)
+                val userViewModel: UserViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+                handleGoogleSignInResult(data, this, navController, userViewModel)
             } catch (e: ApiException) {
                 println("Google Sign-In failed: ${e.statusCode}")
                 println("Error message: ${e.message}")
@@ -93,40 +97,60 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-//sa
 }
 
 
+private fun handleGoogleSignInResult(
+    data: Intent?,
+    context: Context,
+    navController: NavController,
+    userViewModel: UserViewModel
+) {
+    val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+    try {
+        val account = task.getResult(ApiException::class.java)
+        if (account != null) {
+            val idToken = account.idToken
+            val email = account.email
+            val displayName = account.displayName
 
-private fun firebaseAuthWithGoogle(idToken: String, navController: NavHostController, context: Context) {
+            if (!email.isNullOrEmpty()) {
+                userViewModel.getUsers { users ->
+                    val existingUser = users?.find { it.email == email }
+                    if (existingUser == null) {
+                        val firebaseUser = FirebaseAuth.getInstance().currentUser
+                        val firebaseUid = firebaseUser?.uid ?: UUID.randomUUID().toString()
 
-
-    val credential = GoogleAuthProvider.getCredential(idToken, null)
-    FirebaseAuth.getInstance().signInWithCredential(credential)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val user = task.result?.user
-                val token = user?.uid
-
-                val userPreferences = UserPreferences(context)
-                (context as ComponentActivity).lifecycleScope.launch {
-                    userPreferences.saveLoginState(isLoggedIn = true, token = token ?: "", email = user?.email ?: "")
+                        val request = CreateUserRequest(
+                            id = firebaseUid,
+                            fullName = displayName ?: "Unknown Name",
+                            username = displayName ?: "Unknown Username",
+                            email = email,
+                            password = "",
+                            phone = "1234567891012",
+                            role = "USER",
+                            provider = "GOOGLE",
+                            longitude = "",
+                            latitude = "",
+                            address = ""
+                        )
+                        userViewModel.createUser(request)
+                    } else {
+                        navController.navigate("home") {
+                            popUpTo("signIn") { inclusive = true }
+                        }
+                    }
                 }
-
-                navController.navigate("home") {
-                    popUpTo("splash") { inclusive = true }
-                }
-            } else {
-                println("Sign-In Failed: ${task.exception?.message}")
-                task.exception?.printStackTrace()
             }
         }
+    } catch (e: ApiException) {
+        e.printStackTrace()
+    }
 }
 
 
 @Composable
 fun MainScreen(navController: NavHostController) {
-    // Mendapatkan rute saat ini
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val imageCaptureViewModel: ImageCaptureVM = viewModel()
@@ -143,7 +167,6 @@ fun MainScreen(navController: NavHostController) {
             }
         },
         floatingActionButton = {
-            // Only show FAB on main screens
             if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile")) {
                 FloatingButtonWithIntent(
                     navController = navController,

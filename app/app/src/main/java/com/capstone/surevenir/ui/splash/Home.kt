@@ -250,7 +250,7 @@ fun ScanHistorySection(products: List<Product>) {
                 modifier = Modifier
                     .width(350.dp)
                     .padding(end = 10.dp)
-                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp)) // Add shadow
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.White)
             )
@@ -393,7 +393,6 @@ fun BottomNavigationBar(navController: NavController) {
         ) {
             items.forEachIndexed { index, item ->
                 if (index == 2) {
-                    // Add space for FAB
                     Spacer(modifier = Modifier.weight(1f))
                 }
 
@@ -484,7 +483,6 @@ fun FloatingButtonWithIntent(
     }
 
     Box {
-        // Extended FAB Menu
         AnimatedVisibility(
             visible = isExtended,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
@@ -496,7 +494,6 @@ fun FloatingButtonWithIntent(
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Camera Button
                 Button(
                     onClick = {
                         isExtended = false
@@ -526,7 +523,6 @@ fun FloatingButtonWithIntent(
                     Text("Camera")
                 }
 
-                // Gallery Button
                 Button(
                     onClick = {
                         isExtended = false
@@ -538,7 +534,7 @@ fun FloatingButtonWithIntent(
                     },
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color(0xFFED8A00),
-                        contentColor = Color.White // White text
+                        contentColor = Color.White
                     ),
                     modifier = Modifier
                         .widthIn(min = 180.dp, max = 240.dp)
@@ -556,7 +552,6 @@ fun FloatingButtonWithIntent(
             }
         }
 
-        // Main FAB
         FloatingActionButton(
             onClick = { isExtended = !isExtended },
             containerColor = Color(0xFFED8A00),

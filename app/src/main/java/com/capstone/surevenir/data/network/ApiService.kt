@@ -1,5 +1,8 @@
 package com.capstone.surevenir.data.network
 
+import android.service.autofill.UserData
+import com.capstone.surevenir.data.network.response.CreateUserRequest
+import com.capstone.surevenir.data.network.response.UserResponse
 import com.capstone.surevenir.model.Category
 import com.capstone.surevenir.model.Merchant
 import com.capstone.surevenir.model.Product
@@ -7,6 +10,8 @@ import com.capstone.surevenir.model.User
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -16,8 +21,10 @@ import retrofit2.http.Part
 interface ApiService {
 
     @GET("users")
-    fun getUsers(): Call<List<User>>
+    suspend fun getUsers(): Response<List<User>>
 
+    @POST("users")
+    fun createUser(@Body request: CreateUserRequest): Call<UserResponse>
 
 
 //    @GET("markets")

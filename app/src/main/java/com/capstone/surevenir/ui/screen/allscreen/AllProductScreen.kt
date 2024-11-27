@@ -88,7 +88,6 @@ fun AllProductScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,7 +119,6 @@ fun AllProductScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Scrollable Grid of products
         AllProductSection(popularProducts, navController)
     }
 }
@@ -154,7 +152,6 @@ fun AllProductSection(popularProducts: List<Product>, navController: NavHostCont
                             .clickable { navController.navigate("singleProduct")  }
                     )
                 }
-                // Add spacer if row has only 1 product
                 if (rowProducts.size < 2) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
@@ -167,7 +164,6 @@ fun AllProductSection(popularProducts: List<Product>, navController: NavHostCont
 @Preview(showBackground = true)
 @Composable
 fun PreviewAllProductScreen() {
-    // Create a mock NavHostController for preview
     val navController = rememberNavController()
     AllProductScreen(navController = navController)
 }

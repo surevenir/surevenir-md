@@ -74,7 +74,7 @@ fun ShopCard (
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Row (
-                    verticalAlignment = Alignment.CenterVertically // Sejajarkan elemen ke tengah secara ve
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_location),
@@ -88,7 +88,7 @@ fun ShopCard (
                         fontFamily = sfui_semibold,                    )
                 }
                 Row (
-                    verticalAlignment = Alignment.CenterVertically // Sejajarkan elemen ke tengah secara ve
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_souvenir),

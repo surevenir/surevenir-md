@@ -94,7 +94,6 @@ fun AllHistory(navController: NavHostController) {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Header Section
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -126,7 +125,6 @@ fun AllHistory(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // History Section
         AllScanHistorySection(scanHistory)
     }
 }

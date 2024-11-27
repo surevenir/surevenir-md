@@ -53,7 +53,6 @@ private fun ResultScreenContent(
             .fillMaxSize()
             .padding(30.dp)
     ) {
-        // Judul berada di tengah
         Text(
             text = "Identified Souvenir",
             fontSize = 24.sp,
@@ -167,7 +166,6 @@ private fun ResultScreenContent(
                     shape = CircleShape,
                     modifier = Modifier.size(24.dp)
                 ) {
-                    // Placeholder for store avatar
                     Box(
                         modifier = Modifier
                             .fillMaxSize()

@@ -33,14 +33,12 @@ import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 
 @Composable
 fun SingleCategoryScreen (navController: NavHostController){
-    // Use LazyColumn to make the content scrollable
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     )
     {
-        // Header
         item {
             Row(
                 modifier = Modifier
@@ -74,21 +72,21 @@ fun SingleCategoryScreen (navController: NavHostController){
             Spacer(
                 modifier = Modifier
                     .padding(top = 15.dp)
-                    .fillMaxWidth() // Memenuhi lebar layar
-                    .height(0.4.dp) // Tinggi garis
-                    .background(Color.Gray) // Warna garis
+                    .fillMaxWidth()
+                    .height(0.4.dp)
+                    .background(Color.Gray)
             )
         }
 
         item {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth() // Memenuhi lebar layar
+                    .fillMaxWidth()
                     .padding(10.dp),
-                contentAlignment = Alignment.Center // Menempatkan konten di tengah secara horizontal
+                contentAlignment = Alignment.Center
             ) {
                 Column(
-                    horizontalAlignment = Alignment.CenterHorizontally // Mengatur elemen di dalam Column tetap rata tengah
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.cat_art),

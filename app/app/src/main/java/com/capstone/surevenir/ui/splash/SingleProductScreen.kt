@@ -67,14 +67,12 @@ fun SingleProductScreen(navController: NavHostController) {
     )
 
 
-    // Use LazyColumn to make the content scrollable
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
             .padding(16.dp)
     ) {
-        // Header
         item {
             Row(
                 modifier = Modifier
@@ -107,7 +105,6 @@ fun SingleProductScreen(navController: NavHostController) {
         }
 
 
-        // Image Section
         item {
             Column(
                 modifier = Modifier
@@ -117,17 +114,14 @@ fun SingleProductScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Image Slider Section
                 ImageSlider(images = images)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Additional product details here...
             }
         }
 
 
-        // Price and Title
         item {
             Column {
                 Text(
@@ -149,7 +143,7 @@ fun SingleProductScreen(navController: NavHostController) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_star),
                         contentDescription = "Rating Star",
-                        tint = Color(0xFFFFCC00), // Yellow star
+                        tint = Color(0xFFFFCC00),
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -166,7 +160,6 @@ fun SingleProductScreen(navController: NavHostController) {
         }
 
 
-        // Details Section
         item {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(
@@ -223,7 +216,6 @@ fun SingleProductScreen(navController: NavHostController) {
         }
 
 
-        // Description
         item {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(
@@ -243,7 +235,6 @@ fun SingleProductScreen(navController: NavHostController) {
         }
 
 
-        // Reviews Section
         item {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(
@@ -271,7 +262,6 @@ fun SingleProductScreen(navController: NavHostController) {
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                // Example Review
                 repeat(2) {
                     Column(modifier = Modifier.padding(vertical = 8.dp)) {
                         Text(
@@ -318,9 +308,8 @@ fun ImageSlider(images: List<Int>) {
             .fillMaxWidth()
             .height(300.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(Color.LightGray) // Placeholder
+            .background(Color.LightGray)
     ) {
-        // Horizontal Pager for Images
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
@@ -332,7 +321,6 @@ fun ImageSlider(images: List<Int>) {
             )
         }
 
-        // Slider Indicator
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -342,7 +330,7 @@ fun ImageSlider(images: List<Int>) {
             repeat(images.size) { index ->
                 Box(
                     modifier = Modifier
-                        .size(if (pagerState.currentPage == index) 10.dp else 8.dp) // Active indicator larger
+                        .size(if (pagerState.currentPage == index) 10.dp else 8.dp)
                         .padding(2.dp)
                         .clip(CircleShape)
                         .background(

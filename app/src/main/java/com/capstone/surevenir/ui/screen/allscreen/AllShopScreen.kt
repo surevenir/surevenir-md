@@ -51,7 +51,6 @@ fun AllShopScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -81,7 +80,6 @@ fun AllShopScreen(navController: NavHostController) {
             )
         }
 
-        // Grid of shops
         ShopSectionAll(merchants = merchantLists, navController)
     }
 }
@@ -90,7 +88,7 @@ fun AllShopScreen(navController: NavHostController) {
 @Composable
 fun ShopSectionAll(merchants: List<Merchant>, navController: NavHostController) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(1), // Gunakan "columns" sebagai pengganti "cells"
+        columns = GridCells.Fixed(1),
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
@@ -105,11 +103,11 @@ fun ShopSectionAll(merchants: List<Merchant>, navController: NavHostController) 
                 totalShopProduct = shop.totalShopProduct,
                 modifier = Modifier
                     .padding(top = 10.dp)
-                    .fillMaxWidth() // Sesuaikan ukuran agar mengikuti kolom
-                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(8.dp)) // Tambahkan bayangan
-                    .clip(RoundedCornerShape(8.dp)) // Pastikan bentuk tetap sesuai
+                    .fillMaxWidth()
+                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .background(Color.White)
-                    .padding(8.dp) // Jarak dalam untuk konten
+                    .padding(8.dp)
                     .clickable { navController.navigate("singleShop") }
             )
         }

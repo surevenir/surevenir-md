@@ -2,7 +2,6 @@ package com.capstone.surevenir.model
 
 import java.util.Date
 
-//Tes Lagi 3
 
 data class User(
     val id: String,

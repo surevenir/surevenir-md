@@ -1,6 +1,7 @@
 package com.capstone.surevenir.ui.screen.navmenu
 
 import android.app.Activity
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -42,14 +43,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import com.capstone.surevenir.R
+import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.ui.component.CustomPasswordField
 import com.capstone.surevenir.ui.component.CustomTextField
 import com.capstone.surevenir.ui.component.isValidEmail
+import com.capstone.surevenir.ui.viewmodel.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 private const val GOOGLE_SIGN_IN_CODE = 1001
 
@@ -237,9 +242,8 @@ fun SignInScreen(navController: NavController){
             }
         }
     }
-
-
 }
+
 
 
 @Composable

@@ -125,7 +125,6 @@ private fun firebaseAuthWithGoogle(idToken: String, navController: NavHostContro
 
 @Composable
 fun MainScreen(navController: NavHostController) {
-    // Mendapatkan rute saat ini
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val imageCaptureViewModel: ImageCaptureVM = viewModel()
@@ -142,7 +141,6 @@ fun MainScreen(navController: NavHostController) {
             }
         },
         floatingActionButton = {
-            // Only show FAB on main screens
             if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile")) {
                 FloatingButtonWithIntent(
                     navController = navController,

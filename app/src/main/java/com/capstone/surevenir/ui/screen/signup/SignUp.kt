@@ -2,15 +2,7 @@ package com.capstone.surevenir.ui.screen.signup
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
@@ -19,11 +11,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,20 +20,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.capstone.surevenir.R
+import com.capstone.surevenir.data.network.response.CreateUserRequest
+import com.capstone.surevenir.ui.SuccessDialog
 import com.capstone.surevenir.ui.component.CustomPasswordField
 import com.capstone.surevenir.ui.component.CustomTextField
-import com.capstone.surevenir.ui.SuccessDialog
 import com.capstone.surevenir.ui.component.isValidEmail
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_text
+import com.capstone.surevenir.ui.viewmodel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun SignUpScreen(navController: NavController){
-
-    val auth = FirebaseAuth.getInstance() // Instance FirebaseAuth
+fun SignUpScreen(navController: NavController, userViewModel: UserViewModel = hiltViewModel()) {
+    val auth = FirebaseAuth.getInstance()
     val showDialog = remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var nameError by remember { mutableStateOf("") }
@@ -58,10 +49,20 @@ fun SignUpScreen(navController: NavController){
 
     SuccessDialog(navController, showDialog)
 
+    val userResponse by userViewModel.userResponse.observeAsState()
+    userResponse?.let {
+        if (it.success == true) {
+            userViewModel.clearState()
+        }
+    }
 
-    Column (modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
+    SuccessDialog(navController, showDialog)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         Spacer(modifier = Modifier.height(40.dp))
 
         Box(
@@ -69,17 +70,14 @@ fun SignUpScreen(navController: NavController){
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(Color(0xFFE7E7E9))
-                .clickable(onClick = { /* Handle back action */ }),
+                .clickable { navController.popBackStack() },
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.arrow),
                 contentDescription = "Back",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clickable(onClick = ({navController.popBackStack() }))
+                modifier = Modifier.size(24.dp)
             )
-
         }
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -88,8 +86,7 @@ fun SignUpScreen(navController: NavController){
             text = "Sign up now",
             fontFamily = sfui_semibold,
             fontSize = 25.sp,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -97,8 +94,7 @@ fun SignUpScreen(navController: NavController){
         Text(
             text = "Please fill the details and create account",
             color = Color(0xFF7D848D),
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -107,7 +103,7 @@ fun SignUpScreen(navController: NavController){
             value = name,
             onValueChange = {
                 name = it
-                nameError = if (name.isEmpty()) "Name is required" else ""
+                nameError = if (it.isEmpty()) "Name is required" else ""
             },
             label = "Name",
             isError = nameError.isNotEmpty(),
@@ -120,7 +116,11 @@ fun SignUpScreen(navController: NavController){
             value = email,
             onValueChange = {
                 email = it
-                emailError = if (email.isEmpty()) "Email is required" else if (!isValidEmail(email)) "Invalid email format" else ""
+                emailError = when {
+                    it.isEmpty() -> "Email is required"
+                    !isValidEmail(it) -> "Invalid email format"
+                    else -> ""
+                }
             },
             label = "Email",
             isError = emailError.isNotEmpty(),
@@ -133,7 +133,11 @@ fun SignUpScreen(navController: NavController){
             password = password,
             onPasswordChange = {
                 password = it
-                passwordError = if (password.isEmpty()) "Password is required" else if (password.length < 8) "Password must be more than 8 chars." else ""
+                passwordError = when {
+                    it.isEmpty() -> "Password is required"
+                    it.length < 8 -> "Password must be at least 8 characters"
+                    else -> ""
+                }
             },
             passwordVisibility = passwordVisibility,
             onVisibilityChange = { passwordVisibility = !passwordVisibility },
@@ -141,24 +145,51 @@ fun SignUpScreen(navController: NavController){
             errorMessage = passwordError
         )
 
-
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = {
                 nameError = if (name.isEmpty()) "Name is required" else ""
-                emailError = if (email.isEmpty()) "Email is required" else if (!isValidEmail(email)) "Invalid email format" else ""
-                passwordError = if (password.isEmpty()) "Password is required" else if (password.length < 8) "Password must be more than 8 chars." else ""
+                emailError = when {
+                    email.isEmpty() -> "Email is required"
+                    !isValidEmail(email) -> "Invalid email format"
+                    else -> ""
+                }
+                passwordError = when {
+                    password.isEmpty() -> "Password is required"
+                    password.length < 8 -> "Password must be at least 8 characters"
+                    else -> ""
+                }
 
                 if (nameError.isEmpty() && emailError.isEmpty() && passwordError.isEmpty()) {
                     isLoading = true
+
                     auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener {
-                            isLoading = false
-                            if (it.isSuccessful) {
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+
+                                val firebaseUser = task.result?.user
+                                val firebaseUid = firebaseUser?.uid ?: ""
+
+                                val request = CreateUserRequest(
+                                    id = firebaseUid,
+                                    fullName = name,
+                                    username = name,
+                                    email = email,
+                                    password = password,
+                                    phone = "",
+                                    role = "USER",
+                                    provider = "EMAIL",
+                                    longitude = "",
+                                    latitude = "",
+                                    address = ""
+                                )
                                 showDialog.value = true
+                                userViewModel.createUser(request)
+                                isLoading = false
                             } else {
-                                errorMessage = it.exception?.message.toString()
+                                isLoading = false
+                                errorMessage = task.exception?.message.toString()
                             }
                         }
                 }
@@ -195,10 +226,6 @@ fun SignUpScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(8.dp))
 
-
-        Spacer(modifier = Modifier.height(25.dp))
-
-
         Row(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
@@ -206,8 +233,9 @@ fun SignUpScreen(navController: NavController){
                 text = "Already have an account? ",
                 fontSize = 15.sp,
                 fontFamily = sfui_text,
-                color = Color(0xFFF707B81),
-                style = MaterialTheme.typography.bodySmall,)
+                color = Color(0xFF707B81),
+                style = MaterialTheme.typography.bodySmall
+            )
             Text(
                 text = "Sign in",
                 fontSize = 15.sp,
@@ -220,9 +248,7 @@ fun SignUpScreen(navController: NavController){
             )
         }
 
-
         Spacer(modifier = Modifier.height(15.dp))
-
-
     }
 }
+
