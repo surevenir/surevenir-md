@@ -4,6 +4,7 @@ package com.capstone.surevenir
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,10 +21,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.ui.camera.ImageCaptureVM
@@ -53,6 +56,7 @@ import com.capstone.surevenir.ui.screen.profile.AccountCenterScreen
 import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
 import com.capstone.surevenir.ui.screen.profile.SettingsScreen
 import com.capstone.surevenir.ui.theme.MyAppTheme
+import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
 import com.capstone.surevenir.ui.viewmodel.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
@@ -99,7 +103,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
 private fun handleGoogleSignInResult(
     data: Intent?,
     context: Context,
@@ -110,24 +113,37 @@ private fun handleGoogleSignInResult(
     try {
         val account = task.getResult(ApiException::class.java)
         if (account != null) {
-            val idToken = account.idToken
             val email = account.email
             val displayName = account.displayName
+            val firebaseUser = FirebaseAuth.getInstance().currentUser
+            val firebaseUid = firebaseUser?.uid ?: UUID.randomUUID().toString()
 
-            if (!email.isNullOrEmpty()) {
-                userViewModel.getUsers { users ->
-                    val existingUser = users?.find { it.email == email }
-                    if (existingUser == null) {
-                        val firebaseUser = FirebaseAuth.getInstance().currentUser
-                        val firebaseUid = firebaseUser?.uid ?: UUID.randomUUID().toString()
+            val dummyToken = "b1025941-5a1d-4d86-bef0-d05e9118befb"
 
+            Log.d("DEBUG", "Using Dummy Token: $dummyToken")
+
+            userViewModel.getUsers(dummyToken) { users ->
+                val existingUser = users?.find { it.email == email }
+                Log.d("DEBUG", "Fetched Users: $users")
+                Log.d("DEBUG", "Existing User: $existingUser")
+
+                val userPreferences = UserPreferences(context)
+                (context as ComponentActivity).lifecycleScope.launch {
+                    if (existingUser != null) {
+                        userPreferences.saveLoginState(
+                            isLoggedIn = true,
+                            token = existingUser.id,
+                            email = email ?: ""
+                        )
+                        Log.d("DEBUG", "Existing user found. ID: ${existingUser.id}")
+                    } else {
                         val request = CreateUserRequest(
                             id = firebaseUid,
                             fullName = displayName ?: "Unknown Name",
                             username = displayName ?: "Unknown Username",
-                            email = email,
-                            password = "",
-                            phone = "1234567891012",
+                            email = email ?: "unknown_email@gmail.com",
+                            password = "google_login",
+                            phone = "",
                             role = "USER",
                             provider = "GOOGLE",
                             longitude = "",
@@ -135,18 +151,28 @@ private fun handleGoogleSignInResult(
                             address = ""
                         )
                         userViewModel.createUser(request)
-                    } else {
-                        navController.navigate("home") {
-                            popUpTo("signIn") { inclusive = true }
-                        }
+
+                        userPreferences.saveLoginState(
+                            isLoggedIn = true,
+                            token = firebaseUid,
+                            email = email ?: ""
+                        )
+                        Log.d("DEBUG", "New user created with ID: $firebaseUid")
+                    }
+
+                    navController.navigate("home") {
+                        popUpTo("signIn") { inclusive = true }
                     }
                 }
             }
         }
     } catch (e: ApiException) {
         e.printStackTrace()
+        Log.e("DEBUG", "Google Sign-In failed: ${e.message}")
     }
 }
+
+
 
 
 @Composable
@@ -228,9 +254,7 @@ fun MainScreen(navController: NavHostController) {
             composable("allHistory") {
                 AllHistory(navController)
             }
-            composable("singleProduct") {
-                SingleProductScreen(navController)
-            }
+
             composable("preview") {
                 PreviewScreen(
                     navController = navController,
@@ -254,14 +278,22 @@ fun MainScreen(navController: NavHostController) {
             composable("settings") {
                 SettingsScreen(navController)
             }
-            composable("singleProduct") {
-                SingleProductScreen(navController)
-            }
-            composable("singleShop") {
-                SingleShopScreen(navController)
-            }
             composable("singleCategory") {
                 SingleCategoryScreen(navController)
+            }
+            composable(
+                "product/{productId}",
+                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                SingleProductScreen(productId, navController)
+            }
+            composable(
+                "merchant/{merchantId}",
+                arguments = listOf(navArgument("merchantId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val merchantId = backStackEntry.arguments?.getInt("merchantId") ?: 0
+                SingleShopScreen(merchantId, navController)
             }
         }
     }

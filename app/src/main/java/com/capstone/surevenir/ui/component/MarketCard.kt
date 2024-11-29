@@ -1,6 +1,6 @@
 package com.capstone.surevenir.ui.component
 
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,79 +27,67 @@ import coil.compose.AsyncImage
 import com.capstone.surevenir.R
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 
+
 @Composable
-fun ShopCard (
+fun MarketCard(
     imageRes: String,
-    shopName: String,
-    shopLocation: String,
-    totalShopProduct: Int,
+    marketName: String,
+    marketLocation: String,
+    marketDescription: String,
     modifier: Modifier
-){
+) {
+    Log.d("MarketCard", "Rendering MarketCard - Name: $marketName, Location: $marketLocation, Image: $imageRes")
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
             .padding(20.dp)
-    ){
-        Column (
+    ) {
+        Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
-
         ) {
+            val imageToLoad = if (imageRes.isNotEmpty()) imageRes else "https://via.placeholder.com/150"
+            Log.d("MarketCard", "Image URL: $imageToLoad")
             AsyncImage(
-                model = imageRes,
-                contentDescription = shopName,
-                modifier = Modifier
-                    .fillMaxWidth()
+                model = imageRes.ifEmpty { "https://via.placeholder.com/150" },
+                contentDescription = marketName,
+                modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = shopName,
-                fontFamily = sfui_semibold,
+                text = marketName,
                 fontSize = 20.sp,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row (
-                    verticalAlignment = Alignment.CenterVertically // Sejajarkan elemen ke tengah secara ve
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_location),
                         contentDescription = "Location Icon",
-                        tint = Color(0xFFCC5B14)                    )
-
+                        tint = Color(0xFFCC5B14)
+                    )
                     Spacer(modifier = Modifier.width(10.dp))
-
-                    Text(
-                        text = shopLocation,
-                        fontFamily = sfui_semibold,                    )
+                    Text(text = marketLocation)
                 }
-                Row (
-                    verticalAlignment = Alignment.CenterVertically // Sejajarkan elemen ke tengah secara ve
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_souvenir),
-                        contentDescription = "Location Icon",
-                        tint = Color(0xFFCC5B14)                    )
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Text(
-                        text = totalShopProduct.toString(),
-                        fontFamily = sfui_semibold,                    )
-                }
+//                Row(verticalAlignment = Alignment.CenterVertically) {
+//                    Icon(
+//                        painter = painterResource(id = R.drawable.icon_souvenir),
+//                        contentDescription = "Souvenir Icon",
+//                        tint = Color(0xFFCC5B14)
+//                    )
+//                    Spacer(modifier = Modifier.width(10.dp))
+//                    Text(text = marketDescription)
+//                }
             }
         }
     }
 }
-
-

@@ -33,26 +33,36 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
+
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AllCategoryScreen(navController: NavHostController) {
-    val categoryList = listOf(
-        Category(R.drawable.cat_art, "Art"),
-        Category(R.drawable.cat_furniture, "Furniture"),
-        Category(R.drawable.cat_toy, "Toy"),
-        Category(R.drawable.cat_spice, "Spice"),
-        Category(R.drawable.cat_art, "Art"),
-        Category(R.drawable.cat_furniture, "Furniture"),
-        Category(R.drawable.cat_toy, "Toy"),
-        Category(R.drawable.cat_spice, "Spice"),
-        Category(R.drawable.cat_art, "Art"),
-        Category(R.drawable.cat_furniture, "Furniture"),
-        Category(R.drawable.cat_toy, "Toy"),
-        Category(R.drawable.cat_spice, "Spice")
-    )
+fun AllCategoryScreen(navController: NavHostController, tokenViewModel: TokenViewModel = hiltViewModel(), categoryViewModel: CategoryViewModel = hiltViewModel()) {
+
+    val categoryList = remember { mutableStateOf<List<Category>?>(null) }
+
+    val token by tokenViewModel.token.observeAsState()
+
+    LaunchedEffect(Unit) {
+        tokenViewModel.fetchToken()
+    }
+
+    LaunchedEffect(Unit) {
+        categoryViewModel.getCategories("Bearer $token") { categories ->
+            categoryList.value = categories
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -97,7 +107,10 @@ fun AllCategoryScreen(navController: NavHostController) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CategorySectionAll(categories: List<Category>) {
+fun CategorySectionAll(categories: MutableState<List<Category>?>) {
+
+    val categoryList = categories.value ?: emptyList()
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         modifier = Modifier
@@ -106,23 +119,16 @@ fun CategorySectionAll(categories: List<Category>) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(categories) { category ->
+        items(categoryList) { category ->
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = painterResource(id = category.imageRes),
-                    contentDescription = category.catName,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = category.catName,
+                    text = category.name,
                     fontSize = 14.sp,
                     fontFamily = sfui_semibold,
                     color = Color.Black,

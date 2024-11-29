@@ -2,7 +2,6 @@ package com.capstone.surevenir.model
 
 import java.util.Date
 
-
 data class User(
     val id: String,
     val fullName: String,

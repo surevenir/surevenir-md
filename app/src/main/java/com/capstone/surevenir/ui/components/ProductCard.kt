@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,15 +25,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.compose.rememberImagePainter
 import com.capstone.surevenir.R
+import com.capstone.surevenir.data.network.response.ProductData
+import com.capstone.surevenir.model.Product
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 
 @Composable
 fun ProductCard(
-    imageRes: Int,
-    title: String,
-    price: String,
-    rating: String,
+    product: ProductData,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -48,53 +50,37 @@ fun ProductCard(
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(12.dp))
             ) {
+                val imageUrl = product.images.firstOrNull()?.url
+                    ?: "https://via.placeholder.com/150"
                 Image(
-                    painter = painterResource(id = imageRes),
-                    contentDescription = title,
+                    painter = rememberImagePainter(data = imageUrl),
+                    contentDescription = product.name ?: "No name available",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .background(Color.White, RoundedCornerShape(8.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_star),
-                            contentDescription = "Rating",
-                            tint = Color(0xFFFFA726),
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = rating,
-                            fontFamily = sfui_semibold
-                        )
-                    }
-                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = title,
-                fontFamily = sfui_semibold,
+                text = product.name ?: "Unnamed Product",
+                style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = price,
-                fontFamily = sfui_semibold,
-                color = Color(0xFF757575)
+                text = "IDR ${product.price ?: "N/A"}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
             )
         }
     }
 }
+
+
+
 
 
 

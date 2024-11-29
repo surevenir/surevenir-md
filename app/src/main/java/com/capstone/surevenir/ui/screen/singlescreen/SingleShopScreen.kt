@@ -1,5 +1,6 @@
 package com.capstone.surevenir.ui.screen.singlescreen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +20,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,113 +31,120 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.capstone.surevenir.R
 import com.capstone.surevenir.model.Product
+import com.capstone.surevenir.ui.screen.navmenu.ProductsSection
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.viewmodel.MerchantDetailViewModel
+import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 
 @Composable
-fun SingleShopScreen(navController: NavHostController) {
+fun SingleShopScreen(
+    merchantId: Int,
+    navController: NavHostController,
+    tokenViewModel: TokenViewModel = hiltViewModel(),
+    merchantViewModel: MerchantDetailViewModel = hiltViewModel()
+) {
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    )
-    {
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .padding(start = 5.dp, bottom = 0.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
+    val token by tokenViewModel.token.observeAsState()
+    val merchantDetail by merchantViewModel.merchantDetail.collectAsState()
+    val error by merchantViewModel.error.collectAsState()
+
+    LaunchedEffect(Unit) {
+        tokenViewModel.fetchToken()
+    }
+
+    LaunchedEffect(merchantId, token) {
+        if (token != null) {
+            Log.d("SingleProductScreen Debug", "Token is available: $token")
+            merchantViewModel.fetchMerchantDetail(merchantId, token!!)
+        } else {
+            Log.d("SingleProductScreen Debug", "Token is still null")
+        }
+    }
+
+
+    if (merchantDetail != null) {
+        val merchant = merchantDetail!!
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        )
+        {
+            item {
+                Row(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFE7E7E9))
-                        .clickable(onClick = { navController.popBackStack() }),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrow),
-                        contentDescription = "Back",
-                        modifier = Modifier.size(24.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(Color(0xFFE7E7E9), CircleShape)
+                            .clickable(onClick = { navController.popBackStack() }),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.arrow),
+                            contentDescription = "Back",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Text(
+                        text = "Detail Shop",
+                        fontSize = 25.sp,
+                        fontFamily = sfui_semibold,
+                        color = Color(0xFFCC5B14)
                     )
                 }
-                Text(
-                    text = "Detail Shop",
-                    fontSize = 25.sp,
-                    fontFamily = sfui_semibold,
-                    color = Color(0xFFCC5B14)
-                )
             }
-            Spacer(
-                modifier = Modifier
-                    .padding(top = 15.dp)
-                    .fillMaxWidth()
-                    .height(0.4.dp)
-                    .background(Color.Gray)
-            )
-        }
-
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.shop),
-                    contentDescription = "Shop Image",
-                    modifier = Modifier
-                        .size(150.dp)
-                        .background(Color.White)
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
+            item {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
+                    // Gambar Toko
+                    AsyncImage(
+                        model = merchant.profileImageUrl ?: "https://via.placeholder.com/150",
+                        contentDescription = merchant.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Nama Toko
                     Text(
-                        text = "Made Art Shop",
+                        text = merchant.name,
                         fontFamily = sfui_semibold,
-                        fontSize = 30.sp,
+                        fontSize = 24.sp,
                         color = Color.Black
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.icon_souvenir),
-                            contentDescription = "Items Icon",
-                            tint = Color(0xFFCC5B14),
-                            modifier = Modifier.size(30.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Text(
-                            text = "   20 items",
-                            fontFamily = sfui_med,
-                            fontSize = 18.sp,
-                            color = Color.Gray
-                        )
-                    }
+                    // Deskripsi
+                    Text(
+                        text = merchant.description,
+                        fontFamily = sfui_med,
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Lokasi (Latitude dan Longitude)
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -140,60 +152,18 @@ fun SingleShopScreen(navController: NavHostController) {
                             painter = painterResource(id = R.drawable.icon_location),
                             contentDescription = "Location Icon",
                             tint = Color(0xFFCC5B14),
-                            modifier = Modifier.size(30.dp)
+                            modifier = Modifier.size(20.dp)
                         )
-
                         Spacer(modifier = Modifier.width(4.dp))
-
                         Text(
-                            text = "   Ubud",
+                            text = "${merchant.latitude}, ${merchant.longitude}",
                             fontFamily = sfui_med,
-                            fontSize = 18.sp,
-                            color = Color.Gray,
+                            fontSize = 14.sp,
+                            color = Color.Gray
                         )
                     }
                 }
             }
-            Spacer(
-                modifier = Modifier
-                    .padding(top = 15.dp, end = 20.dp, start = 20.dp)
-                    .fillMaxWidth()
-                    .height(0.4.dp)
-                    .background(Color.Gray)
-            )
         }
-
-        item {
-
-            Text(
-                text = "Souvenir List",
-                fontSize = 20.sp,
-                fontFamily = sfui_semibold,
-                color = Color.Black,
-                modifier = Modifier
-                    .padding(16.dp)
-            )
-            val popularProducts = listOf(
-                Product(
-                    R.drawable.product_image,
-                    "Bali Hand Magnet",
-                    "Magnet souvenir for your fridge.",
-                    "IDR 25.000"
-                ),
-                Product(
-                    R.drawable.product_image,
-                    "Keychain",
-                    "Customizable keychains for your loved ones.",
-                    "IDR 15.000"
-                ),
-                Product(
-                    R.drawable.product_image,
-                    "T-shirt Bali",
-                    "High-quality Bali-themed T-shirt.",
-                    "IDR 150.000"
-                )
-            )
-            ProductSectionSix(popularProduct = popularProducts)
         }
-    }
 }

@@ -1,10 +1,18 @@
 package com.capstone.surevenir.data.network.response
 
+import com.capstone.surevenir.model.User
 import com.google.gson.annotations.SerializedName
 
 data class UserResponse(
 	val statusCode: Int? = null,
 	val data: Data? = null,
+	val success: Boolean? = null,
+	val message: String? = null
+)
+
+data class AllUserResponse(
+	val statusCode: Int? = null,
+	val data: List<User>,
 	val success: Boolean? = null,
 	val message: String? = null
 )

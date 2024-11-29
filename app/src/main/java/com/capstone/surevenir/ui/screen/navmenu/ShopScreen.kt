@@ -1,5 +1,6 @@
 package com.capstone.surevenir.ui.screen.navmenu
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +35,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -47,20 +51,39 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.capstone.surevenir.R
+import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.Category
 import com.capstone.surevenir.model.Product
 import com.capstone.surevenir.model.Merchant
 import com.capstone.surevenir.ui.component.ShopCard
+import com.capstone.surevenir.ui.components.SectionHeader
+import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
+import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
+import com.capstone.surevenir.ui.viewmodel.ProductViewModel
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ShopScreen(navController: NavHostController) {
+fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel = hiltViewModel(), categoryViewModel: CategoryViewModel = hiltViewModel(), merchantViewModel: MerchantViewModel = hiltViewModel(), productViewModel: ProductViewModel = hiltViewModel()) {
     val bottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
+    val merchants = remember { mutableStateOf<List<Merchant>?>(null) }
+    val categoryList = remember { mutableStateOf<List<Category>?>(null) }
+    val productList = remember { mutableStateOf<List<ProductData>?>(null) }
+
+
+    val token by tokenViewModel.token.observeAsState()
+
+    LaunchedEffect(Unit) {
+        tokenViewModel.fetchToken()
+    }
+
+    Log.d("TOKEN_CATE", token.toString())
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -89,16 +112,16 @@ fun ShopScreen(navController: NavHostController) {
                     SectionHeader(title = "Categories", actionText = "All Categories", navController)
                 }
                 item {
-                    val categoryList = listOf(
-                        Category(R.drawable.cat_art, "Art"),
-                        Category(R.drawable.cat_furniture, "Furniture"),
-                        Category(R.drawable.cat_furniture, "Furniture"),
-                        Category(R.drawable.cat_furniture, "Furniture"),
-                        Category(R.drawable.cat_toy, "Toy"),
-                        Category(R.drawable.cat_toy, "Toy"),
-                        Category(R.drawable.cat_toy, "Toy"),
-                        Category(R.drawable.cat_spice, "Spice")
-                    )
+                    if (token != null) {
+                        LaunchedEffect(token) {
+                            Log.d("TOKEN_CATE", "Using Token: $token")
+                            categoryViewModel.getCategories("Bearer $token") { categories ->
+                                categoryList.value = categories
+                            }
+                        }
+                    } else {
+                        Log.d("TOKEN_CATE", "Token belum tersedia")
+                    }
                     CategorySection(categories = categoryList, navController)
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -110,114 +133,39 @@ fun ShopScreen(navController: NavHostController) {
 
                 }
                 item {
-                    val merchantLists = listOf(
-                        Merchant(R.drawable.shop, "Ketut Art", "Ubud", 10),
-                        Merchant(R.drawable.shop, "Ketut Art", "Ubud", 10),
-                        Merchant(R.drawable.shop, "Ketut Art", "Ubud", 10)
-                    )
-                    ShopSection(shops = merchantLists, navController)
+                    if (token != null) {
+                        LaunchedEffect(token) {
+                            merchantViewModel.getMerchants("Bearer $token") { merchantList ->
+                                merchants.value = merchantList
+                            }
+                        }
+                    }
+                    ShopSection(shops = merchants.value ?: emptyList(), navController)
                     Spacer(modifier = Modifier.height(16.dp))
 
                 }
 
                 item {
-                    SectionHeader(title = "Popular Products", actionText = "All Products", navController)
+                    SectionHeader(title = "All Products", actionText = "All Products", navController)
                 }
                 item {
-                    val popularProducts = listOf(
-                        Product(
-                            R.drawable.product_image,
-                            "Bali Hand Magnet",
-                            "Magnet souvenir for your fridge.",
-                            "IDR 25.000"
-                        ),
-                        Product(
-                            R.drawable.product_image,
-                            "Keychain",
-                            "Customizable keychains for your loved ones.",
-                            "IDR 15.000"
-                        ),
-                        Product(
-                            R.drawable.product_image,
-                            "T-shirt Bali",
-                            "High-quality Bali-themed T-shirt.",
-                            "IDR 150.000"
-                        )
-                    )
-                    PopolarProductSection(popularProduct = popularProducts)
+                    if (token != null) {
+                        LaunchedEffect(token) {
+                            Log.d("TOKEN_CATE", "Using Token: $token")
+                            productViewModel.getProducts("Bearer $token") { products ->
+                                productList.value = products
+                            }
+                        }
+                    } else {
+                        Log.d("TOKEN_CATE", "Token belum tersedia")
+                    }
+                    ProductsSection(products = productList, navController)
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
+            }
             }
         }
     }
-}
-
-
-
-@Composable
-fun SectionHeader(title: String, actionText: String, navController: NavHostController) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        androidx.compose.material.Text(
-            text = title,
-            fontSize = 20.sp,
-            fontFamily = sfui_semibold
-        )
-        androidx.compose.material.Text(
-            text = actionText,
-            fontSize = 20.sp,
-            fontFamily = sfui_semibold,
-            color = Color(0xFFCC5B14),
-            modifier = Modifier
-                .clickable {
-                    if (actionText == "All Shops"){
-                        navController.navigate("allShop")
-                    }
-                    else if (actionText == "All Categories"){
-                        navController.navigate("allCategory")
-                    }
-                    else if (actionText == "All Products"){
-                        navController.navigate("allProduct")
-                    }
-                }
-        )
-    }
-}
-
-
-@Composable
-fun PopolarProductSection(popularProduct: List<Product>) {
-    Column {
-        popularProduct.chunked(2).forEach { rowProducts ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                rowProducts.forEach { product ->
-                    ProductCard(
-                        imageRes = product.imageRes,
-                        title = product.title,
-                        price = product.price,
-                        rating = "5",
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(vertical = 8.dp)
-                            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color.White)
-                    )
-                }
-                if (rowProducts.size < 2) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
 
 
 @Composable
@@ -226,43 +174,39 @@ fun ShopSection(shops: List<Merchant>, navController: NavHostController) {
     )
     {
         items(shops){ shop->
-            ShopCard(
-                imageRes = shop.imageRes,
-                shopName = shop.shopName,
-                shopLocation = shop.shopLocation,
-                totalShopProduct = shop.totalShopProduct,
-                modifier = Modifier
-                    .width(200.dp)
-                    .padding(end = 10.dp)
-                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
-                    .clickable { navController.navigate("singleShop") }
-            )
+            shop.profile_image_url?.let {
+                ShopCard(
+                    imageRes = it,
+                    shopName = shop.name,
+                    shopLocation = "${shop.latitude}, ${shop.longitude}",
+                    totalShopProduct = shop.products_count,
+                    modifier = Modifier
+                        .width(200.dp)
+                        .padding(end = 10.dp)
+                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.White)
+                        .clickable { navController.navigate("singleShop") }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun CategorySection(categories: List<Category>, navController: NavHostController) {
+fun CategorySection(categories: MutableState<List<Category>?>, navController: NavHostController) {
+
+    val categoryList = categories.value ?: emptyList()
+
     LazyRow (
     ){
-        items(categories) { category ->
+        items(categoryList) { category ->
             Column (
                 modifier = Modifier.padding(10.dp),
                 horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
             ){
-                Image(
-                    painter = painterResource(id = category.imageRes),
-                    contentDescription = category.catName,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .padding(5.dp)
-                        .clickable { navController.navigate("singleCategory") }
-                        .clip(RoundedCornerShape(8.dp))
-                )
                 Text(
-                    text = category.catName,
+                    text = category.name,
                     fontFamily = sfui_semibold
                 )
             }

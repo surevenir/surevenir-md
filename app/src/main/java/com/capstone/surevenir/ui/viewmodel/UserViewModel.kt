@@ -1,5 +1,6 @@
 package com.capstone.surevenir.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -52,27 +53,33 @@ class UserViewModel @Inject constructor(
         })
     }
 
-    fun getUsers(onComplete: (List<User>?) -> Unit) {
+    fun getUsers(token: String, onComplete: (List<User>?) -> Unit) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                val response = userRepository.getUsers()
+                val response = userRepository.getUsers(token)
                 _isLoading.value = false
                 if (response.isSuccessful) {
-                    val userList = response.body()
+                    val userList = response.body()?.data
                     _users.value = userList
+                    Log.d("DEBUG", "API Response Successful: $userList")
                     onComplete(userList)
                 } else {
                     _errorMessage.value = "Error: ${response.code()} - ${response.message()}"
+                    Log.d("DEBUG", "API Response Error: ${response.code()} - ${response.message()}")
                     onComplete(null)
                 }
             } catch (e: Exception) {
                 _isLoading.value = false
                 _errorMessage.value = "Failed: ${e.message}"
+                Log.d("DEBUG", "Exception in API Call: ${e.message}")
                 onComplete(null)
             }
         }
     }
+
+
+
 
     fun clearState() {
         _userResponse.value = null

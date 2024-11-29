@@ -1,6 +1,13 @@
-package com.capstone.surevenir.model
+package com.capstone.surevenir.data.network.response
 
-data class Merchant(
+data class MerchantResponse(
+    val success: Boolean,
+    val status_code: Int,
+    val message: String,
+    val data: List<MerchantData>
+)
+
+data class MerchantData(
     val id: Int,
     val name: String,
     val profile_image_url: String?,
@@ -11,6 +18,5 @@ data class Merchant(
     val market_id: Int?,
     val createdAt: String?,
     val updatedAt: String?,
-    val shopLocation: String?,
-    val products_count: Int,
+    val products_count: Int
 )

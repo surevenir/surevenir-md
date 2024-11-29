@@ -27,24 +27,38 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.capstone.surevenir.ui.component.ShopCard
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AllShopScreen(navController: NavHostController) {
-    val merchantLists = listOf(
-        Merchant(R.drawable.shop, "Ketut Art", "Ubud", 10),
-        Merchant(R.drawable.shop, "Sukawati Market", "Sukawati", 20),
-        Merchant(R.drawable.shop, "Ubud Handicraft", "Ubud", 15),
-        Merchant(R.drawable.shop, "Bali Crafts", "Denpasar", 12),
-        Merchant(R.drawable.shop, "Art Shop", "Kuta", 8),
-        Merchant(R.drawable.shop, "Handmade Store", "Seminyak", 14)
-    )
+fun AllShopScreen(navController: NavHostController, merchantViewModel: MerchantViewModel = hiltViewModel(), tokenViewModel : TokenViewModel = hiltViewModel()) {
+    val merchants = remember { mutableStateOf<List<Merchant>?>(null) }
+    val token by tokenViewModel.token.observeAsState()
+
+    LaunchedEffect(Unit) {
+        tokenViewModel.fetchToken()
+    }
+
+    if (token != null) {
+        LaunchedEffect(token) {
+            merchantViewModel.getMerchants("Bearer $token") { merchantList ->
+                merchants.value = merchantList
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -80,7 +94,7 @@ fun AllShopScreen(navController: NavHostController) {
             )
         }
 
-        ShopSectionAll(merchants = merchantLists, navController)
+        ShopSectionAll(merchants = merchants.value ?: emptyList(), navController)
     }
 }
 
@@ -96,20 +110,21 @@ fun ShopSectionAll(merchants: List<Merchant>, navController: NavHostController) 
         contentPadding = PaddingValues(8.dp)
     ) {
         items(merchants) { shop ->
-            ShopCard(
-                imageRes = shop.imageRes,
-                shopName = shop.shopName,
-                shopLocation = shop.shopLocation,
-                totalShopProduct = shop.totalShopProduct,
-                modifier = Modifier
-                    .padding(top = 10.dp)
-                    .fillMaxWidth()
-                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(8.dp))
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
-                    .padding(8.dp)
-                    .clickable { navController.navigate("singleShop") }
-            )
+            shop.profile_image_url?.let {
+                ShopCard(
+                    imageRes = it,
+                    shopName = shop.name,
+                    shopLocation = "${shop.latitude}, ${shop.longitude}",
+                    totalShopProduct = shop.products_count,
+                    modifier = Modifier
+                        .width(200.dp)
+                        .padding(end = 10.dp)
+                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.White)
+                        .clickable { navController.navigate("merchant/${shop.id}") }
+                )
+            }
         }
     }
 }

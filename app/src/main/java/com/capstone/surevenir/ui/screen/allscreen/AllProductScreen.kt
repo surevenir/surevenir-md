@@ -1,5 +1,6 @@
 package com.capstone.surevenir.ui.screen.allscreen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,60 +34,28 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.capstone.surevenir.R
+import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.Product
+import com.capstone.surevenir.ui.screen.navmenu.ProductsSection
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.viewmodel.ProductViewModel
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 
 @Composable
-fun AllProductScreen(navController: NavHostController) {
+fun AllProductScreen(navController: NavHostController,  tokenViewModel: TokenViewModel = hiltViewModel(), productViewModel: ProductViewModel = hiltViewModel()) {
+    val productList = remember { mutableStateOf<List<ProductData>?>(null) }
 
-    val popularProducts = listOf(
-        Product(
-            R.drawable.product_image,
-            "Bali Hand Magnet",
-            "Magnet souvenir for your fridge.",
-            "IDR 25.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Keychain",
-            "Customizable keychains for your loved ones.",
-            "IDR 15.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "T-shirt Bali",
-            "High-quality Bali-themed T-shirt.",
-            "IDR 150.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Beach Hat",
-            "Elegant hat for sunny days.",
-            "IDR 75.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Coffee Mug",
-            "Stylish Bali-themed coffee mug.",
-            "IDR 50.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Fridge Magnet",
-            "Custom Bali fridge magnet.",
-            "IDR 30.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Beach Bag",
-            "Perfect for your Bali vacation.",
-            "IDR 100.000"
-        )
-    )
+
+    val token by tokenViewModel.token.observeAsState()
+
+    LaunchedEffect(Unit) {
+        tokenViewModel.fetchToken()
+    }
 
     Column(
         modifier = Modifier
@@ -119,46 +93,21 @@ fun AllProductScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AllProductSection(popularProducts, navController)
+        if (token != null) {
+            LaunchedEffect(token) {
+                Log.d("TOKEN_CATE", "Using Token: $token")
+                productViewModel.getProducts("Bearer $token") { products ->
+                    productList.value = products
+                }
+            }
+        } else {
+            Log.d("TOKEN_CATE", "Token belum tersedia")
+        }
+        ProductsSection(products = productList, navController)
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
-@Composable
-fun AllProductSection(popularProducts: List<Product>, navController: NavHostController) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-        items(popularProducts.chunked(2)) { rowProducts ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                rowProducts.forEach { product ->
-                    ProductCard(
-                        imageRes = product.imageRes,
-                        title = product.title,
-                        price = product.price,
-                        rating = "5",
-                        modifier = Modifier
-                            .weight(1f)
-                            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color.White)
-                            .padding(8.dp)
-                            .clickable { navController.navigate("singleProduct")  }
-                    )
-                }
-                if (rowProducts.size < 2) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-        }
-    }
-}
 
 
 @Preview(showBackground = true)

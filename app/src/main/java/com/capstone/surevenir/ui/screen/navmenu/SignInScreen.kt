@@ -2,6 +2,7 @@ package com.capstone.surevenir.ui.screen.navmenu
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import com.capstone.surevenir.R
@@ -59,7 +61,7 @@ import java.util.UUID
 private const val GOOGLE_SIGN_IN_CODE = 1001
 
 @Composable
-fun SignInScreen(navController: NavController){
+fun SignInScreen(navController: NavController, userViewModel: UserViewModel = hiltViewModel()){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -151,25 +153,44 @@ fun SignInScreen(navController: NavController){
 
                 if (emailErrorMessage.isEmpty() && passwordErrorMessage.isEmpty()) {
                     isLoading = true
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
+
+                    userViewModel.getUsers(token = "12345") { users ->
+                        val existingUser = users?.find { it.email == email }
+
+                        if (existingUser != null) {
+                            Log.d("DEBUG", "Users: $users")
+                            Log.d("DEBUG", "Input Email: $email")
+
+                            auth.signInWithEmailAndPassword(email, password)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        val user = task.result?.user
+
+                                        val userPreferences = UserPreferences(context)
+                                        (context as ComponentActivity).lifecycleScope.launch {
+                                            userPreferences.saveLoginState(
+                                                isLoggedIn = true,
+                                                token = existingUser.id,
+                                                email = email
+                                            )
+                                            Log.d("DEBUG_PREF", "TokenPref: ${existingUser.id}")
+                                        }
+
+                                        navController.navigate("home") {
+                                            popUpTo("signIn") { inclusive = true }
+                                        }
+                                    } else {
+                                        isLoading = false
+                                        emailErrorMessage = task.exception?.message ?: "Login failed"
+                                    }
+                                }
+                        } else {
+                            Log.d("DEBUG", "Users: $users")
+                            Log.d("DEBUG", "Input Email: $email")
                             isLoading = false
-                            if (task.isSuccessful) {
-                                val user = task.result?.user
-                                val token = user?.uid
-
-                                val userPreferences = UserPreferences(context)
-                                (context as ComponentActivity).lifecycleScope.launch {
-                                    userPreferences.saveLoginState(isLoggedIn = true, token = token ?: "", email = email)
-                                }
-
-                                navController.navigate("home") {
-                                    popUpTo("signIn") { inclusive = true }
-                                }
-                            } else {
-                                emailErrorMessage = task.exception?.message ?: "Login failed"
-                            }
+                            emailErrorMessage = "Email not registered"
                         }
+                    }
                 }
             },
             modifier = Modifier

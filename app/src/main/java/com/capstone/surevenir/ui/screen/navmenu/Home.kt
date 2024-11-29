@@ -1,6 +1,7 @@
 package com.capstone.surevenir.ui.screen.navmenu
 
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,12 +43,18 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -63,21 +70,46 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.capstone.surevenir.BuildConfig
 import com.capstone.surevenir.R
+import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.ui.components.ProductCard
-import com.capstone.surevenir.ui.components.ScanHistoryCard
 import com.capstone.surevenir.model.BottomNavItem
+import com.capstone.surevenir.model.Market
 import com.capstone.surevenir.model.Product
 import com.capstone.surevenir.ui.camera.ComposeFileProvider
 import com.capstone.surevenir.ui.camera.ImageCaptureVM
 import com.capstone.surevenir.ui.camera.PermissionUtils
+import com.capstone.surevenir.ui.component.MarketCard
+import com.capstone.surevenir.ui.components.SectionHeader
+import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
+import com.capstone.surevenir.ui.viewmodel.MarketViewModel
+import com.capstone.surevenir.ui.viewmodel.ProductViewModel
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun Home(navController: NavController) {
+fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltViewModel(), marketViewModel: MarketViewModel = hiltViewModel(), geocodingViewModel: GeocodingViewModel = hiltViewModel(), productViewModel: ProductViewModel = hiltViewModel()) {
+    val context = LocalContext.current
+    val geocodingViewModel: GeocodingViewModel = hiltViewModel()
+    var subDistrict by remember { mutableStateOf("Loading...") }
+    val productList = remember { mutableStateOf<List<ProductData>?>(null) }
+
+    val markets = remember { mutableStateOf<List<Market>?>(null) }
+    val scope = rememberCoroutineScope()
+
+
+    val token by tokenViewModel.token.observeAsState()
+
+    LaunchedEffect(Unit) {
+        tokenViewModel.fetchToken()
+    }
+
+
     Scaffold(
     ) { padding ->
 
@@ -87,7 +119,7 @@ fun Home(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(padding),
+                .padding(10.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
             item {
@@ -99,7 +131,6 @@ fun Home(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
                 ) {
                     HeroSlider(images = images)
                 }
@@ -110,46 +141,25 @@ fun Home(navController: NavController) {
             }
 
             item {
-                val scanHistoryProducts = listOf(
-                    Product(
-                        R.drawable.product_image,
-                        "Dream Catcher",
-                        "Authentic and beautiful souvenir for your home decor.",
-                        "IDR 50.000 - 150.000"
-                    ),
-                    Product(
-                        R.drawable.product_image,
-                        "Handicraft",
-                        "Handmade craft from local artisans in Bali.",
-                        "IDR 100.000 - 250.000"
-                    )
-                )
+//                val scanHistoryProducts = listOf(
+//                    Product(
+//                        R.drawable.product_image,
+//                        "Dream Catcher",
+//                        "Authentic and beautiful souvenir for your home decor.",
+//                        "IDR 50.000 - 150.000"
+//                    ),
+//                    Product(
+//                        R.drawable.product_image,
+//                        "Handicraft",
+//                        "Handmade craft from local artisans in Bali.",
+//                        "IDR 100.000 - 250.000"
+//                    )
+//                )
                 Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            text = "Scan History",
-                            fontSize = 20.sp,
-                            fontFamily = sfui_semibold,
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                        )
-                        Text(
-                            text = "See All History",
-                            fontSize = 20.sp,
-                            fontFamily = sfui_semibold,
-                            color = Color(0xFFCC5B14),
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .clickable { navController.navigate("allHistory") }
-                        )
-                    }
+                    SectionHeader(title = "Scan History", actionText = "See All History", navController)
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    ScanHistorySection(products = scanHistoryProducts)
+//                    ScanHistorySection(products = scanHistoryP?roducts)
                 }
             }
 
@@ -158,79 +168,183 @@ fun Home(navController: NavController) {
             }
 
             item {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            text = "All Products",
-                            fontSize = 20.sp,
-                            fontFamily = sfui_semibold,
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                        )
-                        Text(
-                            text = "See All Products",
-                            fontSize = 20.sp,
-                            fontFamily = sfui_semibold,
-                            color = Color(0xFFCC5B14),
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .clickable{ navController.navigate("allProduct") }
-                        )
-                    }
-                    }
+                SectionHeader(title = "All Markets", actionText = "See All Markets", navController)
             }
 
-            val allProducts = listOf(
-                Product(
-                    R.drawable.product_image,
-                    "Bali Hand Magnet",
-                    "Magnet souvenir for your fridge.",
-                    "IDR 25.000"
-                ),
-                Product(
-                    R.drawable.product_image,
-                    "Keychain",
-                    "Customizable keychains for your loved ones.",
-                    "IDR 15.000"
-                ),
-                Product(
-                    R.drawable.product_image,
-                    "T-shirt Bali",
-                    "High-quality Bali-themed T-shirt.",
-                    "IDR 150.000"
-                )
-            )
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
 
-            items(allProducts.chunked(2)) { rowProducts ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    rowProducts.forEach { product ->
-                        ProductCard(
-                            imageRes = product.imageRes,
-                            title = product.title,
-                            price = product.price,
-                            rating = "5",
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 8.dp)
-                                .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color.White)
-                        )
+            item {
+                if (token != null) {
+                    LaunchedEffect(token) {
+                        marketViewModel.getMarkets("Bearer $token") { marketList ->
+                            markets.value = marketList
+                            Log.d("ShopScreen", "Markets fetched: $marketList")
+                        }
                     }
-                    if (rowProducts.size < 2) {
-                        Spacer(modifier = Modifier.weight(1f))
+                } else {
+                    Log.d("ShopScreen", "Token is null")
+                }
+                MarketSection(markets = markets.value ?: emptyList(), navController)
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
+
+            item {
+                SectionHeader(title = "All Products", actionText = "See All Products", navController)
+            }
+
+
+            item {
+                if (token != null) {
+                    LaunchedEffect(token) {
+                        Log.d("TOKEN_CATE", "Using Token: $token")
+                        productViewModel.getProducts("Bearer $token") { products ->
+                            productList.value = products
+                        }
+                    }
+                } else {
+                    Log.d("TOKEN_CATE", "Token belum tersedia")
+                }
+                ProductsSection(products = productList, navController)
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductsSection(products: MutableState<List<ProductData>?>, navController: NavController) {
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        products.value?.let { productList ->
+            items(productList.filter { it.images.isNotEmpty() && it.name != null }) { product ->
+                ProductCard(
+                    product = product,
+                    modifier = Modifier
+                        .width(200.dp)
+                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+                        .clickable {
+                            navController.navigate("product/${product.id}")
+                        }
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun MarketSection(
+    markets: List<Market>,
+    navController: NavController,
+    geocodingViewModel: GeocodingViewModel = hiltViewModel()
+) {
+    val updatedMarkets = remember(markets) { mutableStateOf(markets) }
+    val isLoading = remember { mutableStateOf(true) }
+    val apiKey = BuildConfig.MAPS_API_KEY
+    val remainingRequests = remember { mutableStateOf(markets.size) }
+
+    Log.d("MarketSection", "Initial markets size: ${markets.size}")
+
+    LaunchedEffect(markets) {
+        Log.d("MarketSection", "LaunchedEffect triggered. Markets size: ${markets.size}")
+        isLoading.value = true
+
+        if (markets.isEmpty()) {
+            Log.d("MarketSection", "No markets to process, setting loading to false")
+            isLoading.value = false
+            return@LaunchedEffect
+        }
+
+        markets.forEach { market ->
+            Log.d("MarketValidation", "Processing market - ID: ${market.id}, Latitude: ${market.latitude}, Longitude: ${market.longitude}")
+            val latitude = market.longitude?.toDoubleOrNull()
+            val longitude = market.latitude?.toDoubleOrNull()
+
+            if (latitude != null && longitude != null && latitude in -90.0..90.0 && longitude in -180.0..180.0) {
+                geocodingViewModel.getSubDistrictFromCoordinates(latitude, longitude, apiKey) { subDistrict ->
+                    Log.d("GeocodingResult", "Received subDistrict for Market ID ${market.id}: $subDistrict")
+
+                    val currentMarkets = updatedMarkets.value.toMutableList()
+                    val updatedIndex = currentMarkets.indexOfFirst { it.id == market.id }
+
+                    if (updatedIndex != -1) {
+                        val updatedMarket = currentMarkets[updatedIndex].copy(
+                            marketLocation = subDistrict ?: "No Location"
+                        )
+                        currentMarkets[updatedIndex] = updatedMarket
+                        updatedMarkets.value = currentMarkets
+
+                        Log.d("MarketSection", "Updated market ${market.id} location to: ${subDistrict}")
+                    }
+
+                    remainingRequests.value -= 1
+                    Log.d("MarketSection", "Remaining requests: ${remainingRequests.value}")
+
+                    if (remainingRequests.value <= 0) {
+                        Log.d("MarketSection", "All requests completed, setting loading to false")
+                        isLoading.value = false
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+            } else {
+                Log.e("MarketSection", "Invalid coordinates for market ${market.id}")
+                remainingRequests.value -= 1
+                if (remainingRequests.value <= 0) {
+                    isLoading.value = false
+                }
+            }
+        }
+    }
+
+    if (isLoading.value) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Loading market locations...")
+            }
+        }
+    } else {
+        if (updatedMarkets.value.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No markets available")
+            }
+        } else {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
+                items(
+                    items = updatedMarkets.value,
+                    key = { it.id }
+                ) { market ->
+                    Log.d("MarketSection", "Rendering market card - ID: ${market.id}, Name: ${market.name}, Location: ${market.marketLocation}")
+                    MarketCard(
+                        imageRes = market.profileImageUrl ?: "https://via.placeholder.com/150",
+                        marketName = market.name ?: "Unknown Name",
+                        marketLocation = market.marketLocation ?: "No Location",
+                        marketDescription = market.description ?: "No description available",
+                        modifier = Modifier
+                            .width(200.dp)
+                            .padding(end = 10.dp)
+                            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.White)
+                    )
+                }
             }
         }
     }
@@ -238,22 +352,26 @@ fun Home(navController: NavController) {
 
 
 
+
+
+
+
 @Composable
 fun ScanHistorySection(products: List<Product>) {
-    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
+    LazyRow(contentPadding = PaddingValues(horizontal = 4.dp)) {
         items(products) { product ->
-            ScanHistoryCard(
-                imageRes = product.imageRes,
-                title = product.title,
-                description = product.description,
-                price = product.price,
-                modifier = Modifier
-                    .width(350.dp)
-                    .padding(end = 10.dp)
-                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp)) // Add shadow
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
-            )
+//            ScanHistoryCard(
+//                imageRes = product.imageRes,
+//                title = product.title,
+//                description = product.description,
+//                price = product.price,
+//                modifier = Modifier
+//                    .width(350.dp)
+//                    .padding(end = 10.dp)
+//                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp)) // Add shadow
+//                    .clip(RoundedCornerShape(8.dp))
+//                    .background(Color.White)
+//            )
         }
 
     }

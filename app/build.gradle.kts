@@ -18,6 +18,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+        buildConfigField("String", "MAPS_API_KEY", "\"AIzaSyAeZBOcOEpZYP5e8iNsPksO6oXv0Y3tP2o\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -30,7 +31,6 @@ android {
             )
         }
     }
-
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
     }
@@ -53,6 +53,7 @@ android {
 }
 
 dependencies {
+    implementation ("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation ("com.google.dagger:hilt-android:2.52")
     kapt ("com.google.dagger:hilt-compiler:2.52")
     implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")

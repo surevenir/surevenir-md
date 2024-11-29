@@ -56,6 +56,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var navController: NavHostController
@@ -96,10 +97,7 @@ class MainActivity : ComponentActivity() {
 }
 
 
-
 private fun firebaseAuthWithGoogle(idToken: String, navController: NavHostController, context: Context) {
-
-
     val credential = GoogleAuthProvider.getCredential(idToken, null)
     FirebaseAuth.getInstance().signInWithCredential(credential)
         .addOnCompleteListener { task ->

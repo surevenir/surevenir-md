@@ -117,27 +117,27 @@ fun SingleCategoryScreen (navController: NavHostController){
                 modifier = Modifier
                     .padding(16.dp)
             )
-            val popularProducts = listOf(
-                Product(
-                    R.drawable.product_image,
-                    "Bali Hand Magnet",
-                    "Magnet souvenir for your fridge.",
-                    "IDR 25.000"
-                ),
-                Product(
-                    R.drawable.product_image,
-                    "Keychain",
-                    "Customizable keychains for your loved ones.",
-                    "IDR 15.000"
-                ),
-                Product(
-                    R.drawable.product_image,
-                    "T-shirt Bali",
-                    "High-quality Bali-themed T-shirt.",
-                    "IDR 150.000"
-                )
-            )
-            ProductSectionSix(popularProduct = popularProducts)
+//            val popularProducts = listOf(
+//                Product(
+//                    R.drawable.product_image,
+//                    "Bali Hand Magnet",
+//                    "Magnet souvenir for your fridge.",
+//                    "IDR 25.000"
+//                ),
+//                Product(
+//                    R.drawable.product_image,
+//                    "Keychain",
+//                    "Customizable keychains for your loved ones.",
+//                    "IDR 15.000"
+//                ),
+//                Product(
+//                    R.drawable.product_image,
+//                    "T-shirt Bali",
+//                    "High-quality Bali-themed T-shirt.",
+//                    "IDR 150.000"
+//                )
+//            )
+//            ProductSectionSix(popularProduct = popularProducts)
         }
     }
 }

@@ -36,58 +36,58 @@ import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 
 @Composable
 fun AllHistory(navController: NavHostController) {
-    val scanHistory = listOf(
-        Product(
-            R.drawable.product_image,
-            "Bali Hand Magnet",
-            "Magnet souvenir scanned in Bali.",
-            "IDR 25.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Keychain",
-            "Customizable keychain scanned in Seminyak.",
-            "IDR 15.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "T-shirt Bali",
-            "Bali-themed T-shirt scanned in Ubud.",
-            "IDR 150.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Beach Hat",
-            "Elegant hat scanned in Kuta.",
-            "IDR 75.000"
-        )
-        ,
-        Product(
-            R.drawable.product_image,
-            "Beach Hat",
-            "Elegant hat scanned in Kuta.",
-            "IDR 75.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Beach Hat",
-            "Elegant hat scanned in Kuta.",
-            "IDR 75.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Beach Hat",
-            "Elegant hat scanned in Kuta.",
-            "IDR 75.000"
-        ),
-        Product(
-            R.drawable.product_image,
-            "Beach Hat",
-            "Elegant hat scanned in Kuta.",
-            "IDR 75.000"
-        )
+//    val scanHistory = listOf(
+//        Product(
+//            R.drawable.product_image,
+//            "Bali Hand Magnet",
+//            "Magnet souvenir scanned in Bali.",
+//            "IDR 25.000"
+//        ),
+//        Product(
+//            R.drawable.product_image,
+//            "Keychain",
+//            "Customizable keychain scanned in Seminyak.",
+//            "IDR 15.000"
+//        ),
+//        Product(
+//            R.drawable.product_image,
+//            "T-shirt Bali",
+//            "Bali-themed T-shirt scanned in Ubud.",
+//            "IDR 150.000"
+//        ),
+//        Product(
+//            R.drawable.product_image,
+//            "Beach Hat",
+//            "Elegant hat scanned in Kuta.",
+//            "IDR 75.000"
+//        )
+//        ,
+//        Product(
+//            R.drawable.product_image,
+//            "Beach Hat",
+//            "Elegant hat scanned in Kuta.",
+//            "IDR 75.000"
+//        ),
+//        Product(
+//            R.drawable.product_image,
+//            "Beach Hat",
+//            "Elegant hat scanned in Kuta.",
+//            "IDR 75.000"
+//        ),
+//        Product(
+//            R.drawable.product_image,
+//            "Beach Hat",
+//            "Elegant hat scanned in Kuta.",
+//            "IDR 75.000"
+//        ),
+//        Product(
+//            R.drawable.product_image,
+//            "Beach Hat",
+//            "Elegant hat scanned in Kuta.",
+//            "IDR 75.000"
+//        )
 
-    )
+//    )
 
     Column(
         modifier = Modifier
@@ -125,7 +125,7 @@ fun AllHistory(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AllScanHistorySection(scanHistory)
+//        AllScanHistorySection(scanHistory)
     }
 }
 
@@ -136,18 +136,18 @@ fun AllScanHistorySection(products: List<Product>) {
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(products) { product ->
-            ScanHistoryCard(
-                imageRes = product.imageRes,
-                title = product.title,
-                description = product.description,
-                price = product.price,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
-            )
-        }
+//        items(products) { product ->
+//            ScanHistoryCard(
+//                imageRes = product.imageRes,
+//                title = product.title,
+//                description = product.description,
+//                price = product.price,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+//                    .clip(RoundedCornerShape(8.dp))
+//                    .background(Color.White)
+//            )
+//        }
     }
 }
