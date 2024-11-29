@@ -12,6 +12,8 @@ data class ProductResponse(
     val message: String? = null
 )
 
+//dsada
+
 data class ProductData(
     val id: Int,
     val slug: String,
