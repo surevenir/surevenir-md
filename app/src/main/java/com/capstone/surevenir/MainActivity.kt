@@ -3,8 +3,10 @@ package com.capstone.surevenir
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,6 +47,8 @@ import com.capstone.surevenir.ui.screen.navmenu.Home
 import com.capstone.surevenir.ui.screen.onboarding.OnBoardingScreen
 import com.capstone.surevenir.ui.screen.navmenu.ProfileScreen
 import com.capstone.surevenir.ui.screen.ResultScreen
+import com.capstone.surevenir.ui.screen.allscreen.AllMarket
+import com.capstone.surevenir.ui.screen.mylocation.MyLocationScreen
 import com.capstone.surevenir.ui.screen.navmenu.ScanScreen
 import com.capstone.surevenir.ui.screen.navmenu.ShopScreen
 import com.capstone.surevenir.ui.screen.navmenu.SignInScreen
@@ -60,6 +66,8 @@ import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
 import com.capstone.surevenir.ui.viewmodel.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.AndroidEntryPoint
@@ -70,6 +78,8 @@ import java.util.UUID
 class MainActivity : ComponentActivity() {
 
     private lateinit var navController: NavHostController
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     companion object {
         private const val GOOGLE_SIGN_IN_CODE = 1001
@@ -100,8 +110,13 @@ class MainActivity : ComponentActivity() {
                 e.printStackTrace()
             }
         }
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
     }
+
 }
+
+
 
 private fun handleGoogleSignInResult(
     data: Intent?,
@@ -183,8 +198,8 @@ fun MainScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile")) {
-                StickyTopBar()
+            if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile", "myLocation")) {
+                StickyTopBar(navController)
             }
         },
         bottomBar = {
@@ -214,6 +229,9 @@ fun MainScreen(navController: NavHostController) {
                     navigateToHome = { navController.navigate("home") { popUpTo("splash") { inclusive = true } } },
                     navigateToSignIn = { navController.navigate("signIn") { popUpTo("splash") { inclusive = true } } }
                 )
+            }
+            composable("myLocation") {
+                MyLocationScreen(navController)
             }
             composable("onboarding") {
                 OnBoardingScreen(navController = navController)
@@ -253,6 +271,9 @@ fun MainScreen(navController: NavHostController) {
             }
             composable("allHistory") {
                 AllHistory(navController)
+            }
+            composable("allMarket") {
+                AllMarket(navController)
             }
 
             composable("preview") {
@@ -298,6 +319,8 @@ fun MainScreen(navController: NavHostController) {
         }
     }
 }
+
+
 
 
 @Preview(showBackground = true)

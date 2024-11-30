@@ -50,7 +50,6 @@ fun SingleShopScreen(
     tokenViewModel: TokenViewModel = hiltViewModel(),
     merchantViewModel: MerchantDetailViewModel = hiltViewModel()
 ) {
-
     val token by tokenViewModel.token.observeAsState()
     val merchantDetail by merchantViewModel.merchantDetail.collectAsState()
     val error by merchantViewModel.error.collectAsState()
@@ -113,7 +112,6 @@ fun SingleShopScreen(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    // Gambar Toko
                     AsyncImage(
                         model = merchant.profileImageUrl ?: "https://via.placeholder.com/150",
                         contentDescription = merchant.name,
@@ -124,7 +122,6 @@ fun SingleShopScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Nama Toko
                     Text(
                         text = merchant.name,
                         fontFamily = sfui_semibold,
@@ -134,7 +131,6 @@ fun SingleShopScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Deskripsi
                     Text(
                         text = merchant.description,
                         fontFamily = sfui_med,
@@ -144,7 +140,6 @@ fun SingleShopScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Lokasi (Latitude dan Longitude)
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -165,5 +160,5 @@ fun SingleShopScreen(
                 }
             }
         }
-        }
+    }
 }

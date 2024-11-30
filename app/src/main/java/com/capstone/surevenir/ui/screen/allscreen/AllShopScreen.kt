@@ -179,8 +179,10 @@ fun ShopSectionAll(shops: List<MerchantData>, navController: NavHostController, 
             }
         }
     } else {
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 4.dp)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
             items(
                 items = updatedShops.value,
@@ -194,12 +196,12 @@ fun ShopSectionAll(shops: List<MerchantData>, navController: NavHostController, 
                         shopLocation = shop.location ?: "No Location",
                         totalShopProduct = shop.products_count,
                         modifier = Modifier
-                            .width(200.dp)
-                            .padding(end = 10.dp)
+                            .fillMaxWidth()
+                            .padding(8.dp)
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
-                            .clickable { navController.navigate("singleShop") }
+                            .clickable { navController.navigate("merchant/${shop.id}") }
                     )
                 }
             }

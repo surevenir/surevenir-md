@@ -1,5 +1,6 @@
 package com.capstone.surevenir.model
 
+import com.google.gson.annotations.SerializedName
 import java.util.Date
 
 data class Market(
@@ -7,6 +8,7 @@ data class Market(
     val slug: String,
     val name: String,
     val description: String?,
+    @SerializedName("profile_image_url") // Nama key yang ada di JSON
     val profileImageUrl: String?,
     val longitude: String?,
     val latitude: String?,

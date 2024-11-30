@@ -143,9 +143,12 @@ fun SingleProductScreen(
                         color = Color.Black
                     )
                     Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+                    Spacer(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(0.4.dp)
+                            .height(1.dp)
                             .background(Color.Gray)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -263,7 +266,7 @@ fun SingleProductScreen(
                             Spacer(modifier = Modifier.width(4.dp))
 
                             Text(
-                                text = product.merchant.name,
+                                text = product.merchant.latitude.toString(),
                                 fontFamily = sfui_med,
                                 fontSize = 14.sp,
                                 color = Color.Gray

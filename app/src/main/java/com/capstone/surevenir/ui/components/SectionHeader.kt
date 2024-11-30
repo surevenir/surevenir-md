@@ -37,7 +37,10 @@ fun SectionHeader(title: String, actionText: String, navController: NavControlle
                     else if (actionText == "All Categories"){
                         navController.navigate("allCategory")
                     }
-                    else if (actionText == "All Products"){
+                    else if (actionText == "All Markets" || actionText == "See All Markets"){
+                        navController.navigate("allMarket")
+                    }
+                    else if (actionText == "All Products" || actionText == "See All Products"){
                         navController.navigate("allProduct")
                     }
                     else if (actionText == "All History"){

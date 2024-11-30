@@ -89,6 +89,9 @@ import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
 import com.capstone.surevenir.ui.viewmodel.MarketViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -220,7 +223,7 @@ fun ProductsSection(products: MutableState<List<ProductData>?>, navController: N
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        products.value?.let { productList ->
+        products.value?.take(5)?.let { productList ->
             items(productList.filter { it.images.isNotEmpty() && it.name != null }) { product ->
                 ProductCard(
                     product = product,
@@ -301,18 +304,7 @@ fun MarketSection(
     }
 
     if (isLoading.value) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator()
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Loading market locations...")
-            }
-        }
+        SkeletonLoadingView()
     } else {
         if (updatedMarkets.value.isEmpty()) {
             Box(
@@ -328,10 +320,11 @@ fun MarketSection(
                 contentPadding = PaddingValues(horizontal = 4.dp)
             ) {
                 items(
-                    items = updatedMarkets.value,
+                    items = updatedMarkets.value.take(5),
                     key = { it.id }
                 ) { market ->
                     Log.d("MarketSection", "Rendering market card - ID: ${market.id}, Name: ${market.name}, Location: ${market.marketLocation}")
+                    Log.d("MarketCardImage", "Profile image URL: ${market.profileImageUrl}")
                     MarketCard(
                         imageRes = market.profileImageUrl ?: "https://via.placeholder.com/150",
                         marketName = market.name ?: "Unknown Name",
@@ -350,10 +343,78 @@ fun MarketSection(
     }
 }
 
+@Composable
+fun SkeletonLoadingView() {
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 4.dp)
+    ) {
+        items(5) {
+            SkeletonCard()
+        }
+    }
+}
 
+@Composable
+fun SkeletonCard() {
+    Box(
+        modifier = Modifier
+            .width(200.dp)
+            .padding(end = 10.dp)
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.White)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(120.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.LightGray)
+                    .shimmering()
+            )
 
+            Spacer(modifier = Modifier.height(8.dp))
 
+            Box(
+                modifier = Modifier
+                    .height(20.dp)
+                    .fillMaxWidth(0.6f)
+                    .background(Color.LightGray)
+                    .shimmering()
+            )
 
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Box(
+                modifier = Modifier
+                    .height(16.dp)
+                    .fillMaxWidth(0.4f)
+                    .background(Color.LightGray)
+                    .shimmering()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .height(12.dp)
+                    .fillMaxWidth(0.8f)
+                    .background(Color.LightGray)
+                    .shimmering()
+            )
+        }
+    }
+}
+
+@Composable
+fun Modifier.shimmering(): Modifier {
+    return this.then(Modifier.placeholder(visible = true, highlight = PlaceholderHighlight.shimmer()))
+}
 
 
 @Composable
@@ -381,20 +442,20 @@ fun ScanHistorySection(products: List<Product>) {
 
 
 @Composable
-fun StickyTopBar() {
+fun StickyTopBar(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
             .shadow(1.dp)
     ) {
-        TopBar()
+        TopBar(navController)
 
     }
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -418,7 +479,9 @@ fun TopBar() {
                 text = "Ubud ▼",
                 fontFamily = sfui_semibold,
                 color = Color(0xFFFFA726),
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .clickable { navController.navigate("myLocation") }
             )
         }
     }

@@ -255,7 +255,7 @@ fun ShopSection(
             contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
             items(
-                items = updatedShops.value,
+                items = updatedShops.value.take(5),  // Limit to the first 5 items
                 key = { it.id }
             ) { shop ->
                 shop.profile_image_url?.let {
@@ -271,7 +271,7 @@ fun ShopSection(
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
-                            .clickable { navController.navigate("singleShop") }
+                            .clickable { navController.navigate("merchant/${shop.id}") }
                     )
                 }
             }
@@ -282,9 +282,7 @@ fun ShopSection(
 
 @Composable
 fun CategorySection(categories: MutableState<List<Category>?>, navController: NavHostController) {
-
-    val categoryList = categories.value ?: emptyList()
-
+    val categoryList = categories.value?.take(8) ?: emptyList()
     LazyRow (
     ){
         items(categoryList) { category ->
