@@ -4,6 +4,7 @@
 /.idea/caches
 /.idea/libraries
 /gradle.properties
+/build.gradle.kts
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
