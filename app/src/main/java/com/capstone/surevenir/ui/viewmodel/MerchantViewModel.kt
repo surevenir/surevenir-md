@@ -27,15 +27,14 @@ class MerchantViewModel @Inject constructor(
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
 
-    fun getMerchants(token: String, onComplete: (List<Merchant>?) -> Unit) {
+    fun getMerchants(token: String, onComplete: (List<MerchantData>?) -> Unit) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
                 val response = merchantRepository.getMerchants(token)
                 _isLoading.value = false
                 if (response.isSuccessful) {
-                    val merchantDataList = response.body()?.data
-                    val merchantList = merchantDataList?.toMerchants()
+                    val merchantList = response.body()?.data
                     _merchantResponse.value = response.body()
                     onComplete(merchantList)
                 } else {
@@ -54,22 +53,4 @@ class MerchantViewModel @Inject constructor(
 
 }
 
-private fun List<MerchantData>.toMerchants(): List<Merchant> {
-    return this.map { merchantData ->
-        Merchant(
-            id = merchantData.id,
-            name = merchantData.name,
-            profile_image_url = merchantData.profile_image_url ?: "",
-            description = merchantData.description ?: "",
-            longitude = merchantData.longitude ?: "",
-            latitude = merchantData.latitude ?: "",
-            user_id = merchantData.user_id ?: "",
-            market_id = merchantData.market_id ?: 0,
-            createdAt = merchantData.createdAt ?: "",
-            updatedAt = merchantData.updatedAt ?: "",
-            shopLocation = "${merchantData.latitude}, ${merchantData.longitude}",
-            products_count = merchantData.products_count,
-        )
-    }
-}
 

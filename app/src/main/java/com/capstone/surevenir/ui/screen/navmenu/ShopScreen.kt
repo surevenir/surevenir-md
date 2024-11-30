@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -43,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -53,7 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.capstone.surevenir.BuildConfig
 import com.capstone.surevenir.R
+import com.capstone.surevenir.data.network.response.MerchantData
 import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.Category
@@ -62,6 +67,7 @@ import com.capstone.surevenir.model.Merchant
 import com.capstone.surevenir.ui.component.ShopCard
 import com.capstone.surevenir.ui.components.SectionHeader
 import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
+import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
@@ -72,7 +78,7 @@ import kotlinx.coroutines.launch
 fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel = hiltViewModel(), categoryViewModel: CategoryViewModel = hiltViewModel(), merchantViewModel: MerchantViewModel = hiltViewModel(), productViewModel: ProductViewModel = hiltViewModel()) {
     val bottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
-    val merchants = remember { mutableStateOf<List<Merchant>?>(null) }
+    val merchants = remember { mutableStateOf<List<MerchantData>?>(null) }
     val categoryList = remember { mutableStateOf<List<Category>?>(null) }
     val productList = remember { mutableStateOf<List<ProductData>?>(null) }
 
@@ -169,29 +175,110 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
 
 
 @Composable
-fun ShopSection(shops: List<Merchant>, navController: NavHostController) {
-    LazyRow(
-    )
-    {
-        items(shops){ shop->
-            shop.profile_image_url?.let {
-                ShopCard(
-                    imageRes = it,
-                    shopName = shop.name,
-                    shopLocation = "${shop.latitude}, ${shop.longitude}",
-                    totalShopProduct = shop.products_count,
-                    modifier = Modifier
-                        .width(200.dp)
-                        .padding(end = 10.dp)
-                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color.White)
-                        .clickable { navController.navigate("singleShop") }
-                )
+fun ShopSection(
+    shops: List<MerchantData>,
+    navController: NavHostController,
+    geocodingViewModel: GeocodingViewModel = hiltViewModel()
+) {
+    val updatedShops = remember(shops) { mutableStateOf(shops) }
+    val isLoading = remember { mutableStateOf(true) }
+    val apiKey = BuildConfig.MAPS_API_KEY
+    val remainingRequests = remember { mutableStateOf(shops.size) }
+
+    Log.d("ShopSection", "Initial shops size: ${shops.size}")
+
+    LaunchedEffect(shops) {
+        Log.d("ShopSection", "LaunchedEffect triggered. Shops size: ${shops.size}")
+        isLoading.value = true
+
+        if (shops.isEmpty()) {
+            Log.d("ShopSection", "No shops to process, setting loading to false")
+            isLoading.value = false
+            return@LaunchedEffect
+        }
+
+        shops.forEach { shop ->
+            Log.d("ShopValidation", "Processing shop - ID: ${shop.id}, Latitude: ${shop.latitude}, Longitude: ${shop.longitude}")
+            val latitude = shop.longitude?.toDoubleOrNull()
+            val longitude = shop.latitude?.toDoubleOrNull()
+
+            if (latitude != null && longitude != null && latitude in -90.0..90.0 && longitude in -180.0..180.0) {
+                geocodingViewModel.getSubDistrictFromCoordinates(latitude, longitude, apiKey) { subDistrict ->
+                    Log.d("GeocodingResult", "Received subDistrict for Shop ID ${shop.id}: $subDistrict")
+
+                    val currentShops = updatedShops.value.toMutableList()
+                    val updatedIndex = currentShops.indexOfFirst { it.id == shop.id }
+
+                    if (updatedIndex != -1) {
+                        val updatedShop = currentShops[updatedIndex].copy(
+                            location = subDistrict ?: "No Location"  // Assuming you add 'location' property to Merchant class
+                        )
+                        currentShops[updatedIndex] = updatedShop
+                        updatedShops.value = currentShops
+
+                        Log.d("ShopSection", "Updated shop ${shop.id} location to: ${subDistrict}")
+                    }
+
+                    remainingRequests.value -= 1
+                    Log.d("ShopSection", "Remaining requests: ${remainingRequests.value}")
+
+                    if (remainingRequests.value <= 0) {
+                        Log.d("ShopSection", "All requests completed, setting loading to false")
+                        isLoading.value = false
+                    }
+                }
+            } else {
+                Log.e("ShopSection", "Invalid coordinates for shop ${shop.id}")
+                remainingRequests.value -= 1
+                if (remainingRequests.value <= 0) {
+                    isLoading.value = false
+                }
+            }
+        }
+    }
+
+    if (isLoading.value) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Loading shop locations...")
+            }
+        }
+    } else {
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            items(
+                items = updatedShops.value,
+                key = { it.id }
+            ) { shop ->
+                shop.profile_image_url?.let {
+                    Log.d("ShopSection", "Rendering shop card - ID: ${shop.id}, Name: ${shop.name}, Location: ${shop.location}")
+                    ShopCard(
+                        imageRes = it,
+                        shopName = shop.name,
+                        shopLocation = shop.location ?: "No Location",
+                        totalShopProduct = shop.products_count,
+                        modifier = Modifier
+                            .width(200.dp)
+                            .padding(end = 10.dp)
+                            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.White)
+                            .clickable { navController.navigate("singleShop") }
+                    )
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun CategorySection(categories: MutableState<List<Category>?>, navController: NavHostController) {

@@ -18,5 +18,6 @@ data class MerchantData(
     val market_id: Int?,
     val createdAt: String?,
     val updatedAt: String?,
-    val products_count: Int
+    val products_count: Int,
+    val location: String
 )
