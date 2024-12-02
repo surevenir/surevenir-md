@@ -68,6 +68,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.MapsInitializer
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.AndroidEntryPoint
@@ -87,6 +88,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        MapsInitializer.initialize(this, MapsInitializer.Renderer.LATEST) { }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         setContent {
             MyAppTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {

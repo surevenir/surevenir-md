@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +14,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +27,8 @@ import androidx.compose.material.Text
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.capstone.surevenir.R
@@ -95,24 +104,46 @@ fun AllProductScreen(navController: NavHostController,  tokenViewModel: TokenVie
 
         if (token != null) {
             LaunchedEffect(token) {
-                Log.d("TOKEN_CATE", "Using Token: $token")
-                productViewModel.getProducts("Bearer $token") { products ->
-                    productList.value = products
+                if (token != null) {
+                    Log.d("TOKEN_CATE", "Using Token: $token")
+                    productViewModel.getProducts("Bearer $token")
+                } else {
+                    Log.d("TOKEN_CATE", "Token belum tersedia")
+                    productViewModel.getAllProducts()
                 }
             }
         } else {
             Log.d("TOKEN_CATE", "Token belum tersedia")
         }
-        ProductsSection(products = productList, navController)
+        val products = remember { mutableStateOf<List<ProductData>?>(null) }
+        products.value = productViewModel.products.collectAsState().value
+        ProductsSectionAll(products = products, navController)
         Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
-
-
-@Preview(showBackground = true)
 @Composable
-fun PreviewAllProductScreen() {
-    val navController = rememberNavController()
-    AllProductScreen(navController = navController)
+fun ProductsSectionAll(products: MutableState<List<ProductData>?>, navController: NavController) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        products.value?.let { productList ->
+            items(productList.filter { it.images.isNotEmpty() && it.name != null }) { product ->
+                ProductCard(
+                    product = product,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(265.dp)
+                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+                        .clickable {
+                            navController.navigate("product/${product.id}")
+                        }
+                )
+            }
+        }
+    }
 }
+

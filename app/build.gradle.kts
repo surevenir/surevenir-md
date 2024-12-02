@@ -3,7 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
     id("kotlin-kapt")
+    id ("kotlin-parcelize")
     id ("com.google.dagger.hilt.android")
+//    id ("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     alias(libs.plugins.compose.compiler)
 }
 
@@ -18,6 +20,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+        buildConfigField("String", "MAPS_API_KEY", "\"AIzaSyD85fB5qwbsbMAAMu-7rhm52Ywtdy5WJvQ\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -51,16 +54,28 @@ android {
     }
 }
 
+
 dependencies {
+    val coroutines_version = "1.7.3"
+    val hilt_version = "2.52"
+    implementation ("androidx.room:room-runtime:2.5.0")
+    kapt ("androidx.room:room-compiler:2.5.0")
+    implementation ("androidx.room:room-ktx:2.5.0") // Ta
+    implementation ("com.google.maps.android:maps-compose:2.1.0")
+    implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    implementation ("com.google.accompanist:accompanist-placeholder-material:0.28.0")
     implementation ("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation ("com.google.dagger:hilt-android:2.52")
-    kapt ("com.google.dagger:hilt-compiler:2.52")
+    implementation(libs.play.services.location)
+    kapt ("com.google.dagger:hilt-compiler:$hilt_version")
     implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
-    implementation ("com.google.dagger:hilt-android:2.44")
+    implementation ("com.google.dagger:hilt-android:$hilt_version")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
     implementation ("io.coil-kt:coil-compose:2.4.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version")
     implementation (libs.coil)
     implementation ("com.google.accompanist:accompanist-pager:0.30.1")
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")

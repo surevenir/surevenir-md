@@ -50,6 +50,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -197,20 +198,19 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
             item {
                 SectionHeader(title = "All Products", actionText = "See All Products", navController)
             }
-
-
             item {
-                if (token != null) {
-                    LaunchedEffect(token) {
+                LaunchedEffect(token) {
+                    if (token != null) {
                         Log.d("TOKEN_CATE", "Using Token: $token")
-                        productViewModel.getProducts("Bearer $token") { products ->
-                            productList.value = products
-                        }
+                        productViewModel.getProducts("Bearer $token")
+                    } else {
+                        Log.d("TOKEN_CATE", "Token belum tersedia")
+                        productViewModel.getAllProducts()
                     }
-                } else {
-                    Log.d("TOKEN_CATE", "Token belum tersedia")
                 }
-                ProductsSection(products = productList, navController)
+                val products = remember { mutableStateOf<List<ProductData>?>(null) }
+                products.value = productViewModel.products.collectAsState().value
+                ProductsSection(products = products, navController)
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
@@ -449,13 +449,31 @@ fun StickyTopBar(navController: NavController) {
             .background(Color.White)
             .shadow(1.dp)
     ) {
-        TopBar(navController)
+        TopBar(geocodingViewModel = GeocodingViewModel(), navController)
 
     }
 }
 
 @Composable
-fun TopBar(navController: NavController) {
+fun TopBar(
+    geocodingViewModel: GeocodingViewModel = hiltViewModel(),
+    navController: NavController,
+) {
+    val context = LocalContext.current
+    var subDistrict by remember { mutableStateOf<String?>(null) }
+    var district by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        geocodingViewModel.getCurrentLocationAndGetSubDistrict(
+            context = context,
+            apiKey = BuildConfig.MAPS_API_KEY,
+            onResult = { result ->
+                subDistrict = result
+                district = result
+            }
+        )
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -476,7 +494,7 @@ fun TopBar(navController: NavController) {
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                text = "Ubud ▼",
+                text = if (subDistrict != null && district != null) "$subDistrict, $district ▼" else "Getting location...",
                 fontFamily = sfui_semibold,
                 color = Color(0xFFFFA726),
                 style = MaterialTheme.typography.bodyLarge,

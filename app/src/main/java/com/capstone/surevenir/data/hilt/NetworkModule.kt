@@ -5,6 +5,10 @@ import com.capstone.surevenir.data.database.GeocodingRetrofit
 import com.capstone.surevenir.data.database.MainRetrofit
 import com.capstone.surevenir.data.network.ApiService
 import com.capstone.surevenir.data.network.GeocodingApiService
+import com.capstone.surevenir.helper.ProductImageAdapter
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,18 +39,19 @@ object NetworkModule {
             .build()
     }
 
+
     @Provides
     @MainRetrofit
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient, gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .client(okHttpClient)
             .build()
     }
 
-    @Provides
+        @Provides
     @GeocodingRetrofit
     @Singleton
     fun provideGeocodingRetrofit(okHttpClient: OkHttpClient): Retrofit {
@@ -68,4 +73,16 @@ object NetworkModule {
     fun provideGeocodingApiService(@GeocodingRetrofit retrofit: Retrofit): GeocodingApiService {
         return retrofit.create(GeocodingApiService::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson {
+        return GsonBuilder()
+            .registerTypeAdapter(
+                object : TypeToken<List<String>>() {}.type,
+                ProductImageAdapter()
+            )
+            .create()
+    }
+
 }

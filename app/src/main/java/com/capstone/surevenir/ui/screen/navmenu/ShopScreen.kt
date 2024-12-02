@@ -39,6 +39,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -155,17 +156,18 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
                     SectionHeader(title = "All Products", actionText = "All Products", navController)
                 }
                 item {
-                    if (token != null) {
-                        LaunchedEffect(token) {
+                    LaunchedEffect(token) {
+                        if (token != null) {
                             Log.d("TOKEN_CATE", "Using Token: $token")
-                            productViewModel.getProducts("Bearer $token") { products ->
-                                productList.value = products
-                            }
+                            productViewModel.getProducts("Bearer $token")
+                        } else {
+                            Log.d("TOKEN_CATE", "Token belum tersedia")
+                            productViewModel.getAllProducts()
                         }
-                    } else {
-                        Log.d("TOKEN_CATE", "Token belum tersedia")
                     }
-                    ProductsSection(products = productList, navController)
+                    val products = remember { mutableStateOf<List<ProductData>?>(null) }
+                    products.value = productViewModel.products.collectAsState().value
+                    ProductsSection(products = products, navController)
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }
@@ -211,7 +213,7 @@ fun ShopSection(
 
                     if (updatedIndex != -1) {
                         val updatedShop = currentShops[updatedIndex].copy(
-                            location = subDistrict ?: "No Location"  // Assuming you add 'location' property to Merchant class
+                            location = subDistrict ?: "No Location"
                         )
                         currentShops[updatedIndex] = updatedShop
                         updatedShops.value = currentShops
@@ -255,7 +257,7 @@ fun ShopSection(
             contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
             items(
-                items = updatedShops.value.take(5),  // Limit to the first 5 items
+                items = updatedShops.value.take(5),
                 key = { it.id }
             ) { shop ->
                 shop.profile_image_url?.let {
@@ -267,6 +269,7 @@ fun ShopSection(
                         totalShopProduct = shop.products_count,
                         modifier = Modifier
                             .width(200.dp)
+                            .height(300.dp)
                             .padding(end = 10.dp)
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp))

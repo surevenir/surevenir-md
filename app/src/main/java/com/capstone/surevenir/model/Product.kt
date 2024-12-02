@@ -8,6 +8,8 @@ data class Product(
     val price: Int,
     val merchant_id: Int,
     val stock: Int,
-    val categories: List<Category>,
-    val images: List<Image>
+    val updatedAt: String,
+    val createdAt: String,
+    val categories: List<String>,
+    val images: List<String>
 )

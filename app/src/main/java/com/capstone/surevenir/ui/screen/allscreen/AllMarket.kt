@@ -55,7 +55,6 @@ import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
 import com.capstone.surevenir.ui.viewmodel.MarketViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
-import com.facebook.shimmer.Shimmer
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer

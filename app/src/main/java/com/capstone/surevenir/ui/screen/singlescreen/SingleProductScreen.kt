@@ -47,6 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
+import com.capstone.surevenir.helper.formatPrice
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.Product
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
@@ -55,6 +56,7 @@ import com.capstone.surevenir.ui.screen.navmenu.sfui_text
 import com.capstone.surevenir.ui.viewmodel.ProductDetailViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
 
 @Composable
 fun SingleProductScreen(
@@ -137,7 +139,7 @@ fun SingleProductScreen(
                         .padding(16.dp)
                 ) {
                     Text(
-                        text = "Rp. ${product.price}",
+                        "Rp ${formatPrice(product.price)}",
                         fontSize = 24.sp,
                         fontFamily = sfui_semibold,
                         color = Color.Black

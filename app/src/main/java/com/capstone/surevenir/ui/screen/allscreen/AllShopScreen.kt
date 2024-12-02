@@ -43,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.capstone.surevenir.BuildConfig
 import com.capstone.surevenir.data.network.response.MerchantData
+import com.capstone.surevenir.model.ShopData
 import com.capstone.surevenir.ui.component.ShopCard
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
@@ -201,7 +202,13 @@ fun ShopSectionAll(shops: List<MerchantData>, navController: NavHostController, 
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
-                            .clickable { navController.navigate("merchant/${shop.id}") }
+                            .clickable {
+                                navController.currentBackStackEntry?.savedStateHandle?.set(
+                                    "shopData",
+                                    ShopData(shop.location ?: "No Location", shop.products_count)
+                                )
+                                navController.navigate("merchant/${shop.id}")
+                            }
                     )
                 }
             }

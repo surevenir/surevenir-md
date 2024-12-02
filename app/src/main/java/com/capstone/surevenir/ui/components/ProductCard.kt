@@ -1,5 +1,6 @@
 package com.capstone.surevenir.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,13 +25,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import com.capstone.surevenir.R
+import com.capstone.surevenir.data.network.response.ImageData
 import com.capstone.surevenir.data.network.response.ProductData
+import com.capstone.surevenir.helper.formatPrice
 import com.capstone.surevenir.model.Product
+import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.screen.navmenu.sfui_text
+import java.text.DecimalFormat
 
 @Composable
 fun ProductCard(
@@ -39,21 +47,28 @@ fun ProductCard(
 ) {
     Box(
         modifier = modifier
+            .width(180.dp)  // Set fixed width
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
             .padding(8.dp)
     ) {
-        Column {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .height(150.dp)  // Set fixed height for image
                     .clip(RoundedCornerShape(12.dp))
             ) {
-                val imageUrl = product.images.firstOrNull()?.url
-                    ?: "https://via.placeholder.com/150"
-                Image(
-                    painter = rememberImagePainter(data = imageUrl),
+                val imageUrl = if (product.images.isNotEmpty()) {
+                    (product.images[0] as? ImageData)?.url ?: "https://via.placeholder.com/150"
+                } else {
+                    "https://via.placeholder.com/150"
+                }
+
+                AsyncImage(
+                    model = imageUrl,
                     contentDescription = product.name ?: "No name available",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -64,20 +79,29 @@ fun ProductCard(
 
             Text(
                 text = product.name ?: "Unnamed Product",
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1
+                fontFamily = sfui_med,
+                fontSize = 16.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,  // Add ellipsis for long text
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "IDR ${product.price ?: "N/A"}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                text = "Rp ${formatPrice(product.price)}",
+                fontFamily = sfui_text,
+                fontSize = 14.sp,
+                color = Color.Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
     }
 }
+
+
 
 
 

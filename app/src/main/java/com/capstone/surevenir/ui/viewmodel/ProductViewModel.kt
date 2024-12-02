@@ -5,16 +5,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.capstone.surevenir.data.network.response.MarketResponse
 import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.data.network.response.ProductResponse
 import com.capstone.surevenir.data.repository.ProductRepository
-import com.capstone.surevenir.model.Market
 import com.capstone.surevenir.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,33 +26,74 @@ class ProductViewModel @Inject constructor(
     private val _productResponse = MutableLiveData<ProductResponse>()
     val productsResponse: LiveData<ProductResponse?> get() = _productResponse
 
+    private val _products = MutableStateFlow<List<ProductData>?>(null)
+    val products: StateFlow<List<ProductData>?> = _products.asStateFlow()
+
+    private val _merchantProducts = MutableStateFlow<List<ProductData>>(emptyList())
+    val merchantProducts: StateFlow<List<ProductData>> = _merchantProducts.asStateFlow()
+
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
 
-    fun getProducts(token: String, onComplete: (List<ProductData>?) -> Unit) {
-        _isLoading.value = true
-        viewModelScope.launch {
+    fun getProducts(token: String) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = productRepository.getProducts(token)
-                _isLoading.value = false
                 if (response.isSuccessful) {
-                    val marketList = response.body()?.data
-                    _productResponse.value = response.body()
-                    onComplete(marketList)
-                } else {
-                    _errorMessage.value = "Error: ${response.code()} - ${response.message()}"
-                    Log.e("MarketViewModel", "API Error: ${response.message()}")
-                    onComplete(null)
+                    response.body()?.data?.forEach { product ->
+                        productRepository.insertProduct(product)
+                    }
+                    val allProducts = productRepository.getAllProducts()
+                    withContext(Dispatchers.Main) {
+                        _products.value = allProducts
+                    }
                 }
             } catch (e: Exception) {
-                _isLoading.value = false
-                _errorMessage.value = "Failed: ${e.message}"
-                Log.e("MarketViewModel", "Exception: ${e.message}")
-                onComplete(null)
+                Log.e("ProductViewModel", "Error fetching products", e)
             }
         }
     }
+
+    fun getProductsByMerchantId(merchantId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val products = productRepository.getProductsByMerchantId(merchantId)
+            withContext(Dispatchers.Main) {
+                _merchantProducts.value = products
+            }
+        }
+    }
+
+    fun insertProduct(product: ProductData) {
+        viewModelScope.launch(Dispatchers.IO) {
+            productRepository.insertProduct(product)
+        }
+    }
+
+    fun updateProduct(product: ProductData) {
+        viewModelScope.launch {
+            productRepository.updateProduct(product)
+        }
+    }
+
+    fun deleteProduct(product: ProductData) {
+        viewModelScope.launch {
+            productRepository.deleteProduct(product)
+        }
+    }
+
+    fun getAllProducts() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val allProducts = productRepository.getAllProducts()
+            withContext(Dispatchers.Main) {
+                _products.value = allProducts
+            }
+        }
+    }
+
+//    fun getProductById(productId: Int): ProductData? {
+//        return productRepository.getProductById(productId)
+//    }
 }

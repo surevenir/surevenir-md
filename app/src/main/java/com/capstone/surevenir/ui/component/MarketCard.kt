@@ -25,7 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.capstone.surevenir.R
+import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.screen.navmenu.sfui_text
 
 
 @Composable
@@ -41,7 +43,7 @@ fun MarketCard(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
-            .padding(20.dp)
+            .padding(5.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -59,14 +61,17 @@ fun MarketCard(
 
             Text(
                 text = marketName,
-                fontSize = 20.sp,
+                fontSize = 15.sp,
+                fontFamily = sfui_med,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp,),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -76,7 +81,11 @@ fun MarketCard(
                         tint = Color(0xFFCC5B14)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = marketLocation)
+
+                    Text(
+                        text = marketLocation,
+                        fontFamily = sfui_text
+                    )
                 }
 //                Row(verticalAlignment = Alignment.CenterVertically) {
 //                    Icon(
@@ -88,6 +97,8 @@ fun MarketCard(
 //                    Text(text = marketDescription)
 //                }
             }
+            Spacer(modifier = Modifier.height(10.dp))
+
         }
     }
 }

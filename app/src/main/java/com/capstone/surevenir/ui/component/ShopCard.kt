@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.capstone.surevenir.R
+import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.screen.navmenu.sfui_text
 
 @Composable
 fun ShopCard (
@@ -40,7 +42,7 @@ fun ShopCard (
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
-            .padding(20.dp)
+            .padding(5.dp)
     ){
         Column (
             modifier = Modifier.fillMaxWidth(),
@@ -57,46 +59,57 @@ fun ShopCard (
 
             Text(
                 text = shopName,
-                fontFamily = sfui_semibold,
+                fontFamily = sfui_med,
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row (
-                    verticalAlignment = Alignment.CenterVertically // Sejajarkan elemen ke tengah secara ve
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_location),
                         contentDescription = "Location Icon",
-                        tint = Color(0xFFCC5B14)                    )
+                        tint = Color(0xFFCC5B14)
+                    )
 
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
                         text = shopLocation,
-                        fontFamily = sfui_semibold,                    )
+                        fontFamily = sfui_text,
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    )
                 }
-                Row (
-                    verticalAlignment = Alignment.CenterVertically // Sejajarkan elemen ke tengah secara ve
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_souvenir),
-                        contentDescription = "Location Icon",
-                        tint = Color(0xFFCC5B14)                    )
+                        contentDescription = "Souvenir Icon",
+                        tint = Color(0xFFCC5B14)
+                    )
 
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
-                        text = totalShopProduct.toString(),
-                        fontFamily = sfui_semibold,                    )
+                        text = totalShopProduct.toString() + " Souvenir",
+                        fontFamily = sfui_text,
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    )
                 }
             }
         }

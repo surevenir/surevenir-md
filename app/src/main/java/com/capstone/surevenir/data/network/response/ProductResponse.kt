@@ -1,18 +1,11 @@
 package com.capstone.surevenir.data.network.response
 
-import com.capstone.surevenir.model.Category
-import com.capstone.surevenir.model.Image
-import com.capstone.surevenir.model.Market
-import com.capstone.surevenir.model.Product
-
 data class ProductResponse(
     val statusCode: Int? = null,
     val data: List<ProductData>? = null,
     val success: Boolean? = null,
     val message: String? = null
 )
-
-//dsada
 
 data class ProductData(
     val id: Int,
@@ -24,6 +17,10 @@ data class ProductData(
     val stock: Int,
     val createdAt: String,
     val updatedAt: String,
-    val categories: List<Category>,
-    val images: List<Image>
+    val categories: List<String>,
+    val images: List<ImageData>
+)
+
+data class ImageData(
+    val url: String
 )
