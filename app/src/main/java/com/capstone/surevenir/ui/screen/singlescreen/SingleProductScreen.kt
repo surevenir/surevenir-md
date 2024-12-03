@@ -35,6 +35,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
@@ -64,6 +66,7 @@ import com.capstone.surevenir.helper.formatPrice
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.Product
 import com.capstone.surevenir.model.Review
+import com.capstone.surevenir.ui.screen.navmenu.ProductDetailSkeleton
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_text
@@ -72,6 +75,7 @@ import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductDetailViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 
@@ -95,27 +99,30 @@ fun SingleProductScreen(
         tokenViewModel.fetchToken()
     }
 
-
-
     LaunchedEffect(productId, token) {
         if (token != null) {
-            Log.d("SingleProductScreen Debug", "Token is available: $token")
+            Log.d("Debug", "Fetching product $productId")
             viewModel.fetchProductDetail(productId, token!!)
-            merchantDetailViewModel.fetchMerchantDetail(productId, token!!)
-        } else {
-            Log.d("SingleProductScreen Debug", "Token is still null")
+
+            delay(500) // Small delay to ensure product is fetched
+            productDetail?.let { product ->
+                Log.d("Debug", "Fetching merchant ${product.merchant_id}")
+                merchantDetailViewModel.fetchMerchantDetail(product.merchant_id, token!!)
+            }
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {  // Parent Box untuk layout
+        if (productDetail != null && merchantDetail != null) {
+            val product = productDetail!!
+            val merchant = merchantDetail!!
 
-    if (productDetail != null && merchantDetail != null) {
-        val product = productDetail!!
-        val merchant = merchantDetail!!
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(bottom = 80.dp)  // Tambah padding untuk button
+            ) {
             item {
                 Row(
                     modifier = Modifier
@@ -252,14 +259,6 @@ fun SingleProductScreen(
             }
 
             item {
-                LaunchedEffect(token) {
-                    if (token != null) {
-                        Log.d("SingleProductScreen Debug", "Token is available: $token")
-                        merchantDetailViewModel.fetchMerchantDetail(product.merchant_id, token!!)
-                    } else {
-                        Log.d("SingleProductScreen Debug", "Token is still null")
-                    }
-                }
 
                 Row(
                     modifier = Modifier
@@ -397,6 +396,34 @@ fun SingleProductScreen(
             }
 
         }
+        // In your Composable:
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(Color.White)
+                .shadow(elevation = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(
+                onClick = { /* Handle add to cart */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(8.dp),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF8B4513)  // Warna coklat sesuai gambar
+//                )
+            ) {
+                Text(
+                    text = "Add to Cart",
+                    fontSize = 16.sp,
+                    fontFamily = sfui_semibold,
+                    color = Color.White
+                )
+            }
+        }
     } else if (error != null) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -405,11 +432,7 @@ fun SingleProductScreen(
             Text(text = "Error: ", color = Color.Red)
         }
     } else {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "Loading...", style = MaterialTheme.typography.h6)
+            ProductDetailSkeleton()
         }
     }
 }

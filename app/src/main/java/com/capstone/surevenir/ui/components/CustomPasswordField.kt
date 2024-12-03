@@ -1,4 +1,4 @@
-package com.capstone.surevenir.ui.component
+package com.capstone.surevenir.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

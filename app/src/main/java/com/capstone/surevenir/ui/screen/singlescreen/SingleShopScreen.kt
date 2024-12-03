@@ -38,6 +38,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -101,6 +103,15 @@ fun SingleShopScreen(
 
 
 
+    val shopDataTemp = remember { mutableStateOf(ShopData("", 0)) }
+
+    LaunchedEffect(merchantId) {
+        shopDataTemp.value = shopData ?: ShopData("No Location", 0)
+        if (token != null) {
+            merchantViewModel.fetchMerchantDetail(merchantId, token!!)
+        }
+    }
+
 
     if (merchantDetail != null) {
         val merchant = merchantDetail!!
@@ -123,7 +134,13 @@ fun SingleShopScreen(
                         modifier = Modifier
                             .size(48.dp)
                             .background(Color(0xFFE7E7E9), CircleShape)
-                            .clickable(onClick = { navController.popBackStack() }),
+                            .clickable {
+                                navController.previousBackStackEntry?.savedStateHandle?.set(
+                                    "shopData",
+                                    shopDataTemp.value
+                                )
+                                navController.popBackStack()
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -193,7 +210,7 @@ fun SingleShopScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "${shopData?.location}",
+                                text = "${shopDataTemp.value.location}",
                                 fontFamily = sfui_med,
                                 fontSize = 18.sp,
                                 color = Color.Black
@@ -210,7 +227,7 @@ fun SingleShopScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "${shopData?.productsCount}",
+                                text = "${shopDataTemp?.value?.productsCount}",
                                 fontFamily = sfui_med,
                                 fontSize = 18.sp,
                                 color = Color.Black

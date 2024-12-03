@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -43,7 +44,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -51,11 +51,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -84,7 +81,7 @@ import com.capstone.surevenir.model.Product
 import com.capstone.surevenir.ui.camera.ComposeFileProvider
 import com.capstone.surevenir.ui.camera.ImageCaptureVM
 import com.capstone.surevenir.ui.camera.PermissionUtils
-import com.capstone.surevenir.ui.component.MarketCard
+import com.capstone.surevenir.ui.components.MarketCard
 import com.capstone.surevenir.ui.components.SectionHeader
 import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
 import com.capstone.surevenir.ui.viewmodel.MarketViewModel
@@ -126,6 +123,15 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
                 .padding(10.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
+
+//            Sliding Username Text
+
+            item {
+
+
+
+            }
+
             item {
                 val images = listOf(
                     R.drawable.bali3,
@@ -494,7 +500,7 @@ fun TopBar(
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                text = if (subDistrict != null && district != null) "$subDistrict, $district ▼" else "Getting location...",
+                text = if (subDistrict != null && district != null) "$district ▼" else "Getting location...",
                 fontFamily = sfui_semibold,
                 color = Color(0xFFFFA726),
                 style = MaterialTheme.typography.bodyLarge,
@@ -569,10 +575,10 @@ fun BottomNavigationBar(navController: NavController) {
             route = "shop"
         ),
         BottomNavItem(
-            title = "Favorites",
-            iconActive = R.drawable.ic_favorite_selected,
-            iconInactive = R.drawable.ic_favorite,
-            route = "favorites"
+            title = "Carts",
+            iconActive = R.drawable.ic_carts_selected,
+            iconInactive = R.drawable.ic_carts,
+            route = "carts"
         ),
         BottomNavItem(
             title = "Profile",
@@ -765,6 +771,133 @@ fun FloatingButtonWithIntent(
                 tint = Color.White,
                 modifier = Modifier.size(30.dp)
             )
+        }
+    }
+}
+
+
+@Composable
+fun ProductDetailSkeleton() {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(bottom = 80.dp)
+    ) {
+        // Header
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .shimmering()
+                )
+                Box(
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(30.dp)
+                        .shimmering()
+                )
+            }
+        }
+
+        // Image slider skeleton
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmering()
+            )
+        }
+
+        // Price and title section
+        item {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(24.dp)
+                        .shimmering()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp)
+                        .shimmering()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .shimmering()
+                )
+            }
+        }
+
+        // Details section
+        item {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(24.dp)
+                        .shimmering()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(20.dp)
+                        .shimmering()
+                )
+            }
+        }
+
+        // Merchant section
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .shimmering()
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Box(
+                        modifier = Modifier
+                            .width(150.dp)
+                            .height(24.dp)
+                            .shimmering()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(20.dp)
+                            .shimmering()
+                    )
+                }
+            }
         }
     }
 }

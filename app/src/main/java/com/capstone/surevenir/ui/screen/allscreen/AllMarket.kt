@@ -23,16 +23,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.capstone.surevenir.R
-import com.capstone.surevenir.model.Merchant
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -44,16 +39,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.capstone.surevenir.BuildConfig
-import com.capstone.surevenir.data.network.response.MerchantData
-import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.model.Market
-import com.capstone.surevenir.ui.component.MarketCard
-import com.capstone.surevenir.ui.component.ShopCard
-import com.capstone.surevenir.ui.screen.navmenu.MarketSection
+import com.capstone.surevenir.ui.components.MarketCard
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
 import com.capstone.surevenir.ui.viewmodel.MarketViewModel
-import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder

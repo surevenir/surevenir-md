@@ -1,6 +1,6 @@
-package com.capstone.surevenir.ui.component
+package com.capstone.surevenir.ui.components
 
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,101 +19,84 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.capstone.surevenir.R
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
-import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_text
 
+
 @Composable
-fun ShopCard (
+fun MarketCard(
     imageRes: String,
-    shopName: String,
-    shopLocation: String,
-    totalShopProduct: Int,
+    marketName: String,
+    marketLocation: String,
+    marketDescription: String,
     modifier: Modifier
-){
+) {
+    Log.d("MarketCard", "Rendering MarketCard - Name: $marketName, Location: $marketLocation, Image: $imageRes")
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
             .padding(5.dp)
-    ){
-        Column (
+    ) {
+        Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
-
         ) {
+            val imageToLoad = if (imageRes.isNotEmpty()) imageRes else "https://via.placeholder.com/150"
+            Log.d("MarketCard", "Image URL: $imageToLoad")
             AsyncImage(
-                model = imageRes,
-                contentDescription = shopName,
-                modifier = Modifier
-                    .fillMaxWidth()
+                model = imageRes.ifEmpty { "https://via.placeholder.com/150" },
+                contentDescription = marketName,
+                modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = shopName,
+                text = marketName,
+                fontSize = 15.sp,
                 fontFamily = sfui_med,
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            Column(
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp,),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_location),
                         contentDescription = "Location Icon",
                         tint = Color(0xFFCC5B14)
                     )
-
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
-                        text = shopLocation,
-                        fontFamily = sfui_text,
-                        fontSize = 16.sp,
-                        color = Color.Black
+                        text = marketLocation,
+                        fontFamily = sfui_text
                     )
                 }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_souvenir),
-                        contentDescription = "Souvenir Icon",
-                        tint = Color(0xFFCC5B14)
-                    )
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Text(
-                        text = totalShopProduct.toString() + " Souvenir",
-                        fontFamily = sfui_text,
-                        fontSize = 16.sp,
-                        color = Color.Black
-                    )
-                }
+//                Row(verticalAlignment = Alignment.CenterVertically) {
+//                    Icon(
+//                        painter = painterResource(id = R.drawable.icon_souvenir),
+//                        contentDescription = "Souvenir Icon",
+//                        tint = Color(0xFFCC5B14)
+//                    )
+//                    Spacer(modifier = Modifier.width(10.dp))
+//                    Text(text = marketDescription)
+//                }
             }
+            Spacer(modifier = Modifier.height(10.dp))
+
         }
     }
 }
-
-

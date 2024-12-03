@@ -40,6 +40,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
@@ -126,6 +127,14 @@ fun CategorySectionAll(categories: MutableState<List<Category>?>, navController:
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                AsyncImage(
+                    model = category.image_url ?: "https://via.placeholder.com/150",
+                    contentDescription = category.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .clickable { navController.navigate("category/${category.id}") }
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = category.name,

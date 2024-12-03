@@ -1,14 +1,11 @@
 package com.capstone.surevenir.ui.screen.navmenu
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -54,18 +52,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.capstone.surevenir.BuildConfig
 import com.capstone.surevenir.R
 import com.capstone.surevenir.data.network.response.MerchantData
 import com.capstone.surevenir.data.network.response.ProductData
-import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.Category
-import com.capstone.surevenir.model.Product
-import com.capstone.surevenir.model.Merchant
-import com.capstone.surevenir.ui.component.ShopCard
+import com.capstone.surevenir.model.ShopData
+import com.capstone.surevenir.ui.components.ShopCard
 import com.capstone.surevenir.ui.components.SectionHeader
 import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
 import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
@@ -274,7 +270,14 @@ fun ShopSection(
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
-                            .clickable { navController.navigate("merchant/${shop.id}") }
+                            .clickable {
+                                navController.currentBackStackEntry?.savedStateHandle?.set(
+                                    "shopData",
+                                    ShopData(shop.location ?: "No Location", shop.products_count)
+                                )
+                                Log.d("Navigation", "Location: ${shop.location}, Count: ${shop.products_count}")
+                                navController.navigate("merchant/${shop.id}")
+                            }
                     )
                 }
             }
@@ -286,13 +289,20 @@ fun ShopSection(
 @Composable
 fun CategorySection(categories: MutableState<List<Category>?>, navController: NavHostController) {
     val categoryList = categories.value?.take(8) ?: emptyList()
-    LazyRow (
-    ){
+    LazyRow {
         items(categoryList) { category ->
-            Column (
+            Column(
                 modifier = Modifier.padding(10.dp),
-                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
-            ){
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AsyncImage(
+                    model = category.image_url ?: "https://via.placeholder.com/150",
+                    contentDescription = category.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = category.name,
                     fontFamily = sfui_semibold

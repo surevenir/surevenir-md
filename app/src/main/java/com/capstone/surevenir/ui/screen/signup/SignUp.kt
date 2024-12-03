@@ -25,9 +25,9 @@ import androidx.navigation.NavController
 import com.capstone.surevenir.R
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.ui.SuccessDialog
-import com.capstone.surevenir.ui.component.CustomPasswordField
-import com.capstone.surevenir.ui.component.CustomTextField
-import com.capstone.surevenir.ui.component.isValidEmail
+import com.capstone.surevenir.ui.components.CustomPasswordField
+import com.capstone.surevenir.ui.components.CustomTextField
+import com.capstone.surevenir.ui.components.isValidEmail
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_text
 import com.capstone.surevenir.ui.viewmodel.UserViewModel

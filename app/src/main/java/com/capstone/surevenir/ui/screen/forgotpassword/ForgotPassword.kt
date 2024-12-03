@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.capstone.surevenir.R
-import com.capstone.surevenir.ui.component.CustomTextField
-import com.capstone.surevenir.ui.component.isValidEmail
+import com.capstone.surevenir.ui.components.CustomTextField
+import com.capstone.surevenir.ui.components.isValidEmail
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_text
 import com.google.firebase.auth.FirebaseAuth

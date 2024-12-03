@@ -20,15 +20,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.capstone.surevenir.R
-import com.capstone.surevenir.model.Merchant
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,7 +41,7 @@ import androidx.navigation.NavHostController
 import com.capstone.surevenir.BuildConfig
 import com.capstone.surevenir.data.network.response.MerchantData
 import com.capstone.surevenir.model.ShopData
-import com.capstone.surevenir.ui.component.ShopCard
+import com.capstone.surevenir.ui.components.ShopCard
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
@@ -203,10 +200,23 @@ fun ShopSectionAll(shops: List<MerchantData>, navController: NavHostController, 
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
                             .clickable {
+                                // Set in current entry
                                 navController.currentBackStackEntry?.savedStateHandle?.set(
                                     "shopData",
                                     ShopData(shop.location ?: "No Location", shop.products_count)
                                 )
+
+                                try {
+                                    // Set in destination entry
+                                    navController.getBackStackEntry("merchant/${shop.id}")
+                                        .savedStateHandle["shopData"] = ShopData(
+                                        shop.location ?: "No Location",
+                                        shop.products_count
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e("Navigation", "Failed to set shop data: ${e.message}")
+                                }
+
                                 navController.navigate("merchant/${shop.id}")
                             }
                     )

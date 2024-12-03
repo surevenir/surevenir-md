@@ -204,17 +204,17 @@ fun MainScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile", "myLocation")) {
+            if (currentRoute in listOf("home", "shop", "scan", "carts", "profile", "myLocation")) {
                 StickyTopBar(navController)
             }
         },
         bottomBar = {
-            if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile")) {
+            if (currentRoute in listOf("home", "shop", "scan", "carts", "profile")) {
                 BottomNavigationBar(navController)
             }
         },
         floatingActionButton = {
-            if (currentRoute in listOf("home", "shop", "scan", "favorites", "profile")) {
+            if (currentRoute in listOf("home", "shop", "scan", "carts", "profile")) {
                 FloatingButtonWithIntent(
                     navController = navController,
                     imageCaptureViewModel = imageCaptureViewModel
@@ -260,7 +260,7 @@ fun MainScreen(navController: NavHostController) {
             composable("scan") {
                 ScanScreen(navController)
             }
-            composable("favorites") {
+            composable("carts") {
                 FavoritesScreen(navController)
             }
             composable("profile") {
