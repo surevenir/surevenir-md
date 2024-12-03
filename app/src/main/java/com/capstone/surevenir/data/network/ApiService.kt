@@ -2,6 +2,7 @@ package com.capstone.surevenir.data.network
 
 import android.service.autofill.UserData
 import com.capstone.surevenir.data.network.response.AllUserResponse
+import com.capstone.surevenir.data.network.response.CategoryDetailResponse
 import com.capstone.surevenir.data.network.response.CategoryResponse
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.data.network.response.MarketResponse
@@ -54,6 +55,12 @@ interface ApiService {
         @Path("id") productId: Int,
         @Header("Authorization") token: String
     ): ProductDetailResponse
+
+    @GET("categories/{id}")
+    suspend fun getCategoryDetail(
+        @Path("id") categoryId: Int,
+        @Header("Authorization") token: String
+    ): CategoryDetailResponse
 
 
     @GET("merchants/{id}")

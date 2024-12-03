@@ -101,13 +101,13 @@ fun AllCategoryScreen(navController: NavHostController, tokenViewModel: TokenVie
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        CategorySectionAll(categories = categoryList)
+        CategorySectionAll(categories = categoryList, navController)
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CategorySectionAll(categories: MutableState<List<Category>?>) {
+fun CategorySectionAll(categories: MutableState<List<Category>?>, navController: NavHostController) {
 
     val categoryList = categories.value ?: emptyList()
 
@@ -132,7 +132,9 @@ fun CategorySectionAll(categories: MutableState<List<Category>?>) {
                     fontSize = 14.sp,
                     fontFamily = sfui_semibold,
                     color = Color.Black,
-                    maxLines = 1
+                    maxLines = 1,
+                    modifier = Modifier
+                        .clickable { navController.navigate("category/${category.id}") }
                 )
             }
         }

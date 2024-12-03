@@ -4,7 +4,9 @@ package com.capstone.surevenir.data.repository
 import com.capstone.surevenir.data.Entity.ProductDatabase
 import com.capstone.surevenir.data.dao.ProductDao
 import com.capstone.surevenir.data.network.ApiService
+import com.capstone.surevenir.data.network.response.Category
 import com.capstone.surevenir.data.network.response.ImageData
+import com.capstone.surevenir.data.network.response.ProductCategory
 import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.data.network.response.ProductDetailResponse
 import com.capstone.surevenir.data.network.response.ProductResponse
@@ -51,6 +53,11 @@ class ProductRepository @Inject constructor(
         return productDao.getProductsByMerchantId(merchantId).map { productDatabaseToProduct(it) }
     }
 
+    fun getProductsByCategoryId(categoryId: Int): List<ProductData> {
+        return productDao.getProductsByCategoryId(categoryId).map { productDatabaseToProduct(it) }
+    }
+
+
 //    fun getProductById(productId: Int): ProductData? {
 //        return productDao.getProductById(productId)?.let { productDatabaseToProduct(it) }
 //    }
@@ -59,22 +66,23 @@ class ProductRepository @Inject constructor(
 //        val productDb = productDao.getProductById(productId)
 //        return productDb?.let { productDatabaseToProduct(it) }
 //    }
+private fun productToProductDatabase(product: ProductData): ProductDatabase {
+    val categoryIds = product.product_categories.mapNotNull { it.category.id }.joinToString(",")
 
-    private fun productToProductDatabase(product: ProductData): ProductDatabase {
-        return ProductDatabase(
-            id = product.id,
-            slug = product.slug,
-            name = product.name,
-            description = product.description,
-            price = product.price,
-            merchantId = product.merchant_id,
-            stock = product.stock,
-            createdAt = product.createdAt.toString(),
-            updatedAt = product.updatedAt.toString(),
-            categories = product.categories?.joinToString(",") ?: "",
-            images = product.images?.joinToString(",") { it.url } ?: ""  // Extract URL dari ImageData
-        )
-    }
+    return ProductDatabase(
+        id = product.id,
+        slug = product.slug,
+        name = product.name,
+        description = product.description,
+        price = product.price,
+        merchantId = product.merchant_id,
+        stock = product.stock,
+        createdAt = product.createdAt.toString(),
+        updatedAt = product.updatedAt.toString(),
+        categories = categoryIds,
+        images = product.images.joinToString(",") { it.url }
+    )
+}
 
     private fun productDatabaseToProduct(productDb: ProductDatabase): ProductData {
         return ProductData(
@@ -87,9 +95,10 @@ class ProductRepository @Inject constructor(
             stock = productDb.stock,
             createdAt = productDb.createdAt,
             updatedAt = productDb.updatedAt,
-            categories = productDb.categories.split(",").filter { it.isNotEmpty() },
-            images = productDb.images.split(",").filter { it.isNotEmpty() }.map { ImageData(url = it) }  // Convert ke ImageData
+            product_categories = productDb.categories.split(",").filter { it.isNotEmpty() }.map {
+                ProductCategory(Category(it.toInt(), ""))
+            },
+            images = productDb.images.split(",").filter { it.isNotEmpty() }.map { ImageData(it) }
         )
     }
-
 }

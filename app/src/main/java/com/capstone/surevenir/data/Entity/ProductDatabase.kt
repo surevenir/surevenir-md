@@ -1,8 +1,10 @@
 package com.capstone.surevenir.data.Entity
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 
 
 @Entity(tableName = "products")
@@ -20,6 +22,5 @@ data class ProductDatabase(
     @ColumnInfo(name = "categories") val categories: String,
     @ColumnInfo(name = "images") val images: String
 )
-
 
 

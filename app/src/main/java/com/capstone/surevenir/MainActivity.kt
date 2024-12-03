@@ -305,8 +305,12 @@ fun MainScreen(navController: NavHostController) {
             composable("settings") {
                 SettingsScreen(navController)
             }
-            composable("singleCategory") {
-                SingleCategoryScreen(navController)
+            composable(
+                "category/{categoryId}",
+                arguments = listOf(navArgument("categoryId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0
+                SingleCategoryScreen(categoryId, navController)
             }
             composable(
                 "product/{productId}",

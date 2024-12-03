@@ -17,8 +17,17 @@ data class ProductData(
     val stock: Int,
     val createdAt: String,
     val updatedAt: String,
-    val categories: List<String>,
+    val product_categories: List<ProductCategory>,
     val images: List<ImageData>
+)
+
+data class ProductCategory(
+    val category: Category
+)
+
+data class Category(
+    val id: Int,
+    val name: String
 )
 
 data class ImageData(

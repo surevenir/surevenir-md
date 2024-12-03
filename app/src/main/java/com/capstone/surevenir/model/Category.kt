@@ -8,3 +8,4 @@ data class Category(
     val createdAt: String,
     val updatedAt: String,
 )
+

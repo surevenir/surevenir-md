@@ -29,6 +29,10 @@ interface ProductDao {
 
     @Query("SELECT * FROM products WHERE merchantId = :merchantId")
     fun getProductsByMerchantId(merchantId: Int): List<ProductDatabase>
+
+    @Query("SELECT * FROM products WHERE categories LIKE '%' || :categoryId || '%'")
+    fun getProductsByCategoryId(categoryId: Int): List<ProductDatabase>
+
 }
 
 

@@ -32,6 +32,9 @@ class ProductViewModel @Inject constructor(
     private val _merchantProducts = MutableStateFlow<List<ProductData>>(emptyList())
     val merchantProducts: StateFlow<List<ProductData>> = _merchantProducts.asStateFlow()
 
+    private val _categoryProducts = MutableStateFlow<List<ProductData>>(emptyList())
+    val categoryProducts: StateFlow<List<ProductData>> = _categoryProducts.asStateFlow()
+
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
 
@@ -62,6 +65,15 @@ class ProductViewModel @Inject constructor(
             val products = productRepository.getProductsByMerchantId(merchantId)
             withContext(Dispatchers.Main) {
                 _merchantProducts.value = products
+            }
+        }
+    }
+
+    fun getProductsByCategoryId(categoryId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val products = productRepository.getProductsByCategoryId(categoryId)
+            withContext(Dispatchers.Main) {
+                _categoryProducts.value = products  // Menggunakan _categoryProducts bukan _merchantProducts
             }
         }
     }

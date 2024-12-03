@@ -21,7 +21,7 @@ data class MerchantDetail(
 	@SerializedName("description")
 	val description: String,
 	@SerializedName("addresses")
-	val addresses: Any?, // Jika null atau tipe data tidak jelas, gunakan `Any?`
+	val addresses: Any?,
 	@SerializedName("longitude")
 	val longitude: String,
 	@SerializedName("latitude")
