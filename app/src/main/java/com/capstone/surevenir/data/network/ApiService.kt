@@ -10,6 +10,7 @@ import com.capstone.surevenir.data.network.response.MerchantDetailResponse
 import com.capstone.surevenir.data.network.response.MerchantResponse
 import com.capstone.surevenir.data.network.response.ProductDetailResponse
 import com.capstone.surevenir.data.network.response.ProductResponse
+import com.capstone.surevenir.data.network.response.ReviewsResponse
 import com.capstone.surevenir.data.network.response.UserResponse
 import com.capstone.surevenir.model.Category
 import com.capstone.surevenir.model.Market
@@ -44,6 +45,13 @@ interface ApiService {
 
     @GET("markets")
     suspend fun getMarkets(@Header("Authorization") token: String): Response<MarketResponse>
+
+    @GET("products/{id}/reviews")
+    suspend fun getReviews(
+        @Path("id") productId: Int,
+        @Header("Authorization") token: String
+    ): Response<ReviewsResponse>
+
 
     @GET("products")
     suspend fun getProducts(

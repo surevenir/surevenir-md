@@ -1,7 +1,9 @@
 package com.capstone.surevenir.ui.screen.singlescreen
 
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +43,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,10 +65,11 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import com.capstone.surevenir.data.network.response.ProductData
+import com.capstone.surevenir.data.network.response.Review
 import com.capstone.surevenir.helper.formatPrice
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.Product
-import com.capstone.surevenir.model.Review
+import com.capstone.surevenir.model.ShopData
 import com.capstone.surevenir.ui.screen.navmenu.ProductDetailSkeleton
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
@@ -74,10 +78,13 @@ import com.capstone.surevenir.ui.viewmodel.MerchantDetailViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductDetailViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductViewModel
+import com.capstone.surevenir.ui.viewmodel.ReviewsViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun SingleProductScreen(
@@ -86,11 +93,13 @@ fun SingleProductScreen(
     tokenViewModel: TokenViewModel = hiltViewModel(),
     viewModel: ProductDetailViewModel = hiltViewModel(),
     merchantDetailViewModel: MerchantDetailViewModel= hiltViewModel(),
-    productViewModel: ProductViewModel = hiltViewModel()
+    productViewModel: ProductViewModel = hiltViewModel(),
+    reviewsViewModel: ReviewsViewModel = hiltViewModel()
 ) {
     val token by tokenViewModel.token.observeAsState()
     val productDetail by viewModel.productDetail.collectAsState()
     val error by viewModel.error.collectAsState()
+    val reviews by reviewsViewModel.reviewResponse.observeAsState()
 
     val merchantDetail by merchantDetailViewModel.merchantDetail.collectAsState()
 
@@ -104,7 +113,7 @@ fun SingleProductScreen(
             Log.d("Debug", "Fetching product $productId")
             viewModel.fetchProductDetail(productId, token!!)
 
-            delay(500) // Small delay to ensure product is fetched
+            delay(500)
             productDetail?.let { product ->
                 Log.d("Debug", "Fetching merchant ${product.merchant_id}")
                 merchantDetailViewModel.fetchMerchantDetail(product.merchant_id, token!!)
@@ -112,7 +121,7 @@ fun SingleProductScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {  // Parent Box untuk layout
+    Box(modifier = Modifier.fillMaxSize()) {
         if (productDetail != null && merchantDetail != null) {
             val product = productDetail!!
             val merchant = merchantDetail!!
@@ -121,7 +130,7 @@ fun SingleProductScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.White)
-                    .padding(bottom = 80.dp)  // Tambah padding untuk button
+                    .padding(bottom = 80.dp)
             ) {
             item {
                 Row(
@@ -227,7 +236,7 @@ fun SingleProductScreen(
                     Spacer(modifier = Modifier.height(10.dp))
                     Row {
                         Text(
-                            text = "Category: ${product.product_categories}",
+                            text = "Stock: ${product.stock}",
                             fontSize = 18.sp,
                             fontFamily = sfui_text,
                             color = Color.Gray
@@ -299,7 +308,26 @@ fun SingleProductScreen(
                                 text = "Click to see Shop Details",
                                 fontFamily = sfui_med,
                                 fontSize = 14.sp,
-                                color = Color(0xFFFF7029)
+                                color = Color(0xFFFF7029),
+                                modifier = Modifier
+                                    .clickable {
+                                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                                            "shopData",
+                                            ShopData(product.merchant.description ?: "No Location", product.merchant.products_count)
+                                        )
+
+                                        try {
+                                            navController.getBackStackEntry("merchant/${product.merchant_id}")
+                                                .savedStateHandle["shopData"] = ShopData(
+                                                product.merchant.description ?: "No Location",
+                                                product.merchant.products_count
+                                            )
+                                        } catch (e: Exception) {
+                                            Log.e("Navigation", "Failed to set shop data: ${e.message}")
+                                        }
+
+                                        navController.navigate("merchant/${product.merchant_id}")
+                                    }
                             )
                         }
                     }
@@ -324,25 +352,27 @@ fun SingleProductScreen(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                val dummyReviews = listOf(
-                    Review(
-                        userName = "Abdul",
-                        rating = 5,
-                        date = "20 April 2024",
-                        comment = "The Bali Hand Magnet captures Bali's vibrant culture through intricate hand gestures inspired by traditional dance."
-                    ),
-                    Review(
-                        userName = "Abdul",
-                        rating = 5,
-                        date = "20 April 2024",
-                        comment = "The Bali Hand Magnet captures Bali's vibrant culture through intricate hand gestures inspired by traditional dance."
-                    )
-                )
+
+                LaunchedEffect(productId, token) {
+                    if (token != null) {
+                        Log.d("Debug", "Fetching product $productId")
+                        viewModel.fetchProductDetail(productId, token!!)
+
+                        delay(500)
+                        productDetail?.let { product ->
+                            Log.d("Debug", "Fetching merchant ${product.merchant_id}")
+                            merchantDetailViewModel.fetchMerchantDetail(product.merchant_id, token!!)
+
+                            reviewsViewModel.getReviews(productId, "Bearer ${token}")
+                        }
+                    }
+                }
 
                 ReviewsSection(
-                    averageRating = 4.8,
-                    totalReviews = 7,
-                    reviews = dummyReviews
+                    averageRating = 5.0,
+                    totalReviews = reviews?.size ?: 0,
+                    reviews = reviews,
+                    isLoading = false
                 )
             }
         }
@@ -396,7 +426,6 @@ fun SingleProductScreen(
             }
 
         }
-        // In your Composable:
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -441,7 +470,8 @@ fun SingleProductScreen(
 fun ReviewsSection(
     averageRating: Double,
     totalReviews: Int,
-    reviews: List<Review>,
+    reviews: List<Review>?,
+    isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -452,7 +482,7 @@ fun ReviewsSection(
         Text(
             text = "Reviews",
             fontSize = 25.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontFamily = sfui_semibold,
             color = Color.Black
         )
 
@@ -469,26 +499,33 @@ fun ReviewsSection(
             Text(
                 text = "$averageRating",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = sfui_semibold,
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
             Text(
                 text = "/5.0",
                 fontSize = 16.sp,
+                fontFamily = sfui_text,
                 color = Color.Gray
             )
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = { }) {
                 Text(
                     text = "$totalReviews review",
-                    color = Color.Blue
+                    color = Color.Blue,
+                    fontFamily = sfui_med
                 )
             }
         }
 
-        reviews.forEach { review ->
-            ReviewItem(review = review)
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        } else {
+            reviews?.forEach { review ->
+                ReviewItem(review = review)
+            } ?: Text("No reviews available.")
         }
+
         TextButton(
             onClick = { },
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -498,16 +535,18 @@ fun ReviewsSection(
                 color = Color(0xFFFFA726),
                 fontSize = 16.sp
             )
-
         }
-
     }
-
 }
 
 
 @Composable
 fun ReviewItem(review: Review) {
+
+    val dateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
+    val parsedDate = LocalDateTime.parse(review.createdAt, DateTimeFormatter.ISO_DATE_TIME)
+    val formattedDate = parsedDate.format(dateFormatter)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -517,18 +556,21 @@ fun ReviewItem(review: Review) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Surface(
+            AsyncImage(
+                model = review.user.profileImageUrl ?: "https://via.placeholder.com/150",
+                contentDescription = "${review.user.fullName}'s profile picture",
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape),
-                color = Color.LightGray
-            ) {}
+                contentScale = ContentScale.Crop
+            )
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Column {
                 Text(
-                    text = review.userName,
+                    text = review.user.username ?: "https://via.placeholder.com/150",
+                    fontFamily = sfui_semibold,
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp
                 )
@@ -543,8 +585,9 @@ fun ReviewItem(review: Review) {
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = review.date,
+                        text = formattedDate ?: "Unknown Date",
                         color = Color.Gray,
+                        fontFamily = sfui_text,
                         fontSize = 14.sp
                     )
                 }
@@ -552,12 +595,12 @@ fun ReviewItem(review: Review) {
         }
 
         Text(
-            text = review.comment,
+            text = review.comment ?: "",
             modifier = Modifier.padding(top = 8.dp),
+            fontFamily = sfui_text,
             fontSize = 14.sp
         )
     }
-
 }
 
 @Composable
@@ -613,20 +656,19 @@ fun ProductsSectionRandom(products: MutableState<List<ProductData>?>, navControl
     val randomProducts = remember(products.value) {
         products.value
             ?.filter { it.images.isNotEmpty() && it.name != null }
-            ?.shuffled()  // Randomize the list
-            ?.take(6)     // Take only 6 items
+            ?.shuffled()
+            ?.take(6)
             ?: emptyList()
     }
 
-    // Calculate the height needed for 3 rows (since we're showing 6 items in 2 columns)
-    val gridHeight = 265.dp * 3 + 16.dp * 2 // (3 items * height) + (2 spacing gaps)
+    val gridHeight = 265.dp * 3 + 16.dp * 2
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.height(gridHeight) // Set fixed height
+        modifier = Modifier.height(gridHeight)
     ) {
         items(randomProducts) { product ->
             ProductCard(

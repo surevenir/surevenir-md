@@ -200,14 +200,12 @@ fun ShopSectionAll(shops: List<MerchantData>, navController: NavHostController, 
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
                             .clickable {
-                                // Set in current entry
                                 navController.currentBackStackEntry?.savedStateHandle?.set(
                                     "shopData",
                                     ShopData(shop.location ?: "No Location", shop.products_count)
                                 )
 
                                 try {
-                                    // Set in destination entry
                                     navController.getBackStackEntry("merchant/${shop.id}")
                                         .savedStateHandle["shopData"] = ShopData(
                                         shop.location ?: "No Location",

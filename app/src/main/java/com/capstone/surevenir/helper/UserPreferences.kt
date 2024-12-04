@@ -19,13 +19,16 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
         val USER_TOKEN = stringPreferencesKey("user_token")
         val USER_EMAIL = stringPreferencesKey(name = "user_email")
+        val USER_NAME = stringPreferencesKey("user_name")
     }
 
-    suspend fun saveLoginState(isLoggedIn: Boolean, token: String, email: String){
+    suspend fun saveLoginState(isLoggedIn: Boolean, token: String, email: String, username: String){
         context.dataStore.edit { preferences ->
             preferences[IS_LOGGED_IN] = isLoggedIn
             if (token != null) preferences[USER_TOKEN] = token
             if (token != null) preferences[USER_EMAIL] = email
+            if (username.isNotEmpty()) preferences[USER_NAME] = username
+
         }
     }
 
@@ -34,6 +37,7 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
             preferences[IS_LOGGED_IN] = false
             preferences.remove(USER_TOKEN)
             preferences.remove(USER_EMAIL)
+            preferences.remove(USER_NAME)
         }
     }
 
@@ -45,11 +49,11 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
         preferences[USER_TOKEN]
     }
 
+    val userName: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[USER_NAME]
+    }
+
     val userEmail: Flow<String?> = context.dataStore.data.map { preferences ->
         preferences[USER_EMAIL]
     }
-
-
-
-
 }

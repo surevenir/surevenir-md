@@ -6,9 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.capstone.surevenir.data.Entity.ProductDatabase
-import com.capstone.surevenir.model.Product
-import kotlinx.coroutines.flow.Flow
+import com.capstone.surevenir.data.entity.ProductDatabase
 
 @Dao
 interface ProductDao {

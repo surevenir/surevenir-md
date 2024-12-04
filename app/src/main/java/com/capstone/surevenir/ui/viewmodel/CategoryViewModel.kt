@@ -36,8 +36,6 @@ class CategoryViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> get() = _errorMessage
 
-
-
     fun getCategories(token: String, onComplete: (List<Category>?) -> Unit) {
         _isLoading.value = true
         viewModelScope.launch {

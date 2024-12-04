@@ -145,6 +145,7 @@ private fun handleGoogleSignInResult(
 
             userViewModel.getUsers(dummyToken) { users ->
                 val existingUser = users?.find { it.email == email }
+
                 Log.d("DEBUG", "Fetched Users: $users")
                 Log.d("DEBUG", "Existing User: $existingUser")
 
@@ -154,7 +155,8 @@ private fun handleGoogleSignInResult(
                         userPreferences.saveLoginState(
                             isLoggedIn = true,
                             token = existingUser.id,
-                            email = email ?: ""
+                            email = email ?: "",
+                            username = displayName.toString()
                         )
                         Log.d("DEBUG", "Existing user found. ID: ${existingUser.id}")
                     } else {
@@ -176,7 +178,8 @@ private fun handleGoogleSignInResult(
                         userPreferences.saveLoginState(
                             isLoggedIn = true,
                             token = firebaseUid,
-                            email = email ?: ""
+                            email = email ?: "",
+                            username = displayName.toString()
                         )
                         Log.d("DEBUG", "New user created with ID: $firebaseUid")
                     }

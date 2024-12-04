@@ -1,7 +1,7 @@
 package com.capstone.surevenir.data.repository
 
 //import com.capstone.surevenir.data.dao.ProductDao
-import com.capstone.surevenir.data.Entity.ProductDatabase
+import com.capstone.surevenir.data.entity.ProductDatabase
 import com.capstone.surevenir.data.dao.ProductDao
 import com.capstone.surevenir.data.network.ApiService
 import com.capstone.surevenir.data.network.response.Category
@@ -10,8 +10,6 @@ import com.capstone.surevenir.data.network.response.ProductCategory
 import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.data.network.response.ProductDetailResponse
 import com.capstone.surevenir.data.network.response.ProductResponse
-import com.capstone.surevenir.model.Product
-import kotlinx.coroutines.flow.map
 import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -1,5 +1,6 @@
 package com.capstone.surevenir.model
 
+import com.capstone.surevenir.data.network.response.Review
 import java.util.Date
 
 data class User(

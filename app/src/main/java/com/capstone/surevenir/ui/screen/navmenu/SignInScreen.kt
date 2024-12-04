@@ -161,15 +161,19 @@ fun SignInScreen(navController: NavController, userViewModel: UserViewModel = hi
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
                                         val user = task.result?.user
+                                        val displayName = user?.displayName ?: email.substringBefore('@')
+
 
                                         val userPreferences = UserPreferences(context)
                                         (context as ComponentActivity).lifecycleScope.launch {
                                             userPreferences.saveLoginState(
                                                 isLoggedIn = true,
                                                 token = existingUser.id,
-                                                email = email
+                                                email = email,
+                                                username = displayName
                                             )
                                             Log.d("DEBUG_PREF", "TokenPref: ${existingUser.id}")
+                                            Log.d("DEBUG_PREF", "UsernamePref: $displayName")
                                         }
 
                                         navController.navigate("home") {

@@ -74,6 +74,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.capstone.surevenir.BuildConfig
 import com.capstone.surevenir.R
 import com.capstone.surevenir.data.network.response.ProductData
+import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.BottomNavItem
 import com.capstone.surevenir.model.Market
@@ -99,6 +100,9 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
     val geocodingViewModel: GeocodingViewModel = hiltViewModel()
     var subDistrict by remember { mutableStateOf("Loading...") }
     val productList = remember { mutableStateOf<List<ProductData>?>(null) }
+
+    val userPreferences = remember { UserPreferences(context) }
+    val username = userPreferences.userName.collectAsState(initial = "User")
 
     val markets = remember { mutableStateOf<List<Market>?>(null) }
     val scope = rememberCoroutineScope()
@@ -127,9 +131,17 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
 //            Sliding Username Text
 
             item {
-
-
-
+                Text(
+                    text = "Hello, ${username.value}!",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontFamily = sfui_semibold,
+                    color = Color(0xFF1E1E1E),
+                    fontSize = 24.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
             item {
@@ -337,6 +349,7 @@ fun MarketSection(
                         marketLocation = market.marketLocation ?: "No Location",
                         marketDescription = market.description ?: "No description available",
                         modifier = Modifier
+                            .height(250.dp)
                             .width(200.dp)
                             .padding(end = 10.dp)
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
