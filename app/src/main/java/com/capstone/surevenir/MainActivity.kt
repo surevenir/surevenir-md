@@ -139,7 +139,7 @@ private fun handleGoogleSignInResult(
             val firebaseUser = FirebaseAuth.getInstance().currentUser
             val firebaseUid = firebaseUser?.uid ?: UUID.randomUUID().toString()
 
-            val dummyToken = "b1025941-5a1d-4d86-bef0-d05e9118befb"
+            val dummyToken = "zQOnr6a5g7ZxkwV8u2pLUiCSbFb2"
 
             Log.d("DEBUG", "Using Dummy Token: $dummyToken")
 

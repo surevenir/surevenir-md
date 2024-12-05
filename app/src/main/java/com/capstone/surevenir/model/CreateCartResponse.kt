@@ -1,5 +1,7 @@
 package com.capstone.surevenir.model
 
+import com.google.gson.annotations.SerializedName
+
 data class CreateCartResponse(
 	val statusCode: Int? = null,
 	val data: DataCart? = null,
@@ -24,6 +26,6 @@ data class DataCart(
 )
 
 data class CreateCartRequest(
-	val productId: Int,
+	@SerializedName("product_id") val productId: Int,
 	val quantity: Int
 )

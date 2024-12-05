@@ -19,7 +19,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+        buildConfigField("String", "BASE_URL", "\"https://surevenir-backend-30505862512.us-central1.run.app/api/\"")
         buildConfigField("String", "MAPS_API_KEY", "\"AIzaSyD85fB5qwbsbMAAMu-7rhm52Ywtdy5WJvQ\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

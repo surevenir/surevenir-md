@@ -46,9 +46,6 @@ interface ApiService {
     @POST("users")
     fun createUser(@Body request: CreateUserRequest): Call<UserResponse>
 
-    @POST("carts")
-    fun createCarts(@Body request: CreateCartRequest): Call<CreateCartResponse>
-
     @GET("categories")
     suspend fun getCategories(@Header("Authorization") token: String): Response<CategoryResponse>
 
@@ -77,6 +74,12 @@ interface ApiService {
         @Body request: UpdateUserRequest
     ): Response<UserResponse>
 
+    @POST("carts")
+    suspend fun createCarts(
+        @Header("Authorization") token: String,
+        @Body request: CreateCartRequest
+    ): Response<CreateCartResponse>
+
     @GET("carts")
     suspend fun getCart(
         @Header("Authorization") token: String
@@ -98,7 +101,6 @@ interface ApiService {
     suspend fun getCheckouts(
         @Header("Authorization") token: String
     ): Response<CheckoutResponse>
-
 
 
     @GET("products")
@@ -127,9 +129,6 @@ interface ApiService {
 
     @GET("reviews")
 //    fun getReviews(): Call<List<Review>>
-
-//    @GET("carts")
-//    fun getCarts(): Call<List<Cart>>
 
     @Multipart
     @POST("upload")

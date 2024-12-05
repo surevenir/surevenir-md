@@ -6,12 +6,27 @@ import com.capstone.surevenir.data.network.response.CartResponse
 import com.capstone.surevenir.data.network.response.CheckoutRequest
 import com.capstone.surevenir.data.network.response.CheckoutResponse
 import com.capstone.surevenir.data.network.response.DeleteCartResponse
+import com.capstone.surevenir.model.CreateCartRequest
+import com.capstone.surevenir.model.CreateCartResponse
 import retrofit2.Response
 import javax.inject.Inject
 
 class CartRepository @Inject constructor(
     private val apiService: ApiService
 ) {
+
+    suspend fun createCart(token: String, request: CreateCartRequest): Response<CreateCartResponse> {
+        return try {
+            Log.d("CartRepository", "Creating cart with product_id: ${request.productId}, quantity: ${request.quantity}")
+            val response = apiService.createCarts(token, request)
+            Log.d("CartRepository", "Create cart API response: ${response.code()}")
+            response
+        } catch (e: Exception) {
+            Log.e("CartRepository", "Error in createCart", e)
+            throw Exception("Failed to create cart: ${e.message}")
+        }
+    }
+
     suspend fun getCart(token: String): Response<CartResponse> {
         val response = apiService.getCart(token)
         return response

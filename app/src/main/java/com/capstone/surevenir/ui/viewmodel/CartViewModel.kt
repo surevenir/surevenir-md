@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.capstone.surevenir.data.network.response.CartData
 import com.capstone.surevenir.data.repository.CartRepository
+import com.capstone.surevenir.model.CreateCartRequest
+import com.capstone.surevenir.model.CreateCartResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +26,32 @@ class CartViewModel @Inject constructor(
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> get() = _errorMessage
+
+    private val _createCartResult = MutableStateFlow<Result<CreateCartResponse>?>(null)
+    val createCartResult: StateFlow<Result<CreateCartResponse>?> = _createCartResult
+
+    fun createCart(token: String, productId: Int, quantity: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val request = CreateCartRequest(productId = productId, quantity = quantity)
+                val response = cartRepository.createCart("Bearer $token", request)
+
+                if (response.isSuccessful) {
+                    _createCartResult.value = Result.success(response.body()!!)
+                } else {
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    Log.e("CartViewModel", "Error response: $errorBody")
+                    _createCartResult.value = Result.failure(Exception(errorBody))
+                }
+            } catch (e: Exception) {
+                Log.e("CartViewModel", "Error creating cart", e)
+                _createCartResult.value = Result.failure(e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 
 
     fun getCart(token: String) {

@@ -86,6 +86,7 @@ import com.capstone.surevenir.ui.screen.navmenu.ProductDetailSkeleton
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_text
+import com.capstone.surevenir.ui.viewmodel.CartViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantDetailViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductDetailViewModel
@@ -107,16 +108,19 @@ fun SingleProductScreen(
     viewModel: ProductDetailViewModel = hiltViewModel(),
     merchantDetailViewModel: MerchantDetailViewModel= hiltViewModel(),
     productViewModel: ProductViewModel = hiltViewModel(),
-    reviewsViewModel: ReviewsViewModel = hiltViewModel()
+    reviewsViewModel: ReviewsViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel()
 ) {
     val token by tokenViewModel.token.observeAsState()
+    val createCartResult by cartViewModel.createCartResult.collectAsState()
+    val isLoading by cartViewModel.isLoading.collectAsState()
     val productDetail by viewModel.productDetail.collectAsState()
     val error by viewModel.error.collectAsState()
     val reviews by reviewsViewModel.reviewResponse.observeAsState()
     var showAddToCartDialog by remember { mutableStateOf(false) }
     var quantity by remember { mutableStateOf(1) }
     val merchantDetail by merchantDetailViewModel.merchantDetail.collectAsState()
-    val context = LocalContext.current  // Tambahkan ini
+    val context = LocalContext.current
 
 
     LaunchedEffect(Unit) {
@@ -469,16 +473,45 @@ fun SingleProductScreen(
                 showDialog = showAddToCartDialog,
                 onDismiss = { showAddToCartDialog = false },
                 productName = product.name,
-                price = product.price,  // Hapus .toDouble() karena price sekarang Int
+                price = product.price,
                 maxQuantity = product.stock,
                 onConfirm = { quantity ->
-                    Toast.makeText(
-                        context,  // Sekarang context tersedia
-                        "$quantity items added to cart",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    token?.let { token ->
+                        cartViewModel.createCart(token, productId, quantity)
+                    }
                 }
             )
+
+            LaunchedEffect(createCartResult) {
+                createCartResult?.let { result ->
+                    result.onSuccess { response ->
+                        Toast.makeText(
+                            context,
+                            "Successfully added to cart!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        showAddToCartDialog = false
+                    }.onFailure { exception ->
+                        Toast.makeText(
+                            context,
+                            "Failed to add to cart: ${exception.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            error?.let { errorMessage ->
+                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+            }
         }
     } else if (error != null) {
         Box(
