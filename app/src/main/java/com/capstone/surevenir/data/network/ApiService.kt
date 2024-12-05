@@ -9,6 +9,7 @@ import com.capstone.surevenir.data.network.response.CheckoutRequest
 import com.capstone.surevenir.data.network.response.CheckoutResponse
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.data.network.response.DeleteCartResponse
+import com.capstone.surevenir.data.network.response.MarketDetailResponse
 import com.capstone.surevenir.data.network.response.MarketResponse
 import com.capstone.surevenir.data.network.response.MerchantDetailResponse
 import com.capstone.surevenir.data.network.response.MerchantResponse
@@ -57,6 +58,13 @@ interface ApiService {
 
     @GET("markets")
     suspend fun getMarkets(@Header("Authorization") token: String): Response<MarketResponse>
+
+        @GET("markets/{id}")
+        suspend fun getMarketDetail(
+            @Path("id") marketId: Int,
+            @Header("Authorization") token: String
+        ): MarketDetailResponse
+
 
     @GET("products/{id}/reviews")
     suspend fun getReviews(

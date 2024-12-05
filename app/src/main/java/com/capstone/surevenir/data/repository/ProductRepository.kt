@@ -55,6 +55,10 @@ class ProductRepository @Inject constructor(
         return productDao.getProductsByCategoryId(categoryId).map { productDatabaseToProduct(it) }
     }
 
+    fun searchProducts(query: String): List<ProductData> {
+        return productDao.searchProducts(query).map { productDatabaseToProduct(it) }
+    }
+
 
 //    fun getProductById(productId: Int): ProductData? {
 //        return productDao.getProductById(productId)?.let { productDatabaseToProduct(it) }

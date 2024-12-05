@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -69,6 +71,7 @@ import com.capstone.surevenir.data.network.response.MerchantData
 import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.model.Category
 import com.capstone.surevenir.model.ShopData
+import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.ui.components.ShopCard
 import com.capstone.surevenir.ui.components.SectionHeader
 import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
@@ -112,10 +115,18 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 item {
-                    ShowSearchBar(onSearch = { query ->
-                    }) {
-                        scope.launch { bottomSheetState.show() }
-                    }
+                    ShowSearchBar(
+                        viewModel = productViewModel,
+                        onSearch = { query ->
+                            productViewModel.searchProducts(query)
+                        },
+                        onFilterClick = {
+                            scope.launch {
+                                bottomSheetState.show()
+                            }
+                        },
+                        navController = navController
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
@@ -409,16 +420,28 @@ fun CategorySection(categories: MutableState<List<Category>?>, navController: Na
 }
 
 
+// ShowSearchBar.kt
 @Composable
-fun ShowSearchBar(onSearch: (String) -> Unit, onFilterClick: () -> Unit) {
+fun ShowSearchBar(
+    onSearch: (String) -> Unit,
+    onFilterClick: () -> Unit,
+    viewModel: ProductViewModel = hiltViewModel(),
+    navController: NavHostController
+) {
     var query by remember { mutableStateOf("") }
+    val searchResults by viewModel.searchResults.collectAsState()
 
-    Column (
-        modifier = Modifier.padding(1.dp)
-    ){
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
         TextField(
             value = query,
-            onValueChange = { query = it },
+            onValueChange = {
+                query = it
+                viewModel.searchProducts(it)
+            },
             label = { Text("Search Souvenir") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -445,17 +468,44 @@ fun ShowSearchBar(onSearch: (String) -> Unit, onFilterClick: () -> Unit) {
                 focusedLabelColor = Color.Gray,
                 unfocusedLabelColor = Color.LightGray
             ),
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search,
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    onSearch(query)
-                }
-            )
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { onSearch(query) })
         )
+
+        if (query.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (searchResults.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "No products found")
+                }
+            } else {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 8.dp)
+                ) {
+                    items(searchResults) { product ->
+                        ProductCard(
+                            product = product,
+                            modifier = Modifier
+                                .width(160.dp)
+                                .padding(end = 8.dp)
+                                .clickable {
+                                    navController.navigate("product/${product.id}")
+                                }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
+
 
 
 @Composable

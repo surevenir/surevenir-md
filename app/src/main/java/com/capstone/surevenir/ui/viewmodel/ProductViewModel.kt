@@ -23,8 +23,17 @@ class ProductViewModel @Inject constructor(
     private val productRepository: ProductRepository
 ) : ViewModel() {
 
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
+
     private val _productResponse = MutableLiveData<ProductResponse>()
     val productsResponse: LiveData<ProductResponse?> get() = _productResponse
+
+    private val _searchResults = MutableStateFlow<List<ProductData>>(emptyList())
+    val searchResults: StateFlow<List<ProductData>> = _searchResults.asStateFlow()
 
     private val _products = MutableStateFlow<List<ProductData>?>(null)
     val products: StateFlow<List<ProductData>?> = _products.asStateFlow()
@@ -60,6 +69,20 @@ class ProductViewModel @Inject constructor(
         }
     }
 
+    fun searchProducts(query: String) {
+        viewModelScope.launch {
+            _searchQuery.value = query
+            if (query.isEmpty()) {
+                _searchResults.value = emptyList()
+                return@launch
+            }
+            val filteredProducts = _products.value!!.filter { product ->
+                product.name.contains(query, ignoreCase = true) ||
+                        product.description.contains(query, ignoreCase = true)
+            }
+            _searchResults.value = filteredProducts
+        }
+    }
     fun getProductsByMerchantId(merchantId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             val products = productRepository.getProductsByMerchantId(merchantId)

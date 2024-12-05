@@ -29,23 +29,22 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.capstone.surevenir.data.network.response.CartData
 import com.capstone.surevenir.data.network.response.CartItem
-import com.capstone.surevenir.ui.viewmodel.CartViewModel
+//import com.capstone.surevenir.ui.viewmodel.CartViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun TransactionScreen(
     navController: NavHostController,
-    cartViewModel: CartViewModel = hiltViewModel(),
+//    cartViewModel: CartViewModel = hiltViewModel(),
     tokenViewModel: TokenViewModel = hiltViewModel()
 ) {
-    val cartData by cartViewModel.cartData.collectAsState()
-    val isLoading by cartViewModel.isLoading.collectAsState()
-    val errorMessage by cartViewModel.errorMessage.collectAsState()
+//    val cartData by cartViewModel.cartData.collectAsState()
+//    val isLoading by cartViewModel.isLoading.collectAsState()
+//    val errorMessage by cartViewModel.errorMessage.collectAsState()
     val token by tokenViewModel.token.observeAsState()
     val scope = rememberCoroutineScope()
 
-    // State for delete confirmation dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<CartItem?>(null) }
 
@@ -57,7 +56,7 @@ fun TransactionScreen(
 
     LaunchedEffect(token) {
         token?.let {
-            cartViewModel.getCart("Bearer $it")
+//            cartViewModel.getCart("Bearer $it")
         }
     }
 
@@ -72,24 +71,24 @@ fun TransactionScreen(
                         Log.d("TransactionScreen", "Delete button clicked")
                         val currentItemToDelete = itemToDelete
                         val currentToken = token
-
-                        if (currentToken != null && currentItemToDelete != null) {
-                            scope.launch {
-                                try {
-                                    cartViewModel.deleteCartItem(
-                                        "Bearer $currentToken",
-                                        currentItemToDelete.id
-                                    )
-                                } catch (e: Exception) {
-                                    Log.e("TransactionScreen", "Error launching delete", e)
-                                }
-                            }
-                        } else {
-                            Log.e(
-                                "TransactionScreen",
-                                "Token or ItemToDelete is null. Token: $currentToken, Item: $currentItemToDelete"
-                            )
-                        }
+//
+//                        if (currentToken != null && currentItemToDelete != null) {
+//                            scope.launch {
+//                                try {
+////                                    cartViewModel.deleteCartItem(
+//                                        "Bearer $currentToken",
+//                                        currentItemToDelete.id
+//                                    )
+//                                } catch (e: Exception) {
+//                                    Log.e("TransactionScreen", "Error launching delete", e)
+//                                }
+//                            }
+//                        } else {
+//                            Log.e(
+//                                "TransactionScreen",
+//                                "Token or ItemToDelete is null. Token: $currentToken, Item: $currentItemToDelete"
+//                            )
+//                        }
                         showDeleteDialog = false
                         itemToDelete = null
                     }
@@ -127,45 +126,45 @@ fun TransactionScreen(
             )
         }
 
-        when {
-            isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            errorMessage != null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = errorMessage!!)
-                }
-            }
-            cartData != null -> {
-                cartData?.let {
-                    CartContent(
-                        cartData = it,
-                        onDeleteClick = { cartItem ->
-                            itemToDelete = cartItem
-                            showDeleteDialog = true
-                        }
-                    )
-                }
-            }
-            cartData == null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "No items in your cart.")
-                }
-            }
+//        when {
+////            isLoading -> {
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    CircularProgressIndicator()
+//                }
+//            }
+//            errorMessage != null -> {
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Text(text = errorMessage!!)
+//                }
+//            }
+//            cartData != null -> {
+//                cartData?.let {
+//                    CartContent(
+//                        cartData = it,
+//                        onDeleteClick = { cartItem ->
+//                            itemToDelete = cartItem
+//                            showDeleteDialog = true
+//                        }
+//                    )
+//                }
+//            }
+//            cartData == null -> {
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Text(text = "No items in your cart.")
+//                }
+//            }
         }
     }
-}
+//}
 
 @Composable
 private fun CartContent(
@@ -207,7 +206,6 @@ private fun CartItemCard(
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Product Image
             if (cartItem.product.images.isNotEmpty()) {
                 AsyncImage(
                     model = cartItem.product.images.first(),
@@ -218,7 +216,6 @@ private fun CartItemCard(
                 )
             }
 
-            // Product Details
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -247,7 +244,6 @@ private fun CartItemCard(
                 )
             }
 
-            // Delete Button
             IconButton(
                 onClick = { onDeleteClick(cartItem) },
                 modifier = Modifier.align(Alignment.Top)

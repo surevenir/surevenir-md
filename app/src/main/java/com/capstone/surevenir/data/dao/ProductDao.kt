@@ -22,6 +22,9 @@ interface ProductDao {
     @Query("SELECT * FROM products")
     fun getAllProducts(): List<ProductDatabase>
 
+    @Query("SELECT * FROM products WHERE name LIKE '%' || :searchQuery || '%' OR description LIKE '%' || :searchQuery || '%'")
+    fun searchProducts(searchQuery: String): List<ProductDatabase>
+
     @Query("SELECT * FROM products WHERE id = :productId")
     fun getProductById(productId: Int): ProductDatabase?
 
@@ -30,6 +33,8 @@ interface ProductDao {
 
     @Query("SELECT * FROM products WHERE categories LIKE '%' || :categoryId || '%'")
     fun getProductsByCategoryId(categoryId: Int): List<ProductDatabase>
+
+
 
 }
 

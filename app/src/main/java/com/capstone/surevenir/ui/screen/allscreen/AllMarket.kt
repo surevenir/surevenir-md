@@ -205,6 +205,10 @@ fun MarketSectionDown(
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
+                            .clickable {
+                                navController.navigate("market/${market.id}")
+                            }
+
                     )
                 }
             }
