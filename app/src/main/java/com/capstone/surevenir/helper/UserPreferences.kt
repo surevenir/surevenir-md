@@ -20,6 +20,7 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
         val USER_TOKEN = stringPreferencesKey("user_token")
         val USER_EMAIL = stringPreferencesKey(name = "user_email")
         val USER_NAME = stringPreferencesKey("user_name")
+        val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
     }
 
     suspend fun saveLoginState(isLoggedIn: Boolean, token: String, email: String, username: String){
@@ -41,8 +42,18 @@ class UserPreferences @Inject constructor(@ApplicationContext private val contex
         }
     }
 
+    suspend fun saveOnboardingState(hasSeenOnboarding: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[HAS_SEEN_ONBOARDING] = hasSeenOnboarding
+        }
+    }
+
     val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[IS_LOGGED_IN] ?: false
+    }
+
+    val hasSeenOnboarding: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[HAS_SEEN_ONBOARDING] ?: false
     }
 
     val userToken: Flow<String?> = context.dataStore.data.map { preferences ->

@@ -14,6 +14,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,16 +29,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.capstone.surevenir.R
+import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.model.OnboardingPage
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun OnBoardingScreen(navController: NavController) {
+fun OnBoardingScreen(navController: NavController,
+                     userPreferences: UserPreferences // Tambahkan parameter ini
+) {
     val pagerState = rememberPagerState()
+    val scope = rememberCoroutineScope() // Tambahkan ini untuk coroutine scope
     val pages = listOf(
         OnboardingPage(
             imageRes = R.drawable.onboard_1,
@@ -90,6 +96,12 @@ fun OnBoardingScreen(navController: NavController) {
             onClick = {
                 if (pagerState.currentPage == pages.size - 1) {
                     navController.navigate("signIn")
+                    scope.launch {
+                        userPreferences.saveOnboardingState(true)
+                        navController.navigate("signIn") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                 } else {
                 }
             },            modifier = Modifier

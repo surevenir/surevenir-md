@@ -36,7 +36,8 @@ data class Data(
 
 data class CreateUserRequest(
 	val id: String,
-	@SerializedName("full_name") val fullName: String,
+	@SerializedName("full_name")
+	val fullName: String,
 	val username: String,
 	val email: String,
 	val password: String? = null,

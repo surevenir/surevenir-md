@@ -3,6 +3,12 @@ package com.capstone.surevenir.ui.screen.singlescreen
 
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,11 +43,15 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.Button
+import androidx.compose.material3.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
@@ -54,11 +64,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -86,6 +98,7 @@ import java.text.DecimalFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+
 @Composable
 fun SingleProductScreen(
     productId: Int,
@@ -100,8 +113,10 @@ fun SingleProductScreen(
     val productDetail by viewModel.productDetail.collectAsState()
     val error by viewModel.error.collectAsState()
     val reviews by reviewsViewModel.reviewResponse.observeAsState()
-
+    var showAddToCartDialog by remember { mutableStateOf(false) }
+    var quantity by remember { mutableStateOf(1) }
     val merchantDetail by merchantDetailViewModel.merchantDetail.collectAsState()
+    val context = LocalContext.current  // Tambahkan ini
 
 
     LaunchedEffect(Unit) {
@@ -435,16 +450,14 @@ fun SingleProductScreen(
             contentAlignment = Alignment.Center
         ) {
             Button(
-                onClick = { /* Handle add to cart */ },
+                onClick = { showAddToCartDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(8.dp),
-//                colors = ButtonDefaults.buttonColors(
-//                    containerColor = Color(0xFF8B4513)  // Warna coklat sesuai gambar
-//                )
-            ) {
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
+                ) {
                 Text(
                     text = "Add to Cart",
                     fontSize = 16.sp,
@@ -452,6 +465,20 @@ fun SingleProductScreen(
                     color = Color.White
                 )
             }
+            AddToCartDialog(
+                showDialog = showAddToCartDialog,
+                onDismiss = { showAddToCartDialog = false },
+                productName = product.name,
+                price = product.price,  // Hapus .toDouble() karena price sekarang Int
+                maxQuantity = product.stock,
+                onConfirm = { quantity ->
+                    Toast.makeText(
+                        context,  // Sekarang context tersedia
+                        "$quantity items added to cart",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            )
         }
     } else if (error != null) {
         Box(
@@ -462,6 +489,119 @@ fun SingleProductScreen(
         }
     } else {
             ProductDetailSkeleton()
+        }
+    }
+}
+
+@Composable
+fun AddToCartDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    productName: String,
+    price: Int,  // Ubah dari Double ke Int karena product.price bertipe Int
+    maxQuantity: Int,
+    onConfirm: (Int) -> Unit
+) {
+    var quantity by remember { mutableStateOf(1) }  // Tambahkan ini
+
+    if (showDialog) {
+        Dialog(onDismissRequest = onDismiss) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Add to Cart - $productName",
+                        fontFamily = sfui_semibold
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { if (quantity > 1) quantity-- },
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(Color(0xFFED8A00), CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Remove,
+                                contentDescription = "Decrease",
+                                tint = Color.White
+                            )
+                        }
+
+                        Text(
+                            text = quantity.toString(),
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            fontFamily = sfui_semibold
+                        )
+
+                        IconButton(
+                            onClick = { if (quantity < maxQuantity) quantity++ },
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(Color(0xFFED8A00), CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Increase",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Price per item: Rp ${formatPrice(price)}",
+                        color = Color.Gray
+                    )
+
+                    Text(
+                        text = "Total: Rp ${formatPrice(price * quantity)}",
+                        fontFamily = sfui_semibold,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Button(
+                            onClick = onDismiss,
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
+                            modifier = Modifier.weight(1f).padding(end = 8.dp)
+                        ) {
+                            Text("Cancel")
+                        }
+
+                        Button(
+                            onClick = {
+                                onConfirm(quantity)
+                                quantity = 1  // Reset quantity
+                                onDismiss()
+                            },
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
+                            modifier = Modifier.weight(1f).padding(start = 8.dp)
+                        ) {
+                            Text("Confirm")
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -650,6 +790,8 @@ fun ImageSlider(images: List<String>) {
         }
     }
 }
+
+
 
 @Composable
 fun ProductsSectionRandom(products: MutableState<List<ProductData>?>, navController: NavController) {

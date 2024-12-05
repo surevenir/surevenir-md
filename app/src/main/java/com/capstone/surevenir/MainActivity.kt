@@ -79,6 +79,8 @@ import java.util.UUID
 class MainActivity : ComponentActivity() {
 
     private lateinit var navController: NavHostController
+    private lateinit var userPreferences: UserPreferences
+
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -89,6 +91,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        userPreferences = UserPreferences(this)
+
         MapsInitializer.initialize(this, MapsInitializer.Renderer.LATEST) { }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -97,7 +101,7 @@ class MainActivity : ComponentActivity() {
             MyAppTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     navController = rememberNavController()
-                    MainScreen(navController)
+                    MainScreen(navController, userPreferences)
                 }
             }
         }
@@ -117,12 +121,8 @@ class MainActivity : ComponentActivity() {
             }
         }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
     }
-
 }
-
-
 
 private fun handleGoogleSignInResult(
     data: Intent?,
@@ -200,10 +200,11 @@ private fun handleGoogleSignInResult(
 
 
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController,     userPreferences: UserPreferences) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val imageCaptureViewModel: ImageCaptureVM = viewModel()
+
 
     Scaffold(
         topBar = {
@@ -227,6 +228,7 @@ fun MainScreen(navController: NavHostController) {
         floatingActionButtonPosition = FabPosition.Center,
         isFloatingActionButtonDocked = true
 
+
     ) { padding ->
         NavHost(
             navController = navController,
@@ -235,15 +237,31 @@ fun MainScreen(navController: NavHostController) {
         ) {
             composable("splash") {
                 SplashScreen(
-                    navigateToHome = { navController.navigate("home") { popUpTo("splash") { inclusive = true } } },
-                    navigateToSignIn = { navController.navigate("signIn") { popUpTo("splash") { inclusive = true } } }
+                    navigateToHome = {
+                        navController.navigate("home") {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    },
+                    navigateToSignIn = {
+                        navController.navigate("signIn") {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    },
+                    navigateToOnboarding = {
+                        navController.navigate("onboarding") {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    }
                 )
             }
             composable("myLocation") {
                 MyLocationScreen(navController)
             }
             composable("onboarding") {
-                OnBoardingScreen(navController = navController)
+                OnBoardingScreen(
+                    navController = navController,
+                    userPreferences = userPreferences
+                )
             }
             composable("home") {
                 Home(navController = navController)
@@ -332,9 +350,6 @@ fun MainScreen(navController: NavHostController) {
         }
     }
 }
-
-
-
 
 @Preview(showBackground = true)
 @Composable

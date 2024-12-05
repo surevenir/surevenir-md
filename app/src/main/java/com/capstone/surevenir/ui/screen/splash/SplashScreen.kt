@@ -25,28 +25,48 @@ import androidx.compose.ui.unit.dp
 import com.capstone.surevenir.R
 import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import kotlinx.coroutines.flow.first
 
 @Composable
-fun SplashScreen(navigateToHome: () -> Unit, navigateToSignIn: () -> Unit) {
+fun SplashScreen(
+    navigateToHome: () -> Unit,
+    navigateToSignIn: () -> Unit,
+    navigateToOnboarding: () -> Unit
+) {
     val context = LocalContext.current
     val userPreferences = UserPreferences(context)
     var isLoggedIn by remember { mutableStateOf(false) }
+    var hasSeenOnboarding by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
+    var hasNavigated by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
         userPreferences.isLoggedIn.collect { loginState ->
             isLoggedIn = loginState
+            hasSeenOnboarding = userPreferences.hasSeenOnboarding.first()
             isLoading = false
         }
     }
 
-    LaunchedEffect(isLoading) {
-        if (!isLoading) {
-            if (isLoggedIn) {
-                navigateToHome()
-            } else {
-                navigateToSignIn()
+    LaunchedEffect(true) {
+        if (!hasNavigated) {
+            // Baca status secara berurutan untuk memastikan konsistensi
+            val isLoggedIn = userPreferences.isLoggedIn.first()
+            val hasOnboarded = userPreferences.hasSeenOnboarding.first()
+
+            when {
+                isLoggedIn -> {
+                    navigateToHome()
+                }
+                !hasOnboarded -> {
+                    navigateToOnboarding()
+                }
+                else -> {
+                    navigateToSignIn()
+                }
             }
+            hasNavigated = true
         }
     }
 

@@ -52,6 +52,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.capstone.surevenir.data.network.response.MerchantData
 import com.capstone.surevenir.model.Market
+import com.capstone.surevenir.services.GeofencingService
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.viewmodel.MarketViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
@@ -72,6 +73,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
@@ -88,6 +90,7 @@ fun MyLocationScreen(
     val context = LocalContext.current
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val scope = rememberCoroutineScope()
+    val geofencingIntent = remember { Intent(context, GeofencingService::class.java) }
 
     var locationPermissionGranted by remember { mutableStateOf(false) }
     var currentLocation by remember { mutableStateOf<LatLng?>(null) }
@@ -126,6 +129,42 @@ fun MyLocationScreen(
     LaunchedEffect(Unit) {
         Log.d("MyLocationScreen", "Fetching initial token")
         tokenViewModel.fetchToken()
+    }
+
+
+    LaunchedEffect(merchants, markets) {
+        if (!merchants.isNullOrEmpty() || !markets.isNullOrEmpty()) {
+            context.startService(geofencingIntent)
+
+            merchants?.forEach { merchant ->
+                val lng = merchant.latitude?.toDoubleOrNull()
+                val lat = merchant.longitude?.toDoubleOrNull()
+
+                if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
+
+                    val location = LatLng(lat, lng)
+                    context.startService(Intent(context, GeofencingService::class.java).apply {
+                        putExtra("id", "merchant_${merchant.id}")
+                        putExtra("lat", lat)
+                        putExtra("lng", lng)
+                    })
+                }
+            }
+
+            markets?.forEach { market ->
+                val lng = market.latitude?.toDoubleOrNull()
+                val lat = market.longitude?.toDoubleOrNull()
+
+                if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
+                    val location = LatLng(lat, lng)
+                    context.startService(Intent(context, GeofencingService::class.java).apply {
+                        putExtra("id", "market_${market.id}")
+                        putExtra("lat", lat)
+                        putExtra("lng", lng)
+                    })
+                }
+            }
+        }
     }
 
     fun checkGpsEnabled(): Boolean {
@@ -241,6 +280,15 @@ fun MyLocationScreen(
                             lat in -90.0..90.0 && lng in -180.0..180.0) {
                             val position = LatLng(lat, lng)
                             Log.d("MyLocationScreen", "Adding merchant marker at: $lat, $lng")
+
+                            Circle(
+                                center = position,
+                                radius = 3000.0, // 3km dalam meter
+                                strokeColor = Color.Blue.copy(alpha = 0.5f),
+                                fillColor = Color.Blue.copy(alpha = 0.1f),
+                                strokeWidth = 2f
+                            )
+
                             Marker(
                                 state = MarkerState(position = position),
                                 title = merchant.name ?: "Merchant",
@@ -258,8 +306,17 @@ fun MyLocationScreen(
 
                         if (lat != null && lng != null &&
                             lat in -90.0..90.0 && lng in -180.0..180.0) {
-                            val position = LatLng(lat, lng) // Posisi yang benar
+                            val position = LatLng(lat, lng)
                             Log.d("MyLocationScreen", "Adding market marker at: $lat, $lng")
+
+                            Circle(
+                                center = position,
+                                radius = 3000.0,
+                                strokeColor = Color.Green.copy(alpha = 0.5f),
+                                fillColor = Color.Green.copy(alpha = 0.1f),
+                                strokeWidth = 2f
+                            )
+
                             Marker(
                                 state = MarkerState(position = position),
                                 title = market.name ?: "Market",
@@ -285,8 +342,8 @@ fun MyLocationScreen(
                 updateLocation()
                 loadData(token)
             },
-            containerColor = Color(0xFFED8A00), // Warna background FAB
-            contentColor = Color.White, // Warna ikon
+            containerColor = Color(0xFFED8A00),
+            contentColor = Color.White,
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp)

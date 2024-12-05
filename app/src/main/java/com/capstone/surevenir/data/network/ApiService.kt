@@ -13,6 +13,8 @@ import com.capstone.surevenir.data.network.response.ProductResponse
 import com.capstone.surevenir.data.network.response.ReviewsResponse
 import com.capstone.surevenir.data.network.response.UserResponse
 import com.capstone.surevenir.model.Category
+import com.capstone.surevenir.model.CreateCartRequest
+import com.capstone.surevenir.model.CreateCartResponse
 import com.capstone.surevenir.model.Market
 import com.capstone.surevenir.model.Merchant
 import com.capstone.surevenir.model.Product
@@ -36,6 +38,9 @@ interface ApiService {
     suspend fun getUsers(@Header("Authorization") token: String): Response<AllUserResponse>
     @POST("users")
     fun createUser(@Body request: CreateUserRequest): Call<UserResponse>
+
+    @POST("carts")
+    fun createCarts(@Body request: CreateCartRequest): Call<CreateCartResponse>
 
     @GET("categories")
     suspend fun getCategories(@Header("Authorization") token: String): Response<CategoryResponse>
