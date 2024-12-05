@@ -56,6 +56,10 @@ android {
 
 
 dependencies {
+    implementation(libs.play.services.location)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation (libs.androidx.camera.camera2)
     val coroutines_version = "1.7.3"
     val hilt_version = "2.52"
     implementation ("androidx.room:room-runtime:2.5.0")

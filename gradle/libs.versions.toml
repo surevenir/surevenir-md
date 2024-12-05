@@ -9,6 +9,7 @@ kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
+cameraCamera2 = "1.4.0"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 maps = "17.0.0"
@@ -28,8 +29,13 @@ runtimeLivedata = "1.7.5"
 playServicesLocation = "21.3.0"
 playServicesMaps = "19.0.0"
 uiVersion = "1.4.0"
+cameraLifecycle = "1.4.0"
+cameraView = "1.4.0"
+
 
 [libraries]
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraLifecycle" }
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPager" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -61,6 +67,8 @@ firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "f
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraView" }
+
 
 [plugins]
 hilt = { id = "com.google.dagger.hilt.android", version = "2.48" }

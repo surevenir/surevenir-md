@@ -4,6 +4,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,10 +16,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,16 +37,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.capstone.surevenir.R
-import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import kotlinx.coroutines.launch
 
 @Composable
@@ -53,6 +58,7 @@ fun PreviewScreen(
 ) {
     val imageUri = imageCaptureViewModel.currentImageUri
     var showDialog by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -103,28 +109,38 @@ fun PreviewScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        // App Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFFED8A00))
                 .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { navController.navigate("home") }) {
+            IconButton(
+                onClick = { navController.navigateUp() }
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_back),
-                    contentDescription = "Back to Home",
+                    contentDescription = "Back",
                     tint = Color.White
                 )
             }
+
             Text(
-                text = "Preview Image",
-                fontSize = 20.sp,
-                fontFamily = sfui_semibold,
-                style = MaterialTheme.typography.bodyLarge,
+                text = "Image Preview",
                 color = Color.White,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold
+                )
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Logo",
+                modifier = Modifier.size(32.dp),
+                colorFilter = ColorFilter.tint(Color.White)
             )
         }
 
@@ -156,6 +172,7 @@ fun PreviewScreen(
             ) {
                 Button(
                     onClick = {
+                        isLoading = true
                         navController.navigate("result") {
                             popUpTo("preview") { inclusive = true }
                         }
@@ -187,6 +204,22 @@ fun PreviewScreen(
                         textAlign = TextAlign.Center
                     )
                 }
+            }
+        }
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x80000000))
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(64.dp),
+                    color = Color.White
+                )
             }
         }
     }
@@ -236,4 +269,15 @@ fun PreviewScreen(
             }
         )
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PreviewScreenPreview() {
+    val navController = rememberNavController()
+    val imageCaptureViewModel = ImageCaptureVM()
+    PreviewScreen(
+        navController = navController,
+        imageCaptureViewModel = imageCaptureViewModel
+    )
 }

@@ -588,7 +588,7 @@ fun BottomNavigationBar(navController: NavController) {
             route = "shop"
         ),
         BottomNavItem(
-            title = "Carts",
+            title = "Transaction",
             iconActive = R.drawable.ic_carts_selected,
             iconInactive = R.drawable.ic_carts,
             route = "carts"
@@ -658,7 +658,7 @@ fun FloatingButtonWithIntent(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val launcher = rememberLauncherForActivityResult(
+    val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val allGranted = permissions.values.all { it }
@@ -668,19 +668,9 @@ fun FloatingButtonWithIntent(
                 "Permissions required to use camera and access gallery",
                 Toast.LENGTH_LONG
             ).show()
-        }
-    }
-
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
+        } else {
             scope.launch {
-                navController.navigate("preview") {
-                    popUpTo("home") { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+                navController.navigate("camera")
             }
         }
     }
@@ -706,7 +696,7 @@ fun FloatingButtonWithIntent(
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
             modifier = Modifier
-                .offset(y =(-100).dp)
+                .offset(y = (-100).dp)
                 .align(Alignment.BottomEnd)
         ) {
             Column(
@@ -716,11 +706,11 @@ fun FloatingButtonWithIntent(
                     onClick = {
                         isExtended = false
                         if (PermissionUtils.hasRequiredPermissions(context)) {
-                            val uri = ComposeFileProvider.getImageUri(context)
-                            imageCaptureViewModel.setImageUri(uri)
-                            cameraLauncher.launch(uri)
+                            scope.launch {
+                                navController.navigate("camera")
+                            }
                         } else {
-                            launcher.launch(PermissionUtils.getRequiredPermissions())
+                            permissionLauncher.launch(PermissionUtils.getRequiredPermissions())
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -747,12 +737,12 @@ fun FloatingButtonWithIntent(
                         if (PermissionUtils.hasRequiredPermissions(context)) {
                             galleryLauncher.launch("image/*")
                         } else {
-                            launcher.launch(PermissionUtils.getRequiredPermissions())
+                            permissionLauncher.launch(PermissionUtils.getRequiredPermissions())
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color(0xFFED8A00),
-                        contentColor = Color.White // White text
+                        contentColor = Color.White
                     ),
                     modifier = Modifier
                         .widthIn(min = 180.dp, max = 240.dp)
@@ -820,7 +810,6 @@ fun ProductDetailSkeleton() {
             }
         }
 
-        // Image slider skeleton
         item {
             Box(
                 modifier = Modifier
@@ -832,7 +821,6 @@ fun ProductDetailSkeleton() {
             )
         }
 
-        // Price and title section
         item {
             Column(
                 modifier = Modifier.padding(16.dp)
@@ -881,7 +869,6 @@ fun ProductDetailSkeleton() {
             }
         }
 
-        // Merchant section
         item {
             Row(
                 modifier = Modifier

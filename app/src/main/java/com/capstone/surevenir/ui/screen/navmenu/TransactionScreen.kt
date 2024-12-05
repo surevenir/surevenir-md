@@ -1,58 +1,110 @@
 package com.capstone.surevenir.ui.screen.navmenu
 
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material3.FilterChip
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-import com.capstone.surevenir.R
-
-data class FavoriteItem(
-    val imageUrl: Int,
-    val title: String,
-    val price: String,
-    val itemCount: Int,
-    val grandTotal: String,
-    val date: String,
-    val shopName: String,
-    val status: String
-)
+import com.capstone.surevenir.data.network.response.CartData
+import com.capstone.surevenir.data.network.response.CartItem
+import com.capstone.surevenir.ui.viewmodel.CartViewModel
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun FavoritesScreen(navController: NavHostController) {
-    var selectedFilter by remember { mutableStateOf("Active") }
+fun TransactionScreen(
+    navController: NavHostController,
+    cartViewModel: CartViewModel = hiltViewModel(),
+    tokenViewModel: TokenViewModel = hiltViewModel()
+) {
+    val cartData by cartViewModel.cartData.collectAsState()
+    val isLoading by cartViewModel.isLoading.collectAsState()
+    val errorMessage by cartViewModel.errorMessage.collectAsState()
+    val token by tokenViewModel.token.observeAsState()
+    val scope = rememberCoroutineScope()
 
-    val filters = listOf("Active", "All products", "All Dates")
+    // State for delete confirmation dialog
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var itemToDelete by remember { mutableStateOf<CartItem?>(null) }
 
-    val dummyItems = List(5) {
-        FavoriteItem(
-            imageUrl = R.drawable.product_image,
-            title = "Bali Hand Magnet",
-            price = "Rp. 150.000",
-            itemCount = 10,
-            grandTotal = "Rp 1.500.000",
-            date = "6 Oktober 2024",
-            shopName = "Bali Souvenir Shop",
-            status = "In delivery"
+    LaunchedEffect(Unit) {
+        if (token == null) {
+            tokenViewModel.fetchToken()
+        }
+    }
+
+    LaunchedEffect(token) {
+        token?.let {
+            cartViewModel.getCart("Bearer $it")
+        }
+    }
+
+    if (showDeleteDialog && itemToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Remove Item") },
+            text = { Text("Are you sure you want to remove ${itemToDelete?.product?.name} from your cart?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        Log.d("TransactionScreen", "Delete button clicked")
+                        val currentItemToDelete = itemToDelete
+                        val currentToken = token
+
+                        if (currentToken != null && currentItemToDelete != null) {
+                            scope.launch {
+                                try {
+                                    cartViewModel.deleteCartItem(
+                                        "Bearer $currentToken",
+                                        currentItemToDelete.id
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e("TransactionScreen", "Error launching delete", e)
+                                }
+                            }
+                        } else {
+                            Log.e(
+                                "TransactionScreen",
+                                "Token or ItemToDelete is null. Token: $currentToken, Item: $currentItemToDelete"
+                            )
+                        }
+                        showDeleteDialog = false
+                        itemToDelete = null
+                    }
+                ) {
+                    Text("Remove")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    itemToDelete = null
+                }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 
@@ -64,60 +116,89 @@ fun FavoritesScreen(navController: NavHostController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Favorite",
+                text = "Transaction",
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Icon(
-                painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = "Search",
-                modifier = Modifier.size(24.dp)
+                fontWeight = FontWeight.Bold
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            filters.forEach { filter ->
-                FilterChip(
-                    selected = selectedFilter == filter,
-                    onClick = { selectedFilter = filter },
-                    label = { Text("▼ $filter") },
-                    modifier = Modifier.background(Color(0xFFEEEEEE), RoundedCornerShape(8.dp))
-                )
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            items(dummyItems) { item ->
-                FavoriteItemCard(item = item, navController = navController)
+            errorMessage != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = errorMessage!!)
+                }
+            }
+            cartData != null -> {
+                cartData?.let {
+                    CartContent(
+                        cartData = it,
+                        onDeleteClick = { cartItem ->
+                            itemToDelete = cartItem
+                            showDeleteDialog = true
+                        }
+                    )
+                }
+            }
+            cartData == null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "No items in your cart.")
+                }
             }
         }
     }
 }
 
 @Composable
-fun FavoriteItemCard(item: FavoriteItem, navController: NavHostController) {
+private fun CartContent(
+    cartData: CartData,
+    onDeleteClick: (CartItem) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(cartData.cart) { cartItem ->
+            CartItemCard(
+                cartItem = cartItem,
+                onDeleteClick = onDeleteClick
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            TotalPriceCard(cartData.totalPrice)
+        }
+    }
+}
+
+@Composable
+private fun CartItemCard(
+    cartItem: CartItem,
+    onDeleteClick: (CartItem) -> Unit
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { navController.navigate("productDetail/${item.title}") },
-        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
         elevation = 2.dp
     ) {
         Row(
@@ -126,86 +207,86 @@ fun FavoriteItemCard(item: FavoriteItem, navController: NavHostController) {
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            AsyncImage(
-                model = item.imageUrl,
-                contentDescription = item.title,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+            // Product Image
+            if (cartItem.product.images.isNotEmpty()) {
+                AsyncImage(
+                    model = cartItem.product.images.first(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                )
+            }
 
+            // Product Details
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = item.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    text = cartItem.product.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
                 Text(
-                    text = item.price,
-                    fontSize = 14.sp,
+                    text = "Rp ${cartItem.product.price}",
                     color = Color.Gray
                 )
                 Text(
-                    text = "${item.itemCount} items",
-                    fontSize = 12.sp,
+                    text = "${cartItem.quantity} items",
                     color = Color.Gray
                 )
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Grand Total: ${item.grandTotal}",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = item.date,
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_star),
-                            contentDescription = "Store",
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = item.shopName,
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
-                    }
-                    Text(
-                        text = item.status,
-                        fontSize = 12.sp,
-                        color = Color(0xFFCC5B14),
-                        modifier = Modifier
-                            .background(Color(0xFFFFECE3), RoundedCornerShape(4.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
+                Text(
+                    text = "Total: Rp ${cartItem.product.price * cartItem.quantity}",
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "Added on ${cartItem.createdAt.substring(0, 10)}",
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
+            }
+
+            // Delete Button
+            IconButton(
+                onClick = { onDeleteClick(cartItem) },
+                modifier = Modifier.align(Alignment.Top)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete item",
+                    tint = Color.Red
+                )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun PreviewFavoriteScreen() {
-    val navController = rememberNavController()
-    FavoritesScreen(navController = navController)
+private fun TotalPriceCard(totalPrice: Int) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        elevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Total Price",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+            Text(
+                text = "Rp $totalPrice",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = Color(0xFFE65100)
+            )
+        }
+    }
 }

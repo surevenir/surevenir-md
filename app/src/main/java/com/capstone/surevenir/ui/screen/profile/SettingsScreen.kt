@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -69,22 +68,6 @@ fun SettingsScreen(navController: NavHostController) {
                 subtitle = "Enable or disable notifications",
                 checked = notificationsEnabled,
                 onCheckedChange = { notificationsEnabled = it }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SettingsGroup {
-            SettingsItem(
-                icon = Icons.AutoMirrored.Filled.Logout,
-                title = "Log Out",
-                onClick = {
-                    navController.navigate("signIn") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                    }
-                }
             )
         }
     }

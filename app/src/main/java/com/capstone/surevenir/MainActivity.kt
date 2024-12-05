@@ -40,7 +40,6 @@ import com.capstone.surevenir.ui.screen.allscreen.AllHistory
 import com.capstone.surevenir.ui.screen.allscreen.AllProductScreen
 import com.capstone.surevenir.ui.screen.allscreen.AllShopScreen
 import com.capstone.surevenir.ui.screen.navmenu.BottomNavigationBar
-import com.capstone.surevenir.ui.screen.navmenu.FavoritesScreen
 import com.capstone.surevenir.ui.screen.navmenu.FloatingButtonWithIntent
 import com.capstone.surevenir.ui.screen.forgotpassword.ForgotPassword
 import com.capstone.surevenir.ui.screen.navmenu.Home
@@ -58,6 +57,7 @@ import com.capstone.surevenir.ui.screen.singlescreen.SingleProductScreen
 import com.capstone.surevenir.ui.screen.singlescreen.SingleShopScreen
 import com.capstone.surevenir.ui.screen.splash.SplashScreen
 import com.capstone.surevenir.ui.screen.navmenu.StickyTopBar
+import com.capstone.surevenir.ui.screen.navmenu.TransactionScreen
 import com.capstone.surevenir.ui.screen.profile.AccountCenterScreen
 import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
 import com.capstone.surevenir.ui.screen.profile.SettingsScreen
@@ -282,7 +282,7 @@ fun MainScreen(navController: NavHostController,     userPreferences: UserPrefer
                 ScanScreen(navController)
             }
             composable("carts") {
-                FavoritesScreen(navController)
+                TransactionScreen(navController)
             }
             composable("profile") {
                 ProfileScreen(navController)
