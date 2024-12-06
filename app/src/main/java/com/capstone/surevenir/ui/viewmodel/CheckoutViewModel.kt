@@ -1,7 +1,9 @@
 package com.capstone.surevenir.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.capstone.surevenir.data.network.response.CartItem
 import com.capstone.surevenir.data.network.response.CheckoutData
 import com.capstone.surevenir.data.repository.CartRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,14 +47,14 @@ class CheckoutViewModel @Inject constructor(
         }
     }
 
-    fun checkout(token: String, cartItemIds: List<Int>) {
+    fun checkout(token: String, cartItems: List<CartItem>) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = cartRepository.checkout(token, cartItemIds)
+                val response = cartRepository.checkout(token, cartItems)
                 if (response.isSuccessful) {
                     _checkoutSuccess.value = true
-                    getCheckouts(token) // Refresh checkout list
+                    getCheckouts(token)
                 } else {
                     _error.value = "Checkout failed: ${response.message()}"
                 }

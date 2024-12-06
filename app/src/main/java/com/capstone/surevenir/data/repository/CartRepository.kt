@@ -2,6 +2,7 @@ package com.capstone.surevenir.data.repository
 
 import android.util.Log
 import com.capstone.surevenir.data.network.ApiService
+import com.capstone.surevenir.data.network.response.CartItem
 import com.capstone.surevenir.data.network.response.CartResponse
 import com.capstone.surevenir.data.network.response.CheckoutRequest
 import com.capstone.surevenir.data.network.response.CheckoutResponse
@@ -45,11 +46,21 @@ class CartRepository @Inject constructor(
         }
     }
 
-    suspend fun checkout(token: String, cartItemIds: List<Int>): Response<CheckoutResponse> {
-        Log.d("CartRepository", "Starting checkout for items: $cartItemIds")
+    suspend fun checkout(token: String, cartItems: List<CartItem>): Response<CheckoutResponse> {
+        Log.d("CartRepository", "Starting checkout for items: ${cartItems.map { it.id }}")
         return try {
             Log.d("CartRepository", "Making checkout API call...")
-            val request = CheckoutRequest(cartItemIds = cartItemIds)
+
+            // Extract both cart item IDs and product IDs
+            val cartItemIds = cartItems.map { it.id }
+            val productIds = cartItems.map { it.product.id }
+
+            val request = CheckoutRequest(
+                cartItemIds = cartItemIds,
+                productIds = productIds
+            )
+
+            Log.d("CartRepository", "Checkout request: $request")
             val response = apiService.checkout(token, request)
             Log.d("CartRepository", "Checkout API call completed with code: ${response.code()}")
             response

@@ -57,5 +57,8 @@ data class CheckoutDetail(
 )
 
 data class CheckoutRequest(
-    val cartItemIds: List<Int>
+    @SerializedName("cart_item_ids")
+    val cartItemIds: List<Int>,
+    @SerializedName("product_ids")
+    val productIds: List<Int>
 )

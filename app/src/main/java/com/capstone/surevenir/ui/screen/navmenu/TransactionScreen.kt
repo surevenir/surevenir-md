@@ -174,11 +174,11 @@ fun TransactionScreen(
                                 itemToDelete = item
                                 showDeleteDialog = true
                             },
-                            onCheckout = { items ->
+                            onCheckout = { selectedCartItems ->
                                 token?.let { token ->
                                     checkoutViewModel.checkout(
                                         "Bearer $token",
-                                        items.toList()
+                                        selectedCartItems
                                     )
                                 }
                             }
@@ -197,7 +197,7 @@ private fun CartTab(
     selectedItems: Set<Int>,
     onSelectionChange: (Set<Int>) -> Unit,
     onDeleteItem: (CartItem) -> Unit,
-    onCheckout: (Set<Int>) -> Unit
+    onCheckout: (List<CartItem>) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -338,7 +338,13 @@ private fun CartTab(
 
                         // Checkout Button
                         Button(
-                            onClick = { onCheckout(selectedItems) },
+                            onClick = {
+                                // Find selected cart items
+                                val selectedCartItems = cartData?.cart?.filter {
+                                    selectedItems.contains(it.id)
+                                } ?: emptyList()
+                                onCheckout(selectedCartItems)
+                            },
                             enabled = selectedItems.isNotEmpty()
                         ) {
                             Text(

@@ -31,6 +31,7 @@ playServicesMaps = "19.0.0"
 uiVersion = "1.4.0"
 cameraLifecycle = "1.4.0"
 cameraView = "1.4.0"
+foundationLayoutAndroid = "1.7.2"
 
 
 [libraries]
@@ -68,6 +69,7 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraView" }
+androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 
 
 [plugins]
