@@ -1,5 +1,7 @@
 package com.capstone.surevenir.data.network.response
 
+import com.google.gson.annotations.SerializedName
+
 data class CheckoutPostResponse(
     @SerializedName("success")
     val success: Boolean,
@@ -20,29 +22,7 @@ data class CheckoutPostData(
     val checkoutDetails: List<CheckoutDetail>
 )
 
-data class CartItem(
-    @SerializedName("id")
-    val id: Int,
-    @SerializedName("slug")
-    val slug: String,
-    @SerializedName("user_id")
-    val userId: String,
-    @SerializedName("product_id")
-    val productId: Int,
-    @SerializedName("quantity")
-    val quantity: Int,
-    @SerializedName("createdAt")
-    val createdAt: String,
-    @SerializedName("updatedAt")
-    val updatedAt: String,
-    @SerializedName("product")
-    val product: Product,
-    @SerializedName("subtotal_price")
-    val subtotalPrice: Int
-)
-
-data class Che\
-ckout(
+data class Checkout(
     @SerializedName("id")
     val id: Int,
     @SerializedName("slug")
