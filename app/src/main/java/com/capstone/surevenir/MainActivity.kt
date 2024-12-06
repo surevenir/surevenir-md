@@ -20,7 +20,9 @@
     import androidx.compose.material.Scaffold
     import androidx.compose.material.Surface
     import androidx.compose.runtime.Composable
+    import androidx.compose.runtime.LaunchedEffect
     import androidx.compose.runtime.getValue
+    import androidx.compose.runtime.remember
     import androidx.compose.ui.Modifier
     import androidx.compose.ui.tooling.preview.Preview
     import androidx.core.app.ActivityCompat
@@ -80,11 +82,15 @@
     import com.google.firebase.auth.FirebaseAuth
     import com.google.firebase.auth.GoogleAuthProvider
     import dagger.hilt.android.AndroidEntryPoint
+    import kotlinx.coroutines.delay
     import kotlinx.coroutines.launch
     import java.util.UUID
 
     @AndroidEntryPoint
     class MainActivity : ComponentActivity() {
+
+        private lateinit var mainNavController: NavHostController
+
 
         private lateinit var navController: NavHostController
         private lateinit var userPreferences: UserPreferences
@@ -98,8 +104,14 @@
             private const val GOOGLE_SIGN_IN_CODE = 1001
         }
 
+        private var pendingNavigation: String? = null
+
+
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
+
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+
 
             requestPermissionLauncher = registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
@@ -120,6 +132,7 @@
                 }
             }
 
+
             checkAndRequestPermissions()
 
             userPreferences = UserPreferences(this)
@@ -129,10 +142,18 @@
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
             setContent {
+
+                val navController = rememberNavController()
+                val initialRoute = remember { intent.getStringExtra("navigate_to") }
+
+
                 MyAppTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        navController = rememberNavController()
-                        MainScreen(navController, userPreferences)
+                        MainScreen(
+                            navController,
+                            userPreferences,
+                            initialRoute = initialRoute
+                        )
                     }
                 }
             }
@@ -268,10 +289,21 @@
 
 
     @Composable
-    fun MainScreen(navController: NavHostController,     userPreferences: UserPreferences) {
+    fun MainScreen(navController: NavHostController,     userPreferences: UserPreferences,   initialRoute: String? = null) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         val imageCaptureViewModel: ImageCaptureVM = viewModel()
+
+        LaunchedEffect(Unit) {
+            initialRoute?.let { route ->
+                delay(1000) // Brief delay to ensure NavHost is ready
+                try {
+                    navController.navigate(route)
+                } catch (e: Exception) {
+                    Log.e("Navigation", "Failed to navigate to $route", e)
+                }
+            }
+        }
 
 
         Scaffold(

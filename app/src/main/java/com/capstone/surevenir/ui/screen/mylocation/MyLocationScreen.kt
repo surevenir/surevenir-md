@@ -180,7 +180,8 @@ private fun GoogleMapContent(
         uiSettings = MapUiSettings(
             zoomControlsEnabled = true,
             myLocationButtonEnabled = true
-        )
+        ),
+
     ) {
         Marker(
             state = MarkerState(position = currentLocation),
@@ -205,12 +206,15 @@ private fun GoogleMapContent(
 
                 Marker(
                     state = MarkerState(position = position),
-                    title = merchant.name ?: "Merchant",
-                    snippet = merchant.description ?: "",
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
-                    onClick = {
-                        navController.navigate("merchant/${merchant.id}")
+                    title = merchant.name,
+                    snippet = "Click to see Detail",
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                    onClick = { marker ->
+                        marker.showInfoWindow()
                         true
+                    },
+                    onInfoWindowClick = {
+                        navController.navigate("market/${merchant.id}")
                     }
                 )
             }
@@ -233,9 +237,16 @@ private fun GoogleMapContent(
 
                 Marker(
                     state = MarkerState(position = position),
-                    title = market.name ?: "Market",
-                    snippet = market.description ?: "",
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
+                    title = market.name,
+                    snippet = "Click to see Detail",
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                    onClick = { marker ->
+                        marker.showInfoWindow()
+                        true
+                    },
+                    onInfoWindowClick = {
+                        navController.navigate("market/${market.id}")
+                    }
                 )
             }
         }

@@ -38,6 +38,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
@@ -72,13 +73,15 @@ fun OnBoardingScreen(navController: NavController,
         ),
     )
 
-    Column (modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp),
-    ){
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
         ) {
             HorizontalPager(
                 count = pages.size,
@@ -88,7 +91,8 @@ fun OnBoardingScreen(navController: NavController,
                 OnboardingPageScreen(page = pages[page])
             }
         }
-        HorizontalPagerIndicator(pagerState = pagerState,
+        HorizontalPagerIndicator(
+            pagerState = pagerState,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(16.dp),
@@ -98,24 +102,28 @@ fun OnBoardingScreen(navController: NavController,
         Button(
             onClick = {
                 if (pagerState.currentPage == pages.size - 1) {
-                    navController.navigate("signIn")
-                    scope.launch {
+                    scope.launch(Dispatchers.Main) {
                         userPreferences.saveOnboardingState(true)
                         navController.navigate("signIn") {
                             popUpTo(0) { inclusive = true }
                         }
                     }
-                } else {
                 }
-            },            modifier = Modifier
+            },
+            modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
             shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00))
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (pagerState.currentPage == pages.size - 1) Color(0xFFED8A00) else Color.Gray
+            ),
+            enabled = pagerState.currentPage == pages.size - 1
         ) {
-            Text(text = if (pagerState.currentPage == pages.size  - 1) "Get Started" else "Get Started")
+            Text(
+                text = if (pagerState.currentPage == pages.size - 1) "Get Started" else "Next",
+                color = if (pagerState.currentPage == pages.size - 1) Color.White else Color.DarkGray
+            )
         }
-        Spacer(modifier = Modifier.height(5.dp))
     }
 }
 
@@ -139,6 +147,8 @@ fun OnboardingPageScreen (page: OnboardingPage){
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
+        Spacer(Modifier.height(20.dp))
+
         Image(
             painter = painterResource(id = page.imageRes),
             contentDescription = null,
@@ -146,6 +156,8 @@ fun OnboardingPageScreen (page: OnboardingPage){
                 .fillMaxWidth()
                 .height(420.dp)
         )
+
+        Spacer(Modifier.height(20.dp))
 
         Text(
             text = buildAnnotatedString {
