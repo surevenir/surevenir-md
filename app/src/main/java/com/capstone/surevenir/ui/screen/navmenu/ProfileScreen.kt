@@ -83,6 +83,7 @@ fun ProfileScreen(
     }
 
     Scaffold(
+        modifier = Modifier.background(Color.White),
         content = { paddingValues ->
             if (isLoading) {
                 Box(
@@ -95,6 +96,7 @@ fun ProfileScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.White)
                         .padding(paddingValues)
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally

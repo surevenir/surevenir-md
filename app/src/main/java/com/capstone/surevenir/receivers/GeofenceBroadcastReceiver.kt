@@ -75,7 +75,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     private fun showNotification(context: Context, geofenceId: String, title: String, message: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Create notification channel for Android O and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
@@ -90,7 +89,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
 
-            // Extract ID from geofenceId (remove "merchant_" or "market_" prefix)
             val id = geofenceId.substringAfter("_")
             when {
                 geofenceId.startsWith("merchant_") -> putExtra("destination", "merchant/$id")
@@ -105,7 +103,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Build notification
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.baseline_notifications_24)
             .setContentTitle(title)
@@ -117,7 +114,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             .setContentIntent(pendingIntent)
             .build()
 
-        // Show notification with unique ID
         val notificationId = System.currentTimeMillis().toInt()
         notificationManager.notify(notificationId, notification)
 

@@ -3,6 +3,7 @@ package com.capstone.surevenir.ui.screen.navmenu
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -44,6 +45,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -69,6 +71,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.capstone.surevenir.BuildConfig
@@ -84,6 +87,7 @@ import com.capstone.surevenir.ui.camera.ImageCaptureVM
 import com.capstone.surevenir.ui.camera.PermissionUtils
 import com.capstone.surevenir.ui.components.MarketCard
 import com.capstone.surevenir.ui.components.SectionHeader
+import com.capstone.surevenir.ui.components.isValidEmail
 import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
 import com.capstone.surevenir.ui.viewmodel.MarketViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductViewModel
@@ -182,6 +186,30 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
 
                     Spacer(modifier = Modifier.height(10.dp))
 //                    ScanHistorySection(products = scanHistoryP?roducts)
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            item {
+                androidx.compose.material3.Button(
+                    onClick = {
+                        navController.navigate("surevenirai")
+
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text(
+                        text = "Try Our SurevenirGenAi",
+                        color = Color.White,
+                        fontFamily = sfui_semibold
+                    )
                 }
             }
 
@@ -505,7 +533,7 @@ fun TopBar(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logo),
+            painter = painterResource(id = R.drawable.surevenir_logo_home),
             contentDescription = "Logo",
             modifier = Modifier.size(32.dp)
         )

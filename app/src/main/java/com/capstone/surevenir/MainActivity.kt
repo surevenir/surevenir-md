@@ -8,6 +8,7 @@
     import android.os.Build
     import android.os.Bundle
     import android.util.Log
+    import android.view.WindowManager
     import android.widget.Toast
     import androidx.activity.ComponentActivity
     import androidx.activity.compose.setContent
@@ -67,6 +68,7 @@
     import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
     import com.capstone.surevenir.ui.screen.profile.SettingsScreen
     import com.capstone.surevenir.ui.screen.singlescreen.SingleMarketScreen
+    import com.capstone.surevenir.ui.screen.singlescreen.SurevenirAi
     import com.capstone.surevenir.ui.theme.MyAppTheme
     import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
     import com.capstone.surevenir.ui.viewmodel.UserViewModel
@@ -99,7 +101,6 @@
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
 
-            // Inisialisasi requestPermissionLauncher
             requestPermissionLauncher = registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
             ) { permissions ->
@@ -143,17 +144,14 @@
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
             )
 
-            // Add notification permission for Android 13+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
             }
 
-            // Add background location permission for Android 10+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 permissions.add(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             }
 
-            // Add foreground service location permission for Android 14+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 permissions.add(android.Manifest.permission.FOREGROUND_SERVICE_LOCATION)
             }
@@ -209,7 +207,7 @@
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 val firebaseUid = firebaseUser?.uid ?: UUID.randomUUID().toString()
 
-                val dummyToken = "b1025941-5a1d-4d86-bef0-d05e9118befb"
+                val dummyToken = "aOKiMaZtCze9lwt1yUBeJKBNCQF3"
 
                 Log.d("DEBUG", "Using Dummy Token: $dummyToken")
 
@@ -339,6 +337,9 @@
                 composable("signIn") {
                     SignInScreen(navController = navController)
                 }
+                composable("surevenirai") {
+                    SurevenirAi(navController = navController)
+                }
                 composable("forgotPassword") {
                     ForgotPassword(navController = navController)
                 }
@@ -427,6 +428,8 @@
             }
         }
     }
+
+
 
     @Preview(showBackground = true)
     @Composable

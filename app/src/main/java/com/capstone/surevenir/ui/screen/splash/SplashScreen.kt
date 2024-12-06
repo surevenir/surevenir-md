@@ -51,7 +51,6 @@ fun SplashScreen(
 
     LaunchedEffect(true) {
         if (!hasNavigated) {
-            // Baca status secara berurutan untuk memastikan konsistensi
             val isLoggedIn = userPreferences.isLoggedIn.first()
             val hasOnboarded = userPreferences.hasSeenOnboarding.first()
 
@@ -78,13 +77,13 @@ fun SplashScreen(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(id = R.drawable.logosure),
+                painter = painterResource(id = R.drawable.surevenir_logo_home),
                 contentDescription = "Logo",
                 modifier = Modifier.size(100.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "SureVenir",
+                text = "Surevenir",
                 fontFamily = sfui_semibold,
                 style = MaterialTheme.typography.h4,
                 color = Color.Black,

@@ -64,7 +64,6 @@ fun MyLocationScreen(
         }
     }
 
-    // Permission Launchers
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -82,8 +81,6 @@ fun MyLocationScreen(
     }
 
 
-
-    // Data Loading Function
     fun loadData(currentToken: String?) {
         if (currentToken == null) return
         val bearerToken = "Bearer $currentToken"
@@ -99,7 +96,6 @@ fun MyLocationScreen(
         }
     }
 
-    // Initial Setup
     LaunchedEffect(Unit) {
         checkAndRequestPermissions(context, locationPermissionLauncher)
         tokenViewModel.fetchToken()
@@ -109,7 +105,6 @@ fun MyLocationScreen(
         if (token != null) loadData(token)
     }
 
-    // UI
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             isLoading -> {
@@ -134,7 +129,6 @@ fun MyLocationScreen(
                 .padding(end = 5.dp, top = 5.dp)
         )
 
-        // Refresh Button
         FloatingActionButton(
             onClick = {
                 updateLocation(context, fusedLocationClient) { location ->
@@ -151,7 +145,6 @@ fun MyLocationScreen(
             Icon(Icons.Default.Refresh, "Refresh Location")
         }
 
-        // Back Button
         Button(
             onClick = { navController.navigate("home") },
             modifier = Modifier
@@ -163,6 +156,7 @@ fun MyLocationScreen(
         }
     }
 }
+
 
 @Composable
 private fun GoogleMapContent(
@@ -188,14 +182,12 @@ private fun GoogleMapContent(
             myLocationButtonEnabled = true
         )
     ) {
-        // Current Location Marker
         Marker(
             state = MarkerState(position = currentLocation),
             title = "Lokasi Saya",
             snippet = "Ini adalah lokasi saya yang sebenarnya"
         )
 
-        // Merchant Markers
         merchants?.forEach { merchant ->
             val lng = merchant.latitude?.toDoubleOrNull()
             val lat = merchant.longitude?.toDoubleOrNull()
@@ -224,7 +216,6 @@ private fun GoogleMapContent(
             }
         }
 
-        // Market Markers
         markets?.forEach { market ->
             val lng = market.latitude?.toDoubleOrNull()
             val lat = market.longitude?.toDoubleOrNull()
@@ -256,12 +247,14 @@ private fun setupGeofencing(context: Context, merchants: List<MerchantData>?, ma
         val lng = merchant.latitude?.toDoubleOrNull()
         val lat = merchant.longitude?.toDoubleOrNull()
 
-        if (lat != null && lng != null) {
-            Log.d("MyLocationScreen", "Starting service for merchant ${merchant.id} at $lat, $lng")
+        if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
+            Log.d("Geofencing", "Setting up merchant geofence at lat: $lat, lng: $lng")
             val intent = Intent(context, GeofencingService::class.java).apply {
                 putExtra("id", "merchant_${merchant.id}")
                 putExtra("lat", lat)
                 putExtra("lng", lng)
+                putExtra("type", "merchant")
+                putExtra("name", merchant.name)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
@@ -272,20 +265,25 @@ private fun setupGeofencing(context: Context, merchants: List<MerchantData>?, ma
     }
 
     markets?.forEach { market ->
-        val lat = market.latitude?.toDoubleOrNull()
-        val lng = market.longitude?.toDoubleOrNull()
+        val lat = market.longitude?.toDoubleOrNull()
+        val lng = market.latitude?.toDoubleOrNull()
 
         if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
+            Log.d("Geofencing", "Setting up market geofence at lat: $lat, lng: $lng")
             val intent = Intent(context, GeofencingService::class.java).apply {
                 putExtra("id", "market_${market.id}")
                 putExtra("lat", lat)
                 putExtra("lng", lng)
+                putExtra("type", "market")
+                putExtra("name", market.name)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {
                 context.startService(intent)
             }
+        } else {
+            Log.e("Geofencing", "Invalid market coordinates: lat=$lat, lng=$lng for market ${market.id}")
         }
     }
 }

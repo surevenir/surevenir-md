@@ -279,7 +279,7 @@ fun ShopSection(
                         totalShopProduct = shop.products_count,
                         modifier = Modifier
                             .width(200.dp)
-                            .height(300.dp)
+                            .height(350.dp)
                             .padding(end = 10.dp)
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp))

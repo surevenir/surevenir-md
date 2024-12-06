@@ -122,7 +122,6 @@ fun SingleMarketScreen(
                         .background(Color.White)
                 ) {
                     item {
-                        // Header with back button
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -149,10 +148,9 @@ fun SingleMarketScreen(
                                 fontFamily = sfui_semibold,
                                 color = Color(0xFFCC5B14)
                             )
-                            Spacer(modifier = Modifier.size(48.dp))
                         }
-
-                        // Market Image and Details
+                    }
+                    item {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -190,7 +188,6 @@ fun SingleMarketScreen(
 
                             Spacer(modifier = Modifier.height(24.dp))
 
-                            // Location Button
                             Button(
                                 onClick = {
                                     val latitude = marketDetail?.latitude
@@ -214,6 +211,15 @@ fun SingleMarketScreen(
                                 )
                             }
                         }
+                    }
+
+                    item {
+                        Text(
+                            text = "Avalaible Shops",
+                            fontSize = 25.sp,
+                            fontFamily = sfui_semibold,
+                            color = Color(0xFFCC5B14)
+                        )
                     }
                 }
             }

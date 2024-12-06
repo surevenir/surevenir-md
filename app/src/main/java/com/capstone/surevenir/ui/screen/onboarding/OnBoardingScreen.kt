@@ -31,6 +31,9 @@ import androidx.navigation.NavController
 import com.capstone.surevenir.R
 import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.model.OnboardingPage
+import com.capstone.surevenir.ui.screen.navmenu.sfui_med
+import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.screen.navmenu.sfui_text
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
@@ -40,10 +43,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun OnBoardingScreen(navController: NavController,
-                     userPreferences: UserPreferences // Tambahkan parameter ini
+                     userPreferences: UserPreferences
 ) {
     val pagerState = rememberPagerState()
-    val scope = rememberCoroutineScope() // Tambahkan ini untuk coroutine scope
+    val scope = rememberCoroutineScope()
     val pages = listOf(
         OnboardingPage(
             imageRes = R.drawable.onboard_1,
@@ -130,7 +133,7 @@ fun OnboardingPageScreen (page: OnboardingPage){
                     append("${page.highlightText}")
                 }
             },
-            fontFamily = geometrFont,
+            fontFamily = sfui_semibold,
             style = MaterialTheme.typography.headlineMedium,
             color = Color.Black,
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -148,7 +151,7 @@ fun OnboardingPageScreen (page: OnboardingPage){
             text = buildAnnotatedString {
                 append(page.belowText)
             },
-            fontFamily = geometrFont,
+            fontFamily = sfui_med,
             style = MaterialTheme.typography.headlineSmall,
             color = Color.Black,
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -157,7 +160,7 @@ fun OnboardingPageScreen (page: OnboardingPage){
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            fontFamily = gilisansFont,
+            fontFamily = sfui_text,
             text = page.description,
             style = MaterialTheme.typography.labelSmall,
             color = Color.Gray,
@@ -169,8 +172,4 @@ fun OnboardingPageScreen (page: OnboardingPage){
     }
 }
 
-val geometrFont = FontFamily(
-    Font(R.font.poppinssemibold, FontWeight.Bold)
-)
 
-val gilisansFont = FontFamily(Font(R.font.poppinssemibold, FontWeight.Normal))

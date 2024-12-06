@@ -86,6 +86,7 @@ import com.capstone.surevenir.ui.screen.navmenu.ProductDetailSkeleton
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_text
+import com.capstone.surevenir.ui.viewmodel.CartViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantDetailViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductDetailViewModel
@@ -107,16 +108,19 @@ fun SingleProductScreen(
     viewModel: ProductDetailViewModel = hiltViewModel(),
     merchantDetailViewModel: MerchantDetailViewModel= hiltViewModel(),
     productViewModel: ProductViewModel = hiltViewModel(),
-    reviewsViewModel: ReviewsViewModel = hiltViewModel()
+    reviewsViewModel: ReviewsViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel()
 ) {
     val token by tokenViewModel.token.observeAsState()
+    val createCartResult by cartViewModel.createCartResult.collectAsState()
+    val isLoading by cartViewModel.isLoading.collectAsState()
     val productDetail by viewModel.productDetail.collectAsState()
     val error by viewModel.error.collectAsState()
     val reviews by reviewsViewModel.reviewResponse.observeAsState()
     var showAddToCartDialog by remember { mutableStateOf(false) }
     var quantity by remember { mutableStateOf(1) }
     val merchantDetail by merchantDetailViewModel.merchantDetail.collectAsState()
-    val context = LocalContext.current  // Tambahkan ini
+    val context = LocalContext.current
 
 
     LaunchedEffect(Unit) {
@@ -147,115 +151,115 @@ fun SingleProductScreen(
                     .background(Color.White)
                     .padding(bottom = 80.dp)
             ) {
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFE7E7E9))
-                            .clickable { navController.popBackStack() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.arrow),
-                            contentDescription = "Back",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Text(
-                        text = "Detail Souvenir",
-                        fontSize = 25.sp,
-                        fontFamily = sfui_semibold,
-                        color = Color(0xFFCC5B14)
-                    )
-                }
-            }
-
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White)
-                ) {
-                    Spacer(modifier = Modifier.height(10.dp))
-                    ImageSlider(images = product.images.map { it.url })
-                }
-            }
-
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        "Rp ${formatPrice(product.price)}",
-                        fontSize = 24.sp,
-                        fontFamily = sfui_semibold,
-                        color = Color.Black
-                    )
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
-                    Spacer(
+                item {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(1.dp)
-                            .background(Color.Gray)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = product.name,
-                        fontSize = 25.sp,
-                        fontFamily = sfui_semibold,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = product.description,
-                        fontSize = 14.sp,
-                        fontFamily = sfui_text,
-                        color = Color.Gray
-                    )
-                }
-            }
-
-            item {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(15.dp)
-                        .background(Color.LightGray)
-                )
-            }
-
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Details",
-                        fontSize = 25.sp,
-                        fontFamily = sfui_semibold,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Row {
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFE7E7E9))
+                                .clickable { navController.popBackStack() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.arrow),
+                                contentDescription = "Back",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                         Text(
-                            text = "Stock: ${product.stock}",
-                            fontSize = 18.sp,
+                            text = "Detail Souvenir",
+                            fontSize = 25.sp,
+                            fontFamily = sfui_semibold,
+                            color = Color(0xFFCC5B14)
+                        )
+                    }
+                }
+
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White)
+                    ) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        ImageSlider(images = product.images.map { it.url })
+                    }
+                }
+
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            "Rp ${formatPrice(product.price)}",
+                            fontSize = 24.sp,
+                            fontFamily = sfui_semibold,
+                            color = Color.Black
+                        )
+                        Spacer(
+                            modifier = Modifier.height(8.dp)
+                        )
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(Color.Gray)
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = product.name,
+                            fontSize = 25.sp,
+                            fontFamily = sfui_semibold,
+                            color = Color.Black
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = product.description,
+                            fontSize = 14.sp,
                             fontFamily = sfui_text,
                             color = Color.Gray
                         )
+                    }
+                }
+
+                item {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(15.dp)
+                            .background(Color.LightGray)
+                    )
+                }
+
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Details",
+                            fontSize = 25.sp,
+                            fontFamily = sfui_semibold,
+                            color = Color.Black
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row {
+                            Text(
+                                text = "Stock: ${product.stock}",
+                                fontSize = 18.sp,
+                                fontFamily = sfui_text,
+                                color = Color.Gray
+                            )
 //                        Text(
 //                            text = "Stock: ${product.stock}",
 //                            fontSize = 18.sp,
@@ -268,226 +272,255 @@ fun SingleProductScreen(
 //                            fontFamily = sfui_text,
 //                            color = Color.Gray
 //                        )
+                        }
+
                     }
-
                 }
-            }
 
-            item {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(15.dp)
-                        .background(Color.LightGray)
-                )
-            }
-
-            item {
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AsyncImage(
-                        model = merchant.profileImageUrl ?: "https://via.placeholder.com/150",
-                        contentDescription = merchant.name,
+                item {
+                    Spacer(
                         modifier = Modifier
-                            .width(150.dp)
-                            .clip(RoundedCornerShape(20.dp))
+                            .fillMaxWidth()
+                            .height(15.dp)
+                            .background(Color.LightGray)
                     )
+                }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                item {
 
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.SpaceBetween
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = product.merchant.name,
-                            fontFamily = sfui_semibold,
-                            fontSize = 25.sp,
-                            color = Color.Black
+                        AsyncImage(
+                            model = merchant.profileImageUrl ?: "https://via.placeholder.com/150",
+                            contentDescription = merchant.name,
+                            modifier = Modifier
+                                .width(150.dp)
+                                .clip(RoundedCornerShape(20.dp))
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.SpaceBetween
                         ) {
-
-                            Spacer(modifier = Modifier.width(4.dp))
-
                             Text(
-                                text = "Click to see Shop Details",
-                                fontFamily = sfui_med,
-                                fontSize = 14.sp,
-                                color = Color(0xFFFF7029),
-                                modifier = Modifier
-                                    .clickable {
-                                        navController.currentBackStackEntry?.savedStateHandle?.set(
-                                            "shopData",
-                                            ShopData(product.merchant.description ?: "No Location", product.merchant.products_count)
-                                        )
-
-                                        try {
-                                            navController.getBackStackEntry("merchant/${product.merchant_id}")
-                                                .savedStateHandle["shopData"] = ShopData(
-                                                product.merchant.description ?: "No Location",
-                                                product.merchant.products_count
-                                            )
-                                        } catch (e: Exception) {
-                                            Log.e("Navigation", "Failed to set shop data: ${e.message}")
-                                        }
-
-                                        navController.navigate("merchant/${product.merchant_id}")
-                                    }
+                                text = product.merchant.name,
+                                fontFamily = sfui_semibold,
+                                fontSize = 25.sp,
+                                color = Color.Black
                             )
-                        }
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
 
-                }
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(15.dp)
-                        .background(Color.LightGray)
-                )
-            }
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                LaunchedEffect(productId, token) {
-                    if (token != null) {
-                        Log.d("Debug", "Fetching product $productId")
-                        viewModel.fetchProductDetail(productId, token!!)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
 
-                        delay(500)
-                        productDetail?.let { product ->
-                            Log.d("Debug", "Fetching merchant ${product.merchant_id}")
-                            merchantDetailViewModel.fetchMerchantDetail(product.merchant_id, token!!)
+                                Spacer(modifier = Modifier.width(4.dp))
 
-                            reviewsViewModel.getReviews(productId, "Bearer ${token}")
-                        }
-                    }
-                }
+                                Text(
+                                    text = "Click to see Shop Details",
+                                    fontFamily = sfui_med,
+                                    fontSize = 14.sp,
+                                    color = Color(0xFFFF7029),
+                                    modifier = Modifier
+                                        .clickable {
+                                            navController.currentBackStackEntry?.savedStateHandle?.set(
+                                                "shopData",
+                                                ShopData(product.merchant.description ?: "No Location", product.merchant.products_count)
+                                            )
 
-                ReviewsSection(
-                    averageRating = 5.0,
-                    totalReviews = reviews?.size ?: 0,
-                    reviews = reviews,
-                    isLoading = false
-                )
-            }
-        }
-            item {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(15.dp)
-                        .background(Color.LightGray)
-                )
-            }
+                                            try {
+                                                navController.getBackStackEntry("merchant/${product.merchant_id}")
+                                                    .savedStateHandle["shopData"] = ShopData(
+                                                    product.merchant.description ?: "No Location",
+                                                    product.merchant.products_count
+                                                )
+                                            } catch (e: Exception) {
+                                                Log.e("Navigation", "Failed to set shop data: ${e.message}")
+                                            }
 
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-
-                    Column (
-                        modifier = Modifier
-                            .padding(16.dp)
-                    ){   Text(
-                        text = "Other Products",
-                        fontSize = 25.sp,
-                        fontFamily = sfui_semibold,
-                        color = Color.Black
-                    ) }
-
-
-                    if (token != null) {
-                        LaunchedEffect(token) {
-                            if (token != null) {
-                                Log.d("TOKEN_CATE", "Using Token: $token")
-                                productViewModel.getProducts("Bearer $token")
-                            } else {
-                                Log.d("TOKEN_CATE", "Token belum tersedia")
-                                productViewModel.getAllProducts()
+                                            navController.navigate("merchant/${product.merchant_id}")
+                                        }
+                                )
                             }
                         }
-                    } else {
-                        Log.d("TOKEN_CATE", "Token belum tersedia")
                     }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
 
-                    val products = remember { mutableStateOf<List<ProductData>?>(null) }
-                    products.value = productViewModel.products.collectAsState().value
-
-                    ProductsSectionRandom(
-                        products = products,
-                        navController = navController
+                    }
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(15.dp)
+                            .background(Color.LightGray)
                     )
-
-                    Spacer(modifier = Modifier.height(10.dp))
                 }
-            }
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
 
-        }
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .background(Color.White)
-                .shadow(elevation = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Button(
-                onClick = { showAddToCartDialog = true },
+                        LaunchedEffect(productId, token) {
+                            if (token != null) {
+                                Log.d("Debug", "Fetching product $productId")
+                                viewModel.fetchProductDetail(productId, token!!)
+
+                                delay(500)
+                                productDetail?.let { product ->
+                                    Log.d("Debug", "Fetching merchant ${product.merchant_id}")
+                                    merchantDetailViewModel.fetchMerchantDetail(product.merchant_id, token!!)
+
+                                    reviewsViewModel.getReviews(productId, "Bearer ${token}")
+                                }
+                            }
+                        }
+
+                        ReviewsSection(
+                            averageRating = 5.0,
+                            totalReviews = reviews?.size ?: 0,
+                            reviews = reviews,
+                            isLoading = false
+                        )
+                    }
+                }
+                item {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(15.dp)
+                            .background(Color.LightGray)
+                    )
+                }
+
+                item {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+
+                        Column (
+                            modifier = Modifier
+                                .padding(16.dp)
+                        ){   Text(
+                            text = "Other Products",
+                            fontSize = 25.sp,
+                            fontFamily = sfui_semibold,
+                            color = Color.Black
+                        ) }
+
+
+                        if (token != null) {
+                            LaunchedEffect(token) {
+                                if (token != null) {
+                                    Log.d("TOKEN_CATE", "Using Token: $token")
+                                    productViewModel.getProducts("Bearer $token")
+                                } else {
+                                    Log.d("TOKEN_CATE", "Token belum tersedia")
+                                    productViewModel.getAllProducts()
+                                }
+                            }
+                        } else {
+                            Log.d("TOKEN_CATE", "Token belum tersedia")
+                        }
+
+                        val products = remember { mutableStateOf<List<ProductData>?>(null) }
+                        products.value = productViewModel.products.collectAsState().value
+
+                        ProductsSectionRandom(
+                            products = products,
+                            navController = navController
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                }
+
+            }
+            Box(
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(64.dp)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
+                    .background(Color.White)
+                    .shadow(elevation = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = { showAddToCartDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
                 ) {
-                Text(
-                    text = "Add to Cart",
-                    fontSize = 16.sp,
-                    fontFamily = sfui_semibold,
-                    color = Color.White
-                )
-            }
-            AddToCartDialog(
-                showDialog = showAddToCartDialog,
-                onDismiss = { showAddToCartDialog = false },
-                productName = product.name,
-                price = product.price,  // Hapus .toDouble() karena price sekarang Int
-                maxQuantity = product.stock,
-                onConfirm = { quantity ->
-                    Toast.makeText(
-                        context,  // Sekarang context tersedia
-                        "$quantity items added to cart",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Text(
+                        text = "Add to Cart",
+                        fontSize = 16.sp,
+                        fontFamily = sfui_semibold,
+                        color = Color.White
+                    )
                 }
-            )
-        }
-    } else if (error != null) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "Error: ", color = Color.Red)
-        }
-    } else {
+                AddToCartDialog(
+                    showDialog = showAddToCartDialog,
+                    onDismiss = { showAddToCartDialog = false },
+                    productName = product.name,
+                    price = product.price,
+                    maxQuantity = product.stock,
+                    onConfirm = { quantity ->
+                        token?.let { token ->
+                            cartViewModel.createCart(token, productId, quantity)
+                        }
+                    }
+                )
+
+                LaunchedEffect(createCartResult) {
+                    createCartResult?.let { result ->
+                        result.onSuccess { response ->
+                            Toast.makeText(
+                                context,
+                                "Successfully added to cart!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            showAddToCartDialog = false
+                        }.onFailure { exception ->
+                            Toast.makeText(
+                                context,
+                                "Failed to add to cart: ${exception.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                error?.let { errorMessage ->
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                }
+            }
+        } else if (error != null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Error: ", color = Color.Red)
+            }
+        } else {
             ProductDetailSkeleton()
         }
     }

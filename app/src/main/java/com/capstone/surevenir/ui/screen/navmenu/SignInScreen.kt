@@ -150,7 +150,7 @@ fun SignInScreen(navController: NavController, userViewModel: UserViewModel = hi
                 if (emailErrorMessage.isEmpty() && passwordErrorMessage.isEmpty()) {
                     isLoading = true
 
-                    userViewModel.getUsers(token = "12345") { users ->
+                    userViewModel.getUsers(token = "aOKiMaZtCze9lwt1yUBeJKBNCQF3") { users ->
                         val existingUser = users?.find { it.email == email }
 
                         if (existingUser != null) {
