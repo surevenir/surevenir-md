@@ -59,7 +59,7 @@ fun AllShopScreen(navController: NavHostController, merchantViewModel: MerchantV
 
     if (token != null) {
         LaunchedEffect(token) {
-            merchantViewModel.getMerchants("Bearer $token") { merchantList ->
+            merchantViewModel.getMerchants("$token") { merchantList ->
                 merchants.value = merchantList
             }
         }

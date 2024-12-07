@@ -83,9 +83,10 @@ fun MyLocationScreen(
 
     fun loadData(currentToken: String?) {
         if (currentToken == null) return
+        val merchantToken = "$currentToken"
         val bearerToken = "Bearer $currentToken"
 
-        merchantViewModel.getMerchants(bearerToken) { merchantList ->
+        merchantViewModel.getMerchants(merchantToken) { merchantList ->
             merchants = merchantList
             setupGeofencing(context, merchantList, markets)
         }
@@ -208,13 +209,13 @@ private fun GoogleMapContent(
                     state = MarkerState(position = position),
                     title = merchant.name,
                     snippet = "Click to see Detail",
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
                     onClick = { marker ->
                         marker.showInfoWindow()
                         true
                     },
                     onInfoWindowClick = {
-                        navController.navigate("market/${merchant.id}")
+                        navController.navigate("merchant/${merchant.id}")
                     }
                 )
             }

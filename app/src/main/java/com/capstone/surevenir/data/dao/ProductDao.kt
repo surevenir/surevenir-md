@@ -34,8 +34,6 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE categories LIKE '%' || :categoryId || '%'")
     fun getProductsByCategoryId(categoryId: Int): List<ProductDatabase>
 
-
-
 }
 
 

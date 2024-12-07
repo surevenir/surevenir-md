@@ -89,9 +89,8 @@
     @AndroidEntryPoint
     class MainActivity : ComponentActivity() {
 
-        private lateinit var mainNavController: NavHostController
 
-
+        private var mainNavController: NavHostController? = null // Gunakan nullable
         private lateinit var navController: NavHostController
         private lateinit var userPreferences: UserPreferences
 
@@ -142,16 +141,17 @@
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
             setContent {
-
                 val navController = rememberNavController()
                 val initialRoute = remember { intent.getStringExtra("navigate_to") }
 
+                // Simpan referensi navController
+                mainNavController = navController
 
                 MyAppTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         MainScreen(
-                            navController,
-                            userPreferences,
+                            navController = navController,
+                            userPreferences = UserPreferences(this),
                             initialRoute = initialRoute
                         )
                     }
@@ -194,22 +194,21 @@
         }
 
 
-
-
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             super.onActivityResult(requestCode, resultCode, data)
 
             if (requestCode == GOOGLE_SIGN_IN_CODE) {
                 try {
                     val userViewModel: UserViewModel = ViewModelProvider(this)[UserViewModel::class.java]
-                    handleGoogleSignInResult(data, this, navController, userViewModel)
+                    mainNavController?.let { navController ->
+                        handleGoogleSignInResult(data, this, navController, userViewModel)
+                    }
                 } catch (e: ApiException) {
                     println("Google Sign-In failed: ${e.statusCode}")
                     println("Error message: ${e.message}")
                     e.printStackTrace()
                 }
             }
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         }
     }
 

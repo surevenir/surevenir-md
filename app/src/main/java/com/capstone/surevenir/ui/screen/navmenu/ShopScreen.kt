@@ -157,14 +157,13 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
                 item {
                     if (token != null) {
                         LaunchedEffect(token) {
-                            merchantViewModel.getMerchants("Bearer $token") { merchantList ->
+                            merchantViewModel.getMerchants(token!!) { merchantList ->  // Hapus "Bearer " karena sudah ditangani di ViewModel
                                 merchants.value = merchantList
                             }
                         }
                     }
                     ShopSection(shops = merchants.value ?: emptyList(), navController)
                     Spacer(modifier = Modifier.height(16.dp))
-
                 }
 
                 item {
