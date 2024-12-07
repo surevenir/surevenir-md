@@ -10,6 +10,25 @@ import com.capstone.surevenir.data.entity.ProductDatabase
 
 @Dao
 interface ProductDao {
+
+    @Query("""
+    SELECT * FROM products
+    WHERE (:minPrice IS NULL OR price >= :minPrice)
+    AND (:maxPrice IS NULL OR price <= :maxPrice)
+    AND (:startDate IS NULL OR createdAt >= :startDate)
+    AND (:endDate IS NULL OR createdAt <= :endDate)
+    AND (:minStock IS NULL OR stock >= :minStock)
+""")
+    fun getFilteredProducts(
+        minPrice: Double?,
+        maxPrice: Double?,
+        startDate: Long?,
+        endDate: Long?,
+        minStock: Int?
+    ): List<ProductDatabase>
+
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(product: ProductDatabase)
 
@@ -33,6 +52,7 @@ interface ProductDao {
 
     @Query("SELECT * FROM products WHERE categories LIKE '%' || :categoryId || '%'")
     fun getProductsByCategoryId(categoryId: Int): List<ProductDatabase>
+
 
 }
 

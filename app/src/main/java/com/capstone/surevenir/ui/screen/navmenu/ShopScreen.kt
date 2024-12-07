@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,13 +29,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Card
+import androidx.compose.material.Checkbox
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.RadioButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +66,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
@@ -97,12 +102,26 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
         tokenViewModel.fetchToken()
     }
 
+    LaunchedEffect(productViewModel.minPriceFilter, productViewModel.maxPriceFilter, productViewModel.minStockFilter, productViewModel.startDateFilter, productViewModel.endDateFilter) {
+        // Jika semua filter bernilai null, mungkin tidak perlu apply
+        // Tapi jika salah satu berubah atau user baru saja set filter, panggil applyFilter
+        if (productViewModel.minPriceFilter != null || productViewModel.maxPriceFilter != null || productViewModel.minStockFilter != null || productViewModel.startDateFilter != null || productViewModel.endDateFilter != null) {
+            productViewModel.applyFilter()
+        }
+    }
+
     Log.d("TOKEN_CATE", token.toString())
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
         sheetContent = {
-            FilterBottomSheet()
+            FilterBottomSheet(
+                onFilterApplied = {
+                    scope.launch {
+                        bottomSheetState.hide()
+                    }
+                }
+            )
         },
         scrimColor = Color.Black.copy(alpha = 0.5f)
     ) {
@@ -288,7 +307,10 @@ fun ShopSection(
                                     "shopData",
                                     ShopData(shop.location ?: "No Location", shop.products_count)
                                 )
-                                Log.d("Navigation", "Location: ${shop.location}, Count: ${shop.products_count}")
+                                Log.d(
+                                    "Navigation",
+                                    "Location: ${shop.location}, Count: ${shop.products_count}"
+                                )
                                 navController.navigate("merchant/${shop.id}")
                             }
                     )
@@ -508,7 +530,22 @@ fun ShowSearchBar(
 
 
 @Composable
-fun FilterBottomSheet() {
+fun FilterBottomSheet(
+    viewModel: ProductViewModel = hiltViewModel(),
+    onFilterApplied: () -> Unit = {}
+) {
+    var minPrice by remember { mutableStateOf("") }
+    var maxPrice by remember { mutableStateOf("") }
+    var minStock by remember { mutableStateOf("") }
+
+    var startDate by remember { mutableStateOf("") } // date dalam string, nanti convert ke long
+    var endDate by remember { mutableStateOf("") }
+
+    var selectedPriceOption by remember { mutableStateOf<String?>(null) }
+    var selectedStockOption by remember { mutableStateOf<String?>(null) }
+    var isNewRelease by remember { mutableStateOf(false) }
+
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -517,17 +554,144 @@ fun FilterBottomSheet() {
     ) {
         Text(
             text = "Filter",
-            style = MaterialTheme.typography.bodyLarge,
+            fontFamily = sfui_semibold,
+            color = Color(0xFFCC5B14),
+            fontSize = 20.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        Text("Filter Kategori")
+
+        Text(
+            "Filter Price",
+            fontFamily = sfui_med
+        )
         Spacer(modifier = Modifier.height(8.dp))
+        PriceOption(
+            label = "Under 100.000",
+            selected = selectedPriceOption == "under100",
+            onSelect = { selectedPriceOption = "under100" }
+        )
+        PriceOption(
+            label = "100.000 - 300.000",
+            selected = selectedPriceOption == "range100to300",
+            onSelect = { selectedPriceOption = "range100to300" }
+        )
+        PriceOption(
+            label = "Over 300.000",
+            selected = selectedPriceOption == "over300",
+            onSelect = { selectedPriceOption = "over300" }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            "Filter Stock",
+            fontFamily = sfui_med
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+        PriceOption(
+            label = "Under 5",
+            selected = selectedStockOption == "under5",
+            onSelect = { selectedStockOption = "under5" },
+        )
+        PriceOption(
+            label = "5 - 30",
+            selected = selectedStockOption == "5to30",
+            onSelect = { selectedStockOption = "5to30" }
+        )
+        PriceOption(
+            label = "30 - 100",
+            selected = selectedStockOption == "30to100",
+            onSelect = { selectedStockOption = "30to100" }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            "Filter by Date",
+            fontFamily = sfui_med
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = isNewRelease,
+                onCheckedChange = { isNewRelease = it }
+            )
+            Text(
+                text = "New Release (<7 recent days)",
+                fontFamily = sfui_text,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { /* Tambahkan logika filter */ },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
+            onClick = {
+                val (minPriceVal, maxPriceVal) = when(selectedPriceOption) {
+                    "under100" -> Pair(null, 100000.0)
+                    "range100to300" -> Pair(100000.0, 300000.0)
+                    "over300" -> Pair(300000.0, null)
+                    else -> Pair(null, null)
+                }
+
+                val (minStockVal, maxStockVal) = when(selectedStockOption) {
+                    "under5" -> Pair(null, 5)
+                    "5to30" -> Pair(5, 30)
+                    "30to100" -> Pair(30, 100)
+                    else -> Pair(null, null)
+                }
+                val now = System.currentTimeMillis()
+                val sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000
+                val startDateVal = if (isNewRelease) sevenDaysAgo else null
+                val endDateVal = if (isNewRelease) now else null
+
+                viewModel.minPriceFilter = minPriceVal
+                viewModel.maxPriceFilter = maxPriceVal
+                viewModel.minStockFilter = minStockVal
+
+                viewModel.startDateFilter = startDateVal
+                viewModel.endDateFilter = endDateVal
+
+                onFilterApplied()
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Terapkan Filter")
+            Text(
+                "Apply Filter",
+                fontFamily = sfui_semibold,
+            )
         }
     }
 }
+
+@Composable
+fun PriceOption(label: String, selected: Boolean, onSelect: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clickable { onSelect() }
+            .padding(vertical = 4.dp)
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = onSelect
+        )
+        Text(
+            text = label,
+            modifier = Modifier.padding(start = 8.dp),
+            fontFamily = sfui_text,
+        )
+    }
+}
+
+fun parseDateToLong(dateString: String): Long? {
+    return try {
+        val formatter = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val date = formatter.parse(dateString)
+        date?.time
+    } catch (e: Exception) {
+        null
+    }
+}
+
 

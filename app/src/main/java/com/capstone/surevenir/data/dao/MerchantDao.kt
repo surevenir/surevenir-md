@@ -21,6 +21,9 @@ interface MerchantDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
      fun insertMerchants(merchants: List<MerchantDatabase>)
 
+    @Query("SELECT * FROM merchants WHERE market_id = :marketId") // Gunakan market_id sesuai nama kolom di database
+    fun getMerchantsByMarketId(marketId: Int): Flow<List<MerchantDatabase>>
+
     @Query("DELETE FROM merchants")
      fun deleteAllMerchants()
 

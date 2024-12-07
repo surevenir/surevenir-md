@@ -34,7 +34,12 @@ class MerchantRepository @Inject constructor(
     suspend fun updateLocalMerchants(merchants: List<MerchantDatabase>) {
         withContext(Dispatchers.IO) {  // Tambahkan ini
             merchantDao.updateMerchants(merchants)
+
         }
+    }
+
+    fun getMerchantsByMarketId(marketId: Int): Flow<List<MerchantDatabase>> {
+        return merchantDao.getMerchantsByMarketId(marketId)
     }
 
     // Function to fetch and cache merchants

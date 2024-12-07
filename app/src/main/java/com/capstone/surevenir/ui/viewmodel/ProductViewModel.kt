@@ -1,6 +1,9 @@
 package com.capstone.surevenir.ui.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,6 +25,16 @@ import javax.inject.Inject
 class ProductViewModel @Inject constructor(
     private val productRepository: ProductRepository
 ) : ViewModel() {
+
+    private val _filteredProducts = MutableStateFlow<List<ProductData>>(emptyList())
+    val filteredProducts: StateFlow<List<ProductData>> = _filteredProducts
+
+    var minPriceFilter by mutableStateOf<Double?>(null)
+    var maxPriceFilter by mutableStateOf<Double?>(null)
+    var startDateFilter by mutableStateOf<Long?>(null)
+    var endDateFilter by mutableStateOf<Long?>(null)
+    var minStockFilter by mutableStateOf<Int?>(null)
+
 
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
@@ -127,6 +140,28 @@ class ProductViewModel @Inject constructor(
             }
         }
     }
+     fun applyFilter() {
+        viewModelScope.launch {
+            // Pindah ke thread IO sebelum memanggil repository
+            val filteredList = withContext(Dispatchers.IO) {
+                productRepository.getFilteredProducts(
+                    minPrice = minPriceFilter,
+                    maxPrice = maxPriceFilter,
+                    startDate = startDateFilter,
+                    endDate = endDateFilter,
+                    minStock = minStockFilter
+                )
+            }
+            // Di sini gunakan productDatabaseToProduct dari repository:
+            val productDataList = filteredList.map { productDb ->
+                // Karena productDatabaseToProduct() private di repository,
+                // Anda perlu menambahkan fungsi publik di repository untuk memetakannya
+                productRepository.convertProductDatabaseToProduct(productDb)
+            }
+            _filteredProducts.value = productDataList
+        }
+    }
+
 
 //    fun getProductById(productId: Int): ProductData? {
 //        return productRepository.getProductById(productId)

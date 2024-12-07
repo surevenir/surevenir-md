@@ -20,6 +20,24 @@ class ProductRepository @Inject constructor(
     private val productDao: ProductDao
 
 ) {
+
+    suspend fun getFilteredProducts(
+        minPrice: Double? = null,
+        maxPrice: Double? = null,
+        startDate: Long? = null,
+        endDate: Long? = null,
+        minStock: Int? = null
+    ): List<ProductDatabase> {
+        return productDao.getFilteredProducts(
+            minPrice,
+            maxPrice,
+            startDate,
+            endDate,
+            minStock
+        )
+    }
+
+
     suspend fun getProducts(token: String): Response<ProductResponse> {
         return apiService.getProducts(token)
     }
@@ -53,6 +71,10 @@ class ProductRepository @Inject constructor(
 
     fun getProductsByCategoryId(categoryId: Int): List<ProductData> {
         return productDao.getProductsByCategoryId(categoryId).map { productDatabaseToProduct(it) }
+    }
+
+    fun convertProductDatabaseToProduct(productDb: ProductDatabase): ProductData {
+        return productDatabaseToProduct(productDb)
     }
 
 

@@ -11,6 +11,7 @@ import com.capstone.surevenir.data.network.response.MerchantResponse
 import com.capstone.surevenir.data.repository.MerchantRepository
 import com.capstone.surevenir.model.Merchant
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,6 +28,10 @@ class MerchantViewModel @Inject constructor(
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
+
+    fun getMerchantsByMarketId(marketId: Int): Flow<List<MerchantDatabase>> {
+        return merchantRepository.getMerchantsByMarketId(marketId)
+    }
 
     fun getMerchants(token: String, onComplete: (List<MerchantData>?) -> Unit) {
         _isLoading.value = true
