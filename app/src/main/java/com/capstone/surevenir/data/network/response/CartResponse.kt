@@ -1,7 +1,9 @@
 package com.capstone.surevenir.data.network.response
 
+import android.os.Parcelable
 import com.capstone.surevenir.model.Product
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
 data class CartResponse(
     @SerializedName("status_code")
@@ -21,6 +23,7 @@ data class CartData(
     val totalPrice: Int
 )
 
+@Parcelize
 data class CartItem(
     @SerializedName("id")
     val id: Int,
@@ -40,7 +43,7 @@ data class CartItem(
     val product: Product,
     @SerializedName("subtotal_price")
     val subtotalPrice: Int
-)
+) : Parcelable
 
 data class DeleteCartResponse(
     @SerializedName("success")

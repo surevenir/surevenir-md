@@ -38,3 +38,10 @@ data class Checkout(
     @SerializedName("updatedAt")
     val updatedAt: String
 )
+
+data class CheckoutRequest(
+    @SerializedName("cart_item_ids")
+    val cartItemIds: List<Int>,
+    @SerializedName("product_ids")
+    val productIds: List<Int>
+)

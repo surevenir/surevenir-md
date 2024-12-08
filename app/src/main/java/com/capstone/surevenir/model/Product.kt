@@ -1,6 +1,10 @@
 package com.capstone.surevenir.model
 
-data class Product(
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class  Product(
     val id: Int,
     val slug: String,
     val name: String,
@@ -11,5 +15,6 @@ data class Product(
     val updatedAt: String,
     val createdAt: String,
     val categories: List<String>,
-    val images: List<String>
-)
+    val images: List<String>,
+    val merchant: Merchant
+) : Parcelable

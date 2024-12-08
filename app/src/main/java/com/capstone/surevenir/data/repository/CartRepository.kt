@@ -5,7 +5,6 @@ import com.capstone.surevenir.data.network.ApiService
 import com.capstone.surevenir.data.network.response.CartItem
 import com.capstone.surevenir.data.network.response.CartResponse
 import com.capstone.surevenir.data.network.response.CheckoutRequest
-import com.capstone.surevenir.data.network.response.CheckoutResponse
 import com.capstone.surevenir.data.network.response.DeleteCartResponse
 import com.capstone.surevenir.model.CreateCartRequest
 import com.capstone.surevenir.model.CreateCartResponse
@@ -46,40 +45,16 @@ class CartRepository @Inject constructor(
         }
     }
 
-    suspend fun checkout(token: String, cartItems: List<CartItem>): Response<CheckoutResponse> {
-        Log.d("CartRepository", "Starting checkout for items: ${cartItems.map { it.id }}")
+    suspend fun updateCartItemQuantity(token: String, cartItemId: Int, quantity: Int): Response<CartResponse> {
+        Log.d("CartRepository", "Updating quantity for cart item $cartItemId to $quantity")
         return try {
-            Log.d("CartRepository", "Making checkout API call...")
-
-            // Extract both cart item IDs and product IDs
-            val cartItemIds = cartItems.map { it.id }
-            val productIds = cartItems.map { it.product.id }
-
-            val request = CheckoutRequest(
-                cartItemIds = cartItemIds,
-                productIds = productIds
-            )
-
-            Log.d("CartRepository", "Checkout request: $request")
-            val response = apiService.checkout(token, request)
-            Log.d("CartRepository", "Checkout API call completed with code: ${response.code()}")
+            val quantityMap = mapOf("quantity" to quantity)
+            val response = apiService.updateCartQuantity(cartItemId, token, quantityMap)
+            Log.d("CartRepository", "Update quantity API response: ${response.code()}")
             response
         } catch (e: Exception) {
-            Log.e("CartRepository", "Error in checkout", e)
-            throw Exception("Failed to checkout: ${e.message}")
-        }
-    }
-
-    suspend fun getCheckouts(token: String): Response<CheckoutResponse> {
-        Log.d("CartRepository", "Fetching checkouts")
-        return try {
-            Log.d("CartRepository", "Making get checkouts API call...")
-            val response = apiService.getCheckouts(token)
-            Log.d("CartRepository", "Get checkouts API call completed with code: ${response.code()}")
-            response
-        } catch (e: Exception) {
-            Log.e("CartRepository", "Error in getCheckouts", e)
-            throw Exception("Failed to get checkouts: ${e.message}")
+            Log.e("CartRepository", "Error in updateCartItemQuantity", e)
+            throw Exception("Failed to update cart quantity: ${e.message}")
         }
     }
 }

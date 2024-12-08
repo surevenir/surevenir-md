@@ -3,6 +3,7 @@ package com.capstone.surevenir.model
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Merchant(
     val id: Int,
     val name: String,
@@ -16,7 +17,7 @@ data class Merchant(
     val updatedAt: String?,
     val shopLocation: String?,
     val products_count: Int,
-)
+) : Parcelable
 
 @Parcelize
 data class ShopData(

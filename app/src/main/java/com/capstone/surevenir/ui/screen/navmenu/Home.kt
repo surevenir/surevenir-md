@@ -591,7 +591,7 @@ fun BottomNavigationBar(navController: NavController) {
             title = "Transaction",
             iconActive = R.drawable.ic_carts_selected,
             iconInactive = R.drawable.ic_carts,
-            route = "carts"
+            route = "transaction"
         ),
         BottomNavItem(
             title = "Profile",

@@ -16,7 +16,9 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
@@ -33,8 +35,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.helper.UserPreferences
+import com.capstone.surevenir.ui.camera.CameraScreen
 import com.capstone.surevenir.ui.camera.ImageCaptureVM
 import com.capstone.surevenir.ui.camera.PreviewScreen
+import com.capstone.surevenir.ui.screen.CheckoutScreen
 import com.capstone.surevenir.ui.screen.allscreen.AllCategoryScreen
 import com.capstone.surevenir.ui.screen.allscreen.AllHistory
 import com.capstone.surevenir.ui.screen.allscreen.AllProductScreen
@@ -204,21 +208,23 @@ fun MainScreen(navController: NavHostController,     userPreferences: UserPrefer
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val imageCaptureViewModel: ImageCaptureVM = viewModel()
+    val context = LocalContext.current
+    val cameraExecutor = remember { ContextCompat.getMainExecutor(context) }
 
 
     Scaffold(
         topBar = {
-            if (currentRoute in listOf("home", "shop", "scan", "carts", "profile", "myLocation")) {
+            if (currentRoute in listOf("home", "shop", "scan", "transaction", "profile", "myLocation")) {
                 StickyTopBar(navController)
             }
         },
         bottomBar = {
-            if (currentRoute in listOf("home", "shop", "scan", "carts", "profile")) {
+            if (currentRoute in listOf("home", "shop", "scan", "transaction", "profile")) {
                 BottomNavigationBar(navController)
             }
         },
         floatingActionButton = {
-            if (currentRoute in listOf("home", "shop", "scan", "carts", "profile")) {
+            if (currentRoute in listOf("home", "shop", "scan", "transaction", "profile")) {
                 FloatingButtonWithIntent(
                     navController = navController,
                     imageCaptureViewModel = imageCaptureViewModel
@@ -281,7 +287,7 @@ fun MainScreen(navController: NavHostController,     userPreferences: UserPrefer
             composable("scan") {
                 ScanScreen(navController)
             }
-            composable("carts") {
+            composable("transaction") {
                 TransactionScreen(navController)
             }
             composable("profile") {
@@ -302,7 +308,13 @@ fun MainScreen(navController: NavHostController,     userPreferences: UserPrefer
             composable("allMarket") {
                 AllMarket(navController)
             }
-
+            composable("camera") {
+                CameraScreen(
+                    navController = navController,
+                    imageCaptureViewModel = imageCaptureViewModel,
+                    executor = cameraExecutor
+                )
+            }
             composable("preview") {
                 PreviewScreen(
                     navController = navController,
@@ -325,6 +337,11 @@ fun MainScreen(navController: NavHostController,     userPreferences: UserPrefer
 
             composable("settings") {
                 SettingsScreen(navController)
+            }
+            composable("checkout") {
+                CheckoutScreen(
+                    navController = navController
+                )
             }
             composable(
                 "category/{categoryId}",

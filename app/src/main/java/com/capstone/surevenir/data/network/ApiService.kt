@@ -1,12 +1,12 @@
 package com.capstone.surevenir.data.network
 
-import android.service.autofill.UserData
 import com.capstone.surevenir.data.network.response.AllUserResponse
 import com.capstone.surevenir.data.network.response.CartResponse
 import com.capstone.surevenir.data.network.response.CategoryDetailResponse
 import com.capstone.surevenir.data.network.response.CategoryResponse
+import com.capstone.surevenir.data.network.response.CheckoutGetResponse
+import com.capstone.surevenir.data.network.response.CheckoutPostResponse
 import com.capstone.surevenir.data.network.response.CheckoutRequest
-import com.capstone.surevenir.data.network.response.CheckoutResponse
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.data.network.response.DeleteCartResponse
 import com.capstone.surevenir.data.network.response.MarketResponse
@@ -91,16 +91,23 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<DeleteCartResponse>
 
+    @PATCH("carts/{id}")
+    suspend fun updateCartQuantity(
+        @Path("id") cartItemId: Int,
+        @Header("Authorization") token: String,
+        @Body quantity: Map<String, Int>
+    ): Response<CartResponse>
+
     @POST("carts/checkout")
     suspend fun checkout(
         @Header("Authorization") token: String,
         @Body request: CheckoutRequest
-    ): Response<CheckoutResponse>
+    ): Response<CheckoutPostResponse>
 
     @GET("carts/checkout")
     suspend fun getCheckouts(
         @Header("Authorization") token: String
-    ): Response<CheckoutResponse>
+    ): Response<CheckoutGetResponse>
 
 
     @GET("products")
