@@ -3,10 +3,8 @@ package com.capstone.surevenir
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -49,7 +46,7 @@ import com.capstone.surevenir.ui.screen.forgotpassword.ForgotPassword
 import com.capstone.surevenir.ui.screen.navmenu.Home
 import com.capstone.surevenir.ui.screen.onboarding.OnBoardingScreen
 import com.capstone.surevenir.ui.screen.navmenu.ProfileScreen
-import com.capstone.surevenir.ui.screen.ResultScreen
+import com.capstone.surevenir.ui.camera.ResultScreen
 import com.capstone.surevenir.ui.screen.allscreen.AllMarket
 import com.capstone.surevenir.ui.screen.mylocation.MyLocationScreen
 import com.capstone.surevenir.ui.screen.navmenu.ScanScreen
@@ -66,7 +63,6 @@ import com.capstone.surevenir.ui.screen.profile.AccountCenterScreen
 import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
 import com.capstone.surevenir.ui.screen.profile.SettingsScreen
 import com.capstone.surevenir.ui.theme.MyAppTheme
-import com.capstone.surevenir.ui.viewmodel.CategoryViewModel
 import com.capstone.surevenir.ui.viewmodel.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
@@ -74,7 +70,6 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.MapsInitializer
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -318,7 +313,7 @@ fun MainScreen(navController: NavHostController,     userPreferences: UserPrefer
             composable("preview") {
                 PreviewScreen(
                     navController = navController,
-                    imageCaptureViewModel = imageCaptureViewModel
+                    imageCaptureVM = imageCaptureViewModel
                 )
             }
             composable("result") {

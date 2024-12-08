@@ -12,6 +12,7 @@ import com.capstone.surevenir.data.network.response.DeleteCartResponse
 import com.capstone.surevenir.data.network.response.MarketResponse
 import com.capstone.surevenir.data.network.response.MerchantDetailResponse
 import com.capstone.surevenir.data.network.response.MerchantResponse
+import com.capstone.surevenir.data.network.response.PredictionResponse
 import com.capstone.surevenir.data.network.response.ProductDetailResponse
 import com.capstone.surevenir.data.network.response.ProductResponse
 import com.capstone.surevenir.data.network.response.ReviewsResponse
@@ -133,6 +134,14 @@ interface ApiService {
         @Path("id") merchantId: Int,
         @Header("Authorization") token: String
     ): MerchantDetailResponse
+
+    @Multipart
+    @POST("predict")
+    suspend fun predictImage(
+        @Header("Authorization") token: String,
+        @Part image: MultipartBody.Part
+    ): Response<PredictionResponse>
+
 
     @GET("reviews")
 //    fun getReviews(): Call<List<Review>>

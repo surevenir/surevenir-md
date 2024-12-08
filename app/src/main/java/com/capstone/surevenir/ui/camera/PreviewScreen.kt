@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +29,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,24 +47,50 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.capstone.surevenir.R
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun PreviewScreen(
     navController: NavController,
-    imageCaptureViewModel: ImageCaptureVM
+    imageCaptureVM: ImageCaptureVM,
+    tokenViewModel: TokenViewModel = hiltViewModel()
 ) {
-    val imageUri = imageCaptureViewModel.currentImageUri
-    var showDialog by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val imageUri = imageCaptureVM.currentImageUri
+    var showDialog by remember { mutableStateOf(false) }
+    val isLoading by imageCaptureVM.isLoading.collectAsState()
+    val predictionResult by imageCaptureVM.predictionResult.collectAsState()
+    val token by tokenViewModel.token.observeAsState()
+
+    LaunchedEffect(predictionResult) {
+        predictionResult?.fold(
+            onSuccess = {
+                navController.navigate("result") {
+                    popUpTo("preview") { inclusive = true }
+                }
+            },
+            onFailure = { error ->
+                Toast.makeText(
+                    context,
+                    error.message ?: "Prediction failed",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        if (token == null) {
+            tokenViewModel.fetchToken()
+        }
+    }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -80,7 +110,7 @@ fun PreviewScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            imageCaptureViewModel.setImageUri(it)
+            imageCaptureVM.setImageUri(it)
             scope.launch {
                 navController.navigate("preview") {
                     popUpTo("home") { saveState = true }
@@ -172,9 +202,16 @@ fun PreviewScreen(
             ) {
                 Button(
                     onClick = {
-                        isLoading = true
-                        navController.navigate("result") {
-                            popUpTo("preview") { inclusive = true }
+                        scope.launch {
+                            token?.let { currentToken ->
+                                imageCaptureVM.predictImage(currentToken, context)
+                            } ?: run {
+                                Toast.makeText(
+                                    context,
+                                    "Please wait, authenticating...",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     },
                     modifier = Modifier
@@ -212,14 +249,24 @@ fun PreviewScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0x80000000))
-                    .align(Alignment.CenterHorizontally)
+                    .clickable(enabled = false) { },
+                contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(64.dp),
-                    color = Color.White
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(64.dp),
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Analyzing image...",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
         }
     }
@@ -237,7 +284,7 @@ fun PreviewScreen(
                             showDialog = false
                             if (PermissionUtils.hasRequiredPermissions(context)) {
                                 val uri = ComposeFileProvider.getImageUri(context)
-                                imageCaptureViewModel.setImageUri(uri)
+                                imageCaptureVM.setImageUri(uri)
                                 cameraLauncher.launch(uri)
                             } else {
                                 permissionLauncher.launch(PermissionUtils.getRequiredPermissions())
@@ -269,15 +316,4 @@ fun PreviewScreen(
             }
         )
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreviewScreenPreview() {
-    val navController = rememberNavController()
-    val imageCaptureViewModel = ImageCaptureVM()
-    PreviewScreen(
-        navController = navController,
-        imageCaptureViewModel = imageCaptureViewModel
-    )
 }
