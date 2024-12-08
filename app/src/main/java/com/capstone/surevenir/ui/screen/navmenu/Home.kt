@@ -237,9 +237,8 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
                     Log.d("ShopScreen", "Token is null")
                 }
                 MarketSection(markets = markets.value ?: emptyList(), navController)
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(18.dp))
             }
-
 
             item {
                 SectionHeader(title = "All Products", actionText = "See All Products", navController)
@@ -257,7 +256,7 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
                 val products = remember { mutableStateOf<List<ProductData>?>(null) }
                 products.value = productViewModel.products.collectAsState().value
                 ProductsSection(products = products, navController)
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -266,7 +265,7 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
 @Composable
 fun ProductsSection(products: MutableState<List<ProductData>?>, navController: NavController) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         products.value?.take(5)?.let { productList ->
@@ -533,24 +532,41 @@ fun TopBar(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Image(
-            painter = painterResource(id = R.drawable.surevenir_logo_home),
+            painter = painterResource(id = R.drawable.notification_top),
             contentDescription = "Logo",
             modifier = Modifier.size(32.dp)
         )
 
-        Column(horizontalAlignment = Alignment.Start) {
-            Text(
-                text = "Your Location",
-                fontFamily = sfui_text,
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = if (subDistrict != null && district != null) "$district ▼" else "Getting location...",
-                fontFamily = sfui_semibold,
-                color = Color(0xFFFFA726),
-                style = MaterialTheme.typography.bodyLarge,
+        Spacer(modifier = Modifier.weight(1f))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = "Your Location",
+                    fontFamily = sfui_text,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = if (subDistrict != null && district != null) "$district ▼" else "Getting location...",
+                    fontFamily = sfui_semibold,
+                    color = Color(0xFF2D1403),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier
+                        .clickable { navController.navigate("myLocation") }
+                )
+            }
+
+            Image(
+                painter = painterResource(id = R.drawable.favorite_top),
+                contentDescription = "Logo",
                 modifier = Modifier
-                    .clickable { navController.navigate("myLocation") }
+                    .size(32.dp)
+                    .clickable { }
             )
         }
     }

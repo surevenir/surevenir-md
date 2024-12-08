@@ -9,6 +9,7 @@ import com.capstone.surevenir.data.network.response.CheckoutRequest
 import com.capstone.surevenir.data.network.response.CheckoutResponse
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.data.network.response.DeleteCartResponse
+import com.capstone.surevenir.data.network.response.FavoriteResponse
 import com.capstone.surevenir.data.network.response.MarketDetailResponse
 import com.capstone.surevenir.data.network.response.MarketResponse
 import com.capstone.surevenir.data.network.response.MerchantDetailResponse
@@ -132,6 +133,12 @@ interface ApiService {
         @Path("id") categoryId: Int,
         @Header("Authorization") token: String
     ): CategoryDetailResponse
+
+    @POST("products/{id}/favorites")
+    suspend fun addToFavorites(
+        @Path("id") productId: Int,
+        @Header("Authorization") token: String
+    ): FavoriteResponse
 
 
     @GET("merchants/{id}")

@@ -69,6 +69,7 @@
     import com.capstone.surevenir.ui.screen.profile.AccountCenterScreen
     import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
     import com.capstone.surevenir.ui.screen.profile.SettingsScreen
+    import com.capstone.surevenir.ui.screen.singlescreen.FavoriteScreen
     import com.capstone.surevenir.ui.screen.singlescreen.SingleMarketScreen
     import com.capstone.surevenir.ui.screen.singlescreen.SurevenirAi
     import com.capstone.surevenir.ui.theme.MyAppTheme
@@ -90,7 +91,7 @@
     class MainActivity : ComponentActivity() {
 
 
-        private var mainNavController: NavHostController? = null // Gunakan nullable
+        private var mainNavController: NavHostController? = null
         private lateinit var navController: NavHostController
         private lateinit var userPreferences: UserPreferences
 
@@ -144,7 +145,6 @@
                 val navController = rememberNavController()
                 val initialRoute = remember { intent.getStringExtra("navigate_to") }
 
-                // Simpan referensi navController
                 mainNavController = navController
 
                 MyAppTheme {
@@ -227,7 +227,7 @@
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 val firebaseUid = firebaseUser?.uid ?: UUID.randomUUID().toString()
 
-                val dummyToken = "aOKiMaZtCze9lwt1yUBeJKBNCQF3"
+                val dummyToken = "zQOnr6a5g7ZxkwV8u2pLUiCSbFb2"
 
                 Log.d("DEBUG", "Using Dummy Token: $dummyToken")
 
@@ -295,7 +295,7 @@
 
         LaunchedEffect(Unit) {
             initialRoute?.let { route ->
-                delay(1000) // Brief delay to ensure NavHost is ready
+                delay(1000)
                 try {
                     navController.navigate(route)
                 } catch (e: Exception) {
@@ -364,6 +364,9 @@
                 }
                 composable("home") {
                     Home(navController = navController)
+                }
+                composable("favorite") {
+                    FavoriteScreen(navController = navController)
                 }
                 composable("signIn") {
                     SignInScreen(navController = navController)
@@ -459,7 +462,6 @@
             }
         }
     }
-
 
 
     @Preview(showBackground = true)

@@ -87,6 +87,7 @@ import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_text
 import com.capstone.surevenir.ui.viewmodel.CartViewModel
+import com.capstone.surevenir.ui.viewmodel.FavoriteViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantDetailViewModel
 import com.capstone.surevenir.ui.viewmodel.MerchantViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductDetailViewModel
@@ -109,7 +110,8 @@ fun SingleProductScreen(
     merchantDetailViewModel: MerchantDetailViewModel= hiltViewModel(),
     productViewModel: ProductViewModel = hiltViewModel(),
     reviewsViewModel: ReviewsViewModel = hiltViewModel(),
-    cartViewModel: CartViewModel = hiltViewModel()
+    cartViewModel: CartViewModel = hiltViewModel(),
+    favoriteViewModel: FavoriteViewModel = hiltViewModel()
 ) {
     val token by tokenViewModel.token.observeAsState()
     val createCartResult by cartViewModel.createCartResult.collectAsState()
@@ -121,6 +123,8 @@ fun SingleProductScreen(
     var quantity by remember { mutableStateOf(1) }
     val merchantDetail by merchantDetailViewModel.merchantDetail.collectAsState()
     val context = LocalContext.current
+    var isFavorite by remember { mutableStateOf(false) }
+    val addFavoriteResult by favoriteViewModel.addFavoriteResult.collectAsState()
 
 
     LaunchedEffect(Unit) {
@@ -194,17 +198,62 @@ fun SingleProductScreen(
                 }
 
                 item {
+
+
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Text(
-                            "Rp ${formatPrice(product.price)}",
-                            fontSize = 24.sp,
-                            fontFamily = sfui_semibold,
-                            color = Color.Black
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Rp ${formatPrice(product.price)}",
+                                fontSize = 24.sp,
+                                fontFamily = sfui_semibold,
+                                color = Color.Black
+                            )
+
+                            Icon(
+                                painter = painterResource(
+                                    id = if (isFavorite) R.drawable.ic_favorite_selected
+                                    else R.drawable.ic_favorite
+                                ),
+                                contentDescription = "Favorite",
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clickable {
+                                        token?.let { token ->
+                                            favoriteViewModel.addToFavorites(token, productId)
+                                        }
+                                    },
+                                tint = if (isFavorite) Color(0xFFED8A00) else Color.Gray
+                            )
+
+                            LaunchedEffect(addFavoriteResult) {
+                                addFavoriteResult?.onSuccess { response ->
+                                    if (response.success) {
+                                        isFavorite = true
+                                        Toast.makeText(
+                                            context,
+                                            "Added to favorites!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }?.onFailure { exception ->
+                                    Toast.makeText(
+                                        context,
+                                        "Failed to add to favorites: ${exception.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
                         Spacer(
                             modifier = Modifier.height(8.dp)
                         )

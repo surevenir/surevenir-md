@@ -420,7 +420,8 @@ fun CategorySection(categories: MutableState<List<Category>?>, navController: Na
     LazyRow {
         items(categoryList) { category ->
             Column(
-                modifier = Modifier.padding(10.dp),
+                modifier = Modifier.padding(10.dp)
+                    .clickable { navController.navigate("category/${category.id}") },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
@@ -441,7 +442,6 @@ fun CategorySection(categories: MutableState<List<Category>?>, navController: Na
 }
 
 
-// ShowSearchBar.kt
 @Composable
 fun ShowSearchBar(
     onSearch: (String) -> Unit,
