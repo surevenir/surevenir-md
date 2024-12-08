@@ -206,7 +206,6 @@ fun MainScreen(navController: NavHostController,     userPreferences: UserPrefer
     val context = LocalContext.current
     val cameraExecutor = remember { ContextCompat.getMainExecutor(context) }
 
-
     Scaffold(
         topBar = {
             if (currentRoute in listOf("home", "shop", "scan", "transaction", "profile", "myLocation")) {
@@ -265,6 +264,7 @@ fun MainScreen(navController: NavHostController,     userPreferences: UserPrefer
                 )
             }
             composable("home") {
+                imageCaptureViewModel.clearPredictionResult()
                 Home(navController = navController)
             }
             composable("signIn") {

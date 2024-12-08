@@ -16,20 +16,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.capstone.surevenir.data.network.response.CategoryPrediction
 import com.capstone.surevenir.data.network.response.Prediction
 import com.capstone.surevenir.data.network.response.RelatedProduct
+import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 
 @Composable
 fun ResultScreen(
@@ -37,12 +35,6 @@ fun ResultScreen(
     imageCaptureViewModel: ImageCaptureVM
 ) {
     val predictionResult = imageCaptureViewModel.predictionResult.collectAsState()
-
-    DisposableEffect(Unit) {
-        onDispose {
-            imageCaptureViewModel.clearPredictionResult()
-        }
-    }
 
     predictionResult.value?.fold(
         onSuccess = { response ->
@@ -161,102 +153,127 @@ private fun ResultScreenContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Available at These Stores",
+            text = "Related Products",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        relatedProducts.distinctBy { it.merchant.id }.take(3).forEach { product ->
+        Spacer(modifier = Modifier.height(12.dp))
+
+        val limitedProducts = relatedProducts
+            .groupBy { it.merchant.id }
+            .flatMap { (_, products) -> products.take(2) }
+            .take(6)
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(30.dp)
+        ) {
+            for (i in limitedProducts.indices step 2) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ProductCardScan(
+                        product = limitedProducts[i],
+                        modifier = Modifier.weight(1f),
+                        navController = navController
+                    )
+                    if (i + 1 < limitedProducts.size) {
+                        ProductCardScan(
+                            product = limitedProducts[i + 1],
+                            modifier = Modifier.weight(1f),
+                            navController = navController
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+    }
+}
+
+
+@Composable
+private fun ProductCardScan(
+    product: RelatedProduct,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(end = 10.dp)
+            .clickable {
+                navController.navigate("product/${product.id}")
+            },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+            ) {
+                AsyncImage(
+                    model = product.images.firstOrNull(),
+                    contentDescription = "Product Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Column(
+                modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp)
+            ) {
+
+                Text(
+                    text = product.name,
+                    fontFamily = sfui_semibold,
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    fontWeight = FontWeight.ExtraBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "Rp ${product.price}",
+                    fontFamily = sfui_semibold,
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.ExtraBold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
                     model = product.merchant.profile_image_url,
                     contentDescription = "Store Avatar",
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(20.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = product.merchant.name,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text = "Stock: ${product.stock}",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Rp ${product.price}",
-                    color = Color(0xFFED8A00),
-                    fontWeight = FontWeight.Bold
-                )
-
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Similar Products
-                Text(
-                    text = "Similar Products",
-                    fontSize = 16.sp,
+                    text = product.merchant.name,
+                    fontFamily = sfui_semibold,
+                    fontSize = 10.sp,
+                    color = Color.Black,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(relatedProducts) { product ->
-                        Card(
-                            modifier = Modifier
-                                .width(160.dp)
-                                .clickable { /* Navigate to product detail */ }
-                        ) {
-                            Column {
-                                AsyncImage(
-                                    model = product.images.firstOrNull(),
-                                    contentDescription = "Product Image",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(120.dp),
-                                    contentScale = ContentScale.Crop
-                                )
-                                Column(
-                                    modifier = Modifier.padding(8.dp)
-                                ) {
-                                    Text(
-                                        text = product.name,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                    Text(
-                                        text = "Rp ${product.price}",
-                                        color = Color(0xFFED8A00),
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                    Text(
-                                        text = product.merchant.name,
-                                        color = Color.Gray,
-                                        fontSize = 12.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
     }
