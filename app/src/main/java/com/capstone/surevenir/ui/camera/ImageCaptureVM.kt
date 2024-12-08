@@ -59,4 +59,8 @@ class ImageCaptureVM@Inject constructor(
             }
         }
     }
+
+    fun clearPredictionResult() {
+        _predictionResult.value = null
+    }
 }

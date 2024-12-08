@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,6 +37,12 @@ fun ResultScreen(
     imageCaptureViewModel: ImageCaptureVM
 ) {
     val predictionResult = imageCaptureViewModel.predictionResult.collectAsState()
+
+    DisposableEffect(Unit) {
+        onDispose {
+            imageCaptureViewModel.clearPredictionResult()
+        }
+    }
 
     predictionResult.value?.fold(
         onSuccess = { response ->
