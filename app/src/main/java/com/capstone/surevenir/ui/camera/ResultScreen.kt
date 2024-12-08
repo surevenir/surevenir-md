@@ -1,5 +1,6 @@
 package com.capstone.surevenir.ui.camera
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,16 +18,18 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.capstone.surevenir.data.network.response.CategoryPrediction
 import com.capstone.surevenir.data.network.response.Prediction
 import com.capstone.surevenir.data.network.response.RelatedProduct
+import com.capstone.surevenir.helper.formatPriceRange
+import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 
 @Composable
@@ -76,7 +79,8 @@ private fun ResultScreenContent(
         Text(
             text = "Identified Souvenir",
             fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            fontFamily = sfui_semibold,
+            fontWeight = FontWeight.ExtraBold,
             color = Color(0xFFFF8C00),
             modifier = Modifier
                 .fillMaxWidth()
@@ -103,12 +107,18 @@ private fun ResultScreenContent(
                 onClick = { /* Bookmark functionality */ },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp)
+                    .padding(12.dp)
+                    .size(50.dp)
+                    .background(
+                        color = Color(0xFFFF8C00),
+                        shape = RoundedCornerShape(10.dp)
+                    )
             ) {
                 Icon(
-                    Icons.Default.Bookmark,
+                    Icons.Default.BookmarkBorder,
                     contentDescription = "Bookmark",
-                    tint = Color(0xFFFF8C00)
+                    tint = Color.White,
+                    modifier = Modifier.size(30.dp)
                 )
             }
         }
@@ -118,37 +128,78 @@ private fun ResultScreenContent(
         Text(
             text = "Results based on your scan:",
             color = Color.Gray,
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            fontFamily = sfui_semibold,
+            fontWeight = FontWeight.ExtraBold
         )
 
         Text(
             text = "[${(prediction.accuration * 100).toInt()}%] ${prediction.result}",
             color = Color(0xFFED8A00),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(vertical = 8.dp)
+            fontSize = 22.sp,
+            fontFamily = sfui_semibold,
+            maxLines = 1,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.padding(vertical = 12.dp)
         )
-
-        Text(
-            text = "Price Range: ${category.rangePrice}",
-            fontSize = 16.sp,
-            color = Color.Black
-        )
+        Row (
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Price Range:",
+                fontSize = 16.sp,
+                fontFamily = sfui_med,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = formatPriceRange(category.rangePrice),
+                fontSize = 16.sp,
+                fontFamily = sfui_semibold,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Black
+            )
+        }
 
         Text(
             text = category.description,
             color = Color.Gray,
             fontSize = 14.sp,
+            fontFamily = sfui_med,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
         Text(
             text = "Category",
             fontSize = 16.sp,
+            color = Color.Black,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
+            fontFamily = sfui_med,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
+        Button(
+            onClick = {
+                navController.navigate("category/${category.id}")
+            },
+            modifier = Modifier
+                .wrapContentWidth()
+                .padding(bottom = 16.dp)
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFFF8C00)
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                text = category.name,
+                color = Color.White,
+                fontSize = 16.sp,
+                fontFamily = sfui_semibold,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -156,6 +207,7 @@ private fun ResultScreenContent(
             text = "Related Products",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
+            fontFamily = sfui_semibold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
