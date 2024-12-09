@@ -50,7 +50,7 @@ class GeofencingService : Service() {
         }
     }
 
-    private fun addGeofence(id: String, latitude: Double, longitude: Double, radius: Float = 3000f) {
+    private fun addGeofence(id: String, latitude: Double, longitude: Double, radius: Float = 1000f) {
         // Debug log
         Log.d("GeofencingService", "Starting addGeofence for $id at $latitude, $longitude")
 

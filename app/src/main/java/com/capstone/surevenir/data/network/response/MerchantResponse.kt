@@ -18,6 +18,7 @@ data class MerchantData(
     val market_id: Int?,
     val createdAt: String?,
     val updatedAt: String?,
-    val products_count: Int,
-    val location: String
+    val product_count: Int,
+    val location: String,
+    val images: List<Any>? = null // atau tipe data berbeda, jika ingin mengabaikan isinya
 )

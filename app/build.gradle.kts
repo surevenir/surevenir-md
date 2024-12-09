@@ -56,12 +56,15 @@ android {
 
 
 dependencies {
+    implementation ("androidx.paging:paging-runtime:3.2.1")
+    implementation ("androidx.paging:paging-compose:3.2.1")
     implementation(libs.play.services.location)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation (libs.androidx.camera.camera2)
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.firebase.messaging.ktx)
     val coroutines_version = "1.7.3"
     val hilt_version = "2.52"
     implementation ("androidx.room:room-runtime:2.5.0")

@@ -20,6 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,66 +32,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.capstone.surevenir.R
 import com.capstone.surevenir.ui.components.ScanHistoryCard
 import com.capstone.surevenir.model.Product
+import com.capstone.surevenir.ui.screen.navmenu.ShimmerScanHistoryCard
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.viewmodel.ScanHistoryViewModel
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 
 @Composable
-fun AllHistory(navController: NavHostController) {
-//    val scanHistory = listOf(
-//        Product(
-//            R.drawable.product_image,
-//            "Bali Hand Magnet",
-//            "Magnet souvenir scanned in Bali.",
-//            "IDR 25.000"
-//        ),
-//        Product(
-//            R.drawable.product_image,
-//            "Keychain",
-//            "Customizable keychain scanned in Seminyak.",
-//            "IDR 15.000"
-//        ),
-//        Product(
-//            R.drawable.product_image,
-//            "T-shirt Bali",
-//            "Bali-themed T-shirt scanned in Ubud.",
-//            "IDR 150.000"
-//        ),
-//        Product(
-//            R.drawable.product_image,
-//            "Beach Hat",
-//            "Elegant hat scanned in Kuta.",
-//            "IDR 75.000"
-//        )
-//        ,
-//        Product(
-//            R.drawable.product_image,
-//            "Beach Hat",
-//            "Elegant hat scanned in Kuta.",
-//            "IDR 75.000"
-//        ),
-//        Product(
-//            R.drawable.product_image,
-//            "Beach Hat",
-//            "Elegant hat scanned in Kuta.",
-//            "IDR 75.000"
-//        ),
-//        Product(
-//            R.drawable.product_image,
-//            "Beach Hat",
-//            "Elegant hat scanned in Kuta.",
-//            "IDR 75.000"
-//        ),
-//        Product(
-//            R.drawable.product_image,
-//            "Beach Hat",
-//            "Elegant hat scanned in Kuta.",
-//            "IDR 75.000"
-//        )
+fun AllHistory(
+    navController: NavHostController,
+    scanHistoryViewModel: ScanHistoryViewModel = hiltViewModel(),
+    tokenViewModel: TokenViewModel = hiltViewModel()
+) {
+    val histories by scanHistoryViewModel.scanHistory.collectAsState()
+    val isLoading by scanHistoryViewModel.isLoading.collectAsState()
+    val error by scanHistoryViewModel.error.collectAsState()
+    val token by tokenViewModel.token.observeAsState()
 
-//    )
+
+    LaunchedEffect(Unit) {
+        tokenViewModel.fetchToken()
+    }
+
+    LaunchedEffect(token) {
+        scanHistoryViewModel.fetchScanHistory(token)
+    }
 
     Column(
         modifier = Modifier
@@ -125,29 +98,42 @@ fun AllHistory(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-//        AllScanHistorySection(scanHistory)
-    }
-}
-
-@Composable
-fun AllScanHistorySection(products: List<Product>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-//        items(products) { product ->
-//            ScanHistoryCard(
-//                imageRes = product.imageRes,
-//                title = product.title,
-//                description = product.description,
-//                price = product.price,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
-//                    .clip(RoundedCornerShape(8.dp))
-//                    .background(Color.White)
-//            )
-//        }
+        when {
+            isLoading -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(5) {
+                        ShimmerScanHistoryCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+                        )
+                    }
+                }
+            }
+            error != null -> Text(text = error ?: "Unknown error occurred")
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(histories) { history ->
+                        ScanHistoryCard(
+                            imageUrl = history.image_url,
+                            title = history.predict,
+                            description = history.category_description,
+                            price = history.category_range_price,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+                        )
+                    }
+                }
+            }
+        }
     }
 }

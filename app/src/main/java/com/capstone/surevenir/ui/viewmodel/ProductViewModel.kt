@@ -8,8 +8,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.capstone.surevenir.data.network.ApiService
 import com.capstone.surevenir.data.network.response.ProductData
 import com.capstone.surevenir.data.network.response.ProductResponse
+import com.capstone.surevenir.data.paging.ProductPagingSource
 import com.capstone.surevenir.data.repository.ProductRepository
 import com.capstone.surevenir.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +29,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProductViewModel @Inject constructor(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val apiService: ApiService  // Add this
 ) : ViewModel() {
 
     private val _filteredProducts = MutableStateFlow<List<ProductData>>(emptyList())
@@ -45,6 +52,9 @@ class ProductViewModel @Inject constructor(
     private val _productResponse = MutableLiveData<ProductResponse>()
     val productsResponse: LiveData<ProductResponse?> get() = _productResponse
 
+    private var _productPagingFlow = MutableStateFlow<PagingData<ProductData>>(PagingData.empty())
+    val productPagingFlow: StateFlow<PagingData<ProductData>> = _productPagingFlow.asStateFlow()
+
     private val _searchResults = MutableStateFlow<List<ProductData>>(emptyList())
     val searchResults: StateFlow<List<ProductData>> = _searchResults.asStateFlow()
 
@@ -64,20 +74,16 @@ class ProductViewModel @Inject constructor(
     val errorMessage: LiveData<String?> get() = _errorMessage
 
     fun getProducts(token: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val response = productRepository.getProducts(token)
-                if (response.isSuccessful) {
-                    response.body()?.data?.forEach { product ->
-                        productRepository.insertProduct(product)
-                    }
-                    val allProducts = productRepository.getAllProducts()
-                    withContext(Dispatchers.Main) {
-                        _products.value = allProducts
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("ProductViewModel", "Error fetching products", e)
+        viewModelScope.launch {
+            Pager(
+                config = PagingConfig(
+                    pageSize = 20,
+                    enablePlaceholders = false,
+                    initialLoadSize = 20
+                ),
+                pagingSourceFactory = { ProductPagingSource(apiService, token) }
+            ).flow.cachedIn(viewModelScope).collect {
+                _productPagingFlow.value = it
             }
         }
     }
@@ -109,7 +115,7 @@ class ProductViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val products = productRepository.getProductsByCategoryId(categoryId)
             withContext(Dispatchers.Main) {
-                _categoryProducts.value = products  // Menggunakan _categoryProducts bukan _merchantProducts
+                _categoryProducts.value = products
             }
         }
     }
@@ -142,7 +148,6 @@ class ProductViewModel @Inject constructor(
     }
      fun applyFilter() {
         viewModelScope.launch {
-            // Pindah ke thread IO sebelum memanggil repository
             val filteredList = withContext(Dispatchers.IO) {
                 productRepository.getFilteredProducts(
                     minPrice = minPriceFilter,
@@ -152,18 +157,10 @@ class ProductViewModel @Inject constructor(
                     minStock = minStockFilter
                 )
             }
-            // Di sini gunakan productDatabaseToProduct dari repository:
             val productDataList = filteredList.map { productDb ->
-                // Karena productDatabaseToProduct() private di repository,
-                // Anda perlu menambahkan fungsi publik di repository untuk memetakannya
                 productRepository.convertProductDatabaseToProduct(productDb)
             }
             _filteredProducts.value = productDataList
         }
     }
-
-
-//    fun getProductById(productId: Int): ProductData? {
-//        return productRepository.getProductById(productId)
-//    }
 }

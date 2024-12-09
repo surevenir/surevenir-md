@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.capstone.surevenir.BuildConfig
 import com.capstone.surevenir.R
@@ -94,12 +95,17 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
     val merchants = remember { mutableStateOf<List<MerchantData>?>(null) }
     val categoryList = remember { mutableStateOf<List<Category>?>(null) }
     val productList = remember { mutableStateOf<List<ProductData>?>(null) }
+    val pagingProducts = productViewModel.productPagingFlow.collectAsLazyPagingItems()
 
 
     val token by tokenViewModel.token.observeAsState()
 
     LaunchedEffect(Unit) {
         tokenViewModel.fetchToken()
+    }
+
+    LaunchedEffect(token) {
+        token?.let { productViewModel.getProducts(it) }
     }
 
     LaunchedEffect(productViewModel.minPriceFilter, productViewModel.maxPriceFilter, productViewModel.minStockFilter, productViewModel.startDateFilter, productViewModel.endDateFilter) {
@@ -189,19 +195,8 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
                     SectionHeader(title = "All Products", actionText = "All Products", navController)
                 }
                 item {
-                    LaunchedEffect(token) {
-                        if (token != null) {
-                            Log.d("TOKEN_CATE", "Using Token: $token")
-                            productViewModel.getProducts("Bearer $token")
-                        } else {
-                            Log.d("TOKEN_CATE", "Token belum tersedia")
-                            productViewModel.getAllProducts()
-                        }
-                    }
-                    val products = remember { mutableStateOf<List<ProductData>?>(null) }
-                    products.value = productViewModel.products.collectAsState().value
-                    ProductsSection(products = products, navController)
-                    Spacer(modifier = Modifier.height(10.dp))
+                    HomeProductsSection(navController, pagingProducts)
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
             }
@@ -234,11 +229,11 @@ fun ShopSection(
 
         shops.forEach { shop ->
             Log.d("ShopValidation", "Processing shop - ID: ${shop.id}, Latitude: ${shop.latitude}, Longitude: ${shop.longitude}")
-            val latitude = shop.longitude?.toDoubleOrNull()
-            val longitude = shop.latitude?.toDoubleOrNull()
+            val latitude = shop.latitude?.toDoubleOrNull()
+            val longitude = shop.longitude?.toDoubleOrNull()
 
             if (latitude != null && longitude != null && latitude in -90.0..90.0 && longitude in -180.0..180.0) {
-                geocodingViewModel.getSubDistrictFromCoordinates(latitude, longitude, apiKey) { subDistrict ->
+                geocodingViewModel.getSubDistrictFromCoordinates(longitude, latitude, apiKey) { subDistrict ->
                     Log.d("GeocodingResult", "Received subDistrict for Shop ID ${shop.id}: $subDistrict")
 
                     val currentShops = updatedShops.value.toMutableList()
@@ -294,7 +289,7 @@ fun ShopSection(
                         imageRes = it,
                         shopName = shop.name,
                         shopLocation = shop.location ?: "No Location",
-                        totalShopProduct = shop.products_count,
+                        totalShopProduct = shop.product_count,
                         modifier = Modifier
                             .width(200.dp)
                             .height(350.dp)
@@ -305,11 +300,11 @@ fun ShopSection(
                             .clickable {
                                 navController.currentBackStackEntry?.savedStateHandle?.set(
                                     "shopData",
-                                    ShopData(shop.location ?: "No Location", shop.products_count)
+                                    ShopData(shop.location ?: "No Location", shop.product_count)
                                 )
                                 Log.d(
                                     "Navigation",
-                                    "Location: ${shop.location}, Count: ${shop.products_count}"
+                                    "Location: ${shop.location}, Count: ${shop.product_count}"
                                 )
                                 navController.navigate("merchant/${shop.id}")
                             }

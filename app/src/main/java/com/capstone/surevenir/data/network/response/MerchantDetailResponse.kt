@@ -33,5 +33,7 @@ data class MerchantDetail(
 	@SerializedName("createdAt")
 	val createdAt: String,
 	@SerializedName("updatedAt")
-	val updatedAt: String
+	val updatedAt: String,
+	@SerializedName("images")
+	val images: List<Any>? = null
 )

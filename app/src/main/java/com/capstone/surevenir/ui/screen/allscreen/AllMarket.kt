@@ -132,11 +132,11 @@ fun MarketSectionDown(
 
         markets.forEach { market ->
             Log.d("MarketValidation", "Processing market - ID: ${market.id}, Latitude: ${market.latitude}, Longitude: ${market.longitude}")
-            val latitude = market.longitude?.toDoubleOrNull()
-            val longitude = market.latitude?.toDoubleOrNull()
+            val latitude = market.latitude?.toDoubleOrNull()
+            val longitude = market.longitude?.toDoubleOrNull()
 
             if (latitude != null && longitude != null && latitude in -90.0..90.0 && longitude in -180.0..180.0) {
-                geocodingViewModel.getSubDistrictFromCoordinates(latitude, longitude, apiKey) { subDistrict ->
+                geocodingViewModel.getSubDistrictFromCoordinates(longitude, latitude, apiKey) { subDistrict ->
                     Log.d("GeocodingResult", "Received subDistrict for Market ID ${market.id}: $subDistrict")
 
                     val currentMarkets = updatedMarkets.value.toMutableList()

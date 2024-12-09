@@ -77,7 +77,7 @@ class MerchantRepository @Inject constructor(
         marketId = market_id,
         createdAt = createdAt,
         updatedAt = updatedAt,
-        productsCount = products_count,
+        productsCount = product_count,
         location = location
     )
 

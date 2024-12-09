@@ -74,6 +74,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.capstone.surevenir.BuildConfig
 import com.capstone.surevenir.R
 import com.capstone.surevenir.data.network.response.ProductData
@@ -86,11 +88,13 @@ import com.capstone.surevenir.ui.camera.ComposeFileProvider
 import com.capstone.surevenir.ui.camera.ImageCaptureVM
 import com.capstone.surevenir.ui.camera.PermissionUtils
 import com.capstone.surevenir.ui.components.MarketCard
+import com.capstone.surevenir.ui.components.ScanHistoryCard
 import com.capstone.surevenir.ui.components.SectionHeader
 import com.capstone.surevenir.ui.components.isValidEmail
 import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
 import com.capstone.surevenir.ui.viewmodel.MarketViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductViewModel
+import com.capstone.surevenir.ui.viewmodel.ScanHistoryViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
@@ -104,6 +108,7 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
     val geocodingViewModel: GeocodingViewModel = hiltViewModel()
     var subDistrict by remember { mutableStateOf("Loading...") }
     val productList = remember { mutableStateOf<List<ProductData>?>(null) }
+    val pagingProducts = productViewModel.productPagingFlow.collectAsLazyPagingItems()
 
     val userPreferences = remember { UserPreferences(context) }
     val username = userPreferences.userName.collectAsState(initial = "User")
@@ -118,6 +123,9 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
         tokenViewModel.fetchToken()
     }
 
+    LaunchedEffect(token) {
+        token?.let { productViewModel.getProducts(it) }
+    }
 
     Scaffold(
     ) { padding ->
@@ -167,25 +175,11 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
             }
 
             item {
-//                val scanHistoryProducts = listOf(
-//                    Product(
-//                        R.drawable.product_image,
-//                        "Dream Catcher",
-//                        "Authentic and beautiful souvenir for your home decor.",
-//                        "IDR 50.000 - 150.000"
-//                    ),
-//                    Product(
-//                        R.drawable.product_image,
-//                        "Handicraft",
-//                        "Handmade craft from local artisans in Bali.",
-//                        "IDR 100.000 - 250.000"
-//                    )
-//                )
+
                 Column {
                     SectionHeader(title = "Scan History", actionText = "See All History", navController)
-
                     Spacer(modifier = Modifier.height(10.dp))
-//                    ScanHistorySection(products = scanHistoryP?roducts)
+                    ScanHistorySection()
                 }
             }
 
@@ -202,7 +196,7 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp),
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF2D1403)),
                     shape = RoundedCornerShape(20.dp)
                 ) {
                     Text(
@@ -240,23 +234,40 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
                 Spacer(modifier = Modifier.height(18.dp))
             }
 
+
             item {
                 SectionHeader(title = "All Products", actionText = "See All Products", navController)
-            }
-            item {
-                LaunchedEffect(token) {
-                    if (token != null) {
-                        Log.d("TOKEN_CATE", "Using Token: $token")
-                        productViewModel.getProducts("Bearer $token")
-                    } else {
-                        Log.d("TOKEN_CATE", "Token belum tersedia")
-                        productViewModel.getAllProducts()
-                    }
-                }
-                val products = remember { mutableStateOf<List<ProductData>?>(null) }
-                products.value = productViewModel.products.collectAsState().value
-                ProductsSection(products = products, navController)
+                HomeProductsSection(navController, pagingProducts)
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun HomeProductsSection(
+    navController: NavController,
+    pagingProducts: LazyPagingItems<ProductData>
+) {
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(
+            count = minOf(pagingProducts.itemCount, 5)
+        ) { index ->
+            pagingProducts[index]?.let { product ->
+                if (product.images.isNotEmpty() && product.name != null) {
+                    ProductCard(
+                        product = product,
+                        modifier = Modifier
+                            .width(200.dp)
+                            .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+                            .clickable {
+                                navController.navigate("product/${product.id}")
+                            }
+                    )
+                }
             }
         }
     }
@@ -310,11 +321,11 @@ fun MarketSection(
 
         markets.forEach { market ->
             Log.d("MarketValidation", "Processing market - ID: ${market.id}, Latitude: ${market.latitude}, Longitude: ${market.longitude}")
-            val latitude = market.longitude?.toDoubleOrNull()
-            val longitude = market.latitude?.toDoubleOrNull()
+            val latitude = market.latitude?.toDoubleOrNull()
+            val longitude = market.longitude?.toDoubleOrNull()
 
             if (latitude != null && longitude != null && latitude in -90.0..90.0 && longitude in -180.0..180.0) {
-                geocodingViewModel.getSubDistrictFromCoordinates(latitude, longitude, apiKey) { subDistrict ->
+                geocodingViewModel.getSubDistrictFromCoordinates(longitude, latitude, apiKey) { subDistrict ->
                     Log.d("GeocodingResult", "Received subDistrict for Market ID ${market.id}: $subDistrict")
 
                     val currentMarkets = updatedMarkets.value.toMutableList()
@@ -468,23 +479,50 @@ fun Modifier.shimmering(): Modifier {
 
 
 @Composable
-fun ScanHistorySection(products: List<Product>) {
-    LazyRow(contentPadding = PaddingValues(horizontal = 4.dp)) {
-        items(products) { product ->
-//            ScanHistoryCard(
-//                imageRes = product.imageRes,
-//                title = product.title,
-//                description = product.description,
-//                price = product.price,
-//                modifier = Modifier
-//                    .width(350.dp)
-//                    .padding(end = 10.dp)
-//                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp)) // Add shadow
-//                    .clip(RoundedCornerShape(8.dp))
-//                    .background(Color.White)
-//            )
-        }
+fun ScanHistorySection(
+    scanHistoryViewModel: ScanHistoryViewModel = hiltViewModel(),
+    tokenViewModel: TokenViewModel = hiltViewModel()
+) {
+    val histories by scanHistoryViewModel.scanHistory.collectAsState()
+    val isLoading by scanHistoryViewModel.isLoading.collectAsState()
+    val error by scanHistoryViewModel.error.collectAsState()
+    val token by tokenViewModel.token.observeAsState()
 
+    LaunchedEffect(token) {
+        scanHistoryViewModel.fetchScanHistory(token)
+    }
+
+
+    when {
+        isLoading -> {
+            LazyRow(contentPadding = PaddingValues(horizontal = 4.dp)) {
+                items(3) {
+                    ShimmerScanHistoryCard(
+                        modifier = Modifier
+                            .width(350.dp)
+                            .padding(end = 10.dp)
+                            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+                    )
+                }
+            }
+        }
+        error != null -> Text(text = error ?: "Unknown error occurred")
+        else -> {
+            LazyRow(contentPadding = PaddingValues(horizontal = 4.dp)) {
+                items(histories) { history ->
+                    ScanHistoryCard(
+                        imageUrl = history.image_url,
+                        title = history.predict,
+                        description = history.category_description,
+                        price = history.category_range_price,
+                        modifier = Modifier
+                            .width(350.dp)
+                            .padding(end = 10.dp)
+                            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -535,6 +573,7 @@ fun TopBar(
             painter = painterResource(id = R.drawable.notification_top),
             contentDescription = "Logo",
             modifier = Modifier.size(32.dp)
+                .clickable { navController.navigate("notification") }
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -566,7 +605,9 @@ fun TopBar(
                 contentDescription = "Logo",
                 modifier = Modifier
                     .size(32.dp)
-                    .clickable { }
+                    .clickable {
+                        navController.navigate("favorite")
+                    }
             )
         }
     }
@@ -946,6 +987,57 @@ fun ProductDetailSkeleton() {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ShimmerScanHistoryCard(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .padding(16.dp)
+            .shimmering()
+    ) {
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color.LightGray)
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(20.dp)
+                    .background(Color.LightGray, RoundedCornerShape(4.dp))
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .background(Color.LightGray, RoundedCornerShape(4.dp))
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .width(80.dp)
+                    .height(24.dp)
+                    .background(Color.LightGray, RoundedCornerShape(8.dp))
+            )
         }
     }
 }

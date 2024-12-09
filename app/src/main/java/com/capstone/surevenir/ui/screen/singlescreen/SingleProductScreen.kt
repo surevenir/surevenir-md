@@ -125,6 +125,9 @@ fun SingleProductScreen(
     val context = LocalContext.current
     var isFavorite by remember { mutableStateOf(false) }
     val addFavoriteResult by favoriteViewModel.addFavoriteResult.collectAsState()
+    val deleteFavoriteResult by favoriteViewModel.deleteFavoriteResult.collectAsState()
+    val favoriteProductsState = favoriteViewModel.favoriteProducts.collectAsState()
+
 
 
     LaunchedEffect(Unit) {
@@ -143,6 +146,17 @@ fun SingleProductScreen(
             }
         }
     }
+
+    val isFavoriteFromServer = favoriteProductsState.value.any { it.product_id == productId }
+
+
+    LaunchedEffect(token) {
+        token?.let {
+            // Ambil daftar favorit saat token sudah siap
+            favoriteViewModel.getFavoriteProducts(it)
+        }
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (productDetail != null && merchantDetail != null) {
@@ -221,36 +235,36 @@ fun SingleProductScreen(
 
                             Icon(
                                 painter = painterResource(
-                                    id = if (isFavorite) R.drawable.ic_favorite_selected
-                                    else R.drawable.ic_favorite
+                                    id = if (isFavoriteFromServer) R.drawable.baseline_favorite_24
+                                    else R.drawable.baseline_favorite_border_24
                                 ),
                                 contentDescription = "Favorite",
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clickable {
-                                        token?.let { token ->
-                                            favoriteViewModel.addToFavorites(token, productId)
+                                modifier = Modifier.clickable {
+                                    token?.let { tk ->
+                                        if (isFavoriteFromServer) {
+                                            favoriteViewModel.deleteFavorite(tk, productId)
+                                        } else {
+                                            favoriteViewModel.addToFavorites(tk, productId)
                                         }
-                                    },
-                                tint = if (isFavorite) Color(0xFFED8A00) else Color.Gray
+                                    }
+                                },
+                                tint = if (isFavoriteFromServer) Color(0xFFED8A00) else Color.Gray
                             )
-
                             LaunchedEffect(addFavoriteResult) {
                                 addFavoriteResult?.onSuccess { response ->
                                     if (response.success) {
-                                        isFavorite = true
-                                        Toast.makeText(
-                                            context,
-                                            "Added to favorites!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        Toast.makeText(context, "Added to favorites!", Toast.LENGTH_SHORT).show()
+                                        token?.let { favoriteViewModel.getFavoriteProducts(it) }
                                     }
-                                }?.onFailure { exception ->
-                                    Toast.makeText(
-                                        context,
-                                        "Failed to add to favorites: ${exception.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                }
+                            }
+
+                            LaunchedEffect(deleteFavoriteResult) {
+                                deleteFavoriteResult?.onSuccess { response ->
+                                    if (response.success) {
+                                        Toast.makeText(context, "Removed from favorites!", Toast.LENGTH_SHORT).show()
+                                        token?.let { favoriteViewModel.getFavoriteProducts(it) }
+                                    }
                                 }
                             }
                         }

@@ -9,7 +9,9 @@ import com.capstone.surevenir.data.network.response.CheckoutRequest
 import com.capstone.surevenir.data.network.response.CheckoutResponse
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.data.network.response.DeleteCartResponse
+import com.capstone.surevenir.data.network.response.DeleteFavoriteResponse
 import com.capstone.surevenir.data.network.response.FavoriteResponse
+import com.capstone.surevenir.data.network.response.GetFavoriteProductsResponse
 import com.capstone.surevenir.data.network.response.MarketDetailResponse
 import com.capstone.surevenir.data.network.response.MarketResponse
 import com.capstone.surevenir.data.network.response.MerchantDetailResponse
@@ -17,6 +19,7 @@ import com.capstone.surevenir.data.network.response.MerchantResponse
 import com.capstone.surevenir.data.network.response.ProductDetailResponse
 import com.capstone.surevenir.data.network.response.ProductResponse
 import com.capstone.surevenir.data.network.response.ReviewsResponse
+import com.capstone.surevenir.data.network.response.ScanHistoryResponse
 import com.capstone.surevenir.data.network.response.UpdateUserRequest
 import com.capstone.surevenir.data.network.response.UserResponse
 import com.capstone.surevenir.model.Category
@@ -39,6 +42,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 
 interface ApiService {
@@ -71,6 +75,12 @@ interface ApiService {
             @Header("Authorization") token: String
         ): MarketDetailResponse
 
+    @GET("predict/histories/me")
+    suspend fun getUserScanHistory(
+        @Header("Authorization") token: String
+    ): ScanHistoryResponse
+
+
 
     @GET("products/{id}/reviews")
     suspend fun getReviews(
@@ -96,7 +106,10 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<CartResponse>
 
-
+    @GET("products/favorites")
+    suspend fun getFavoriteProducts(
+        @Header("Authorization") token: String
+    ): GetFavoriteProductsResponse
 
     @DELETE("carts/{id}")
     suspend fun deleteCartItem(
@@ -115,11 +128,17 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<CheckoutResponse>
 
-
+    @DELETE("products/{productId}/favorites")
+    suspend fun deleteFavorite(
+        @Path("productId") productId: Int,
+        @Header("Authorization") token: String
+    ): DeleteFavoriteResponse
 
     @GET("products")
     suspend fun getProducts(
-        @Header("Authorization") token: String
+        @Header("Authorization") token: String,
+        @Query("page") page: Int,
+        @Query("size") size: Int
     ): Response<ProductResponse>
 
     @GET("products/{id}")

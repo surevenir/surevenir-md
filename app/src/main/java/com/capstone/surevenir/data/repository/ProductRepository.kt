@@ -38,9 +38,9 @@ class ProductRepository @Inject constructor(
     }
 
 
-    suspend fun getProducts(token: String): Response<ProductResponse> {
-        return apiService.getProducts(token)
-    }
+//    suspend fun getProducts(token: String): Response<ProductResponse> {
+//        return apiService.getProducts(token)
+//    }
 
     suspend fun getProductDetail(productId: Int, token: String): ProductDetailResponse {
         return apiService.getProductDetail(productId, "Bearer $token")

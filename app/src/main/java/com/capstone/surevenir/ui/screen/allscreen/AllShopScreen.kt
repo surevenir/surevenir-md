@@ -125,11 +125,11 @@ fun ShopSectionAll(shops: List<MerchantData>, navController: NavHostController, 
 
         shops.forEach { shop ->
             Log.d("ShopValidation", "Processing shop - ID: ${shop.id}, Latitude: ${shop.latitude}, Longitude: ${shop.longitude}")
-            val latitude = shop.longitude?.toDoubleOrNull()
-            val longitude = shop.latitude?.toDoubleOrNull()
+            val latitude = shop.latitude?.toDoubleOrNull()
+            val longitude = shop.longitude?.toDoubleOrNull()
 
             if (latitude != null && longitude != null && latitude in -90.0..90.0 && longitude in -180.0..180.0) {
-                geocodingViewModel.getSubDistrictFromCoordinates(latitude, longitude, apiKey) { subDistrict ->
+                geocodingViewModel.getSubDistrictFromCoordinates(longitude, latitude, apiKey) { subDistrict ->
                     Log.d("GeocodingResult", "Received subDistrict for Shop ID ${shop.id}: $subDistrict")
 
                     val currentShops = updatedShops.value.toMutableList()
@@ -192,7 +192,7 @@ fun ShopSectionAll(shops: List<MerchantData>, navController: NavHostController, 
                         imageRes = it,
                         shopName = shop.name,
                         shopLocation = shop.location ?: "No Location",
-                        totalShopProduct = shop.products_count,
+                        totalShopProduct = shop.product_count,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
@@ -202,14 +202,14 @@ fun ShopSectionAll(shops: List<MerchantData>, navController: NavHostController, 
                             .clickable {
                                 navController.currentBackStackEntry?.savedStateHandle?.set(
                                     "shopData",
-                                    ShopData(shop.location ?: "No Location", shop.products_count)
+                                    ShopData(shop.location ?: "No Location", shop.product_count)
                                 )
 
                                 try {
                                     navController.getBackStackEntry("merchant/${shop.id}")
                                         .savedStateHandle["shopData"] = ShopData(
                                         shop.location ?: "No Location",
-                                        shop.products_count
+                                        shop.product_count
                                     )
                                 } catch (e: Exception) {
                                     Log.e("Navigation", "Failed to set shop data: ${e.message}")

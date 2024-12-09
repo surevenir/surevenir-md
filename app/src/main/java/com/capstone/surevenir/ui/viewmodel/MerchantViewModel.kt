@@ -60,7 +60,7 @@ class MerchantViewModel @Inject constructor(
                                     marketId = merchantData.market_id,
                                     createdAt = merchantData.createdAt,
                                     updatedAt = merchantData.updatedAt,
-                                    productsCount = merchantData.products_count,
+                                    productsCount = merchantData.product_count,
                                     location = merchantData.location
                                 )
                             }

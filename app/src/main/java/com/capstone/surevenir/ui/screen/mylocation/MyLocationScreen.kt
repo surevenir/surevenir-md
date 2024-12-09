@@ -190,20 +190,51 @@ private fun GoogleMapContent(
             snippet = "Ini adalah lokasi saya yang sebenarnya"
         )
 
+        markets?.forEach { market ->
+            val lng = market.longitude?.toDoubleOrNull()
+            val lat = market.latitude?.toDoubleOrNull()
+
+            if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
+                val position = LatLng(lat, lng)
+//
+//                Circle(
+//                    center = position,
+//                    radius = 3000.0,
+//                    strokeColor = Color.Green.copy(alpha = 0.5f),
+//                    fillColor = Color.Green.copy(alpha = 0.1f),
+//                    strokeWidth = 2f
+//                )
+
+                Marker(
+                    state = MarkerState(position = position),
+                    title = market.name,
+                    snippet = "Click to see Detail",
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                    onClick = { marker ->
+                        marker.showInfoWindow()
+                        true
+                    },
+                    onInfoWindowClick = {
+                        navController.navigate("market/${market.id}")
+                    }
+                )
+            }
+        }
+
         merchants?.forEach { merchant ->
-            val lng = merchant.latitude?.toDoubleOrNull()
-            val lat = merchant.longitude?.toDoubleOrNull()
+            val lng = merchant.longitude?.toDoubleOrNull()
+            val lat = merchant.latitude?.toDoubleOrNull()
 
             if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
                 val position = LatLng(lat, lng)
 
-                Circle(
-                    center = position,
-                    radius = 3000.0,
-                    strokeColor = Color.Blue.copy(alpha = 0.5f),
-                    fillColor = Color.Blue.copy(alpha = 0.1f),
-                    strokeWidth = 2f
-                )
+//                Circle(
+//                    center = position,
+//                    radius = 3000.0,
+//                    strokeColor = Color.Blue.copy(alpha = 0.5f),
+//                    fillColor = Color.Blue.copy(alpha = 0.1f),
+//                    strokeWidth = 2f
+//                )
 
                 Marker(
                     state = MarkerState(position = position),
@@ -221,36 +252,7 @@ private fun GoogleMapContent(
             }
         }
 
-        markets?.forEach { market ->
-            val lng = market.latitude?.toDoubleOrNull()
-            val lat = market.longitude?.toDoubleOrNull()
 
-            if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
-                val position = LatLng(lat, lng)
-
-                Circle(
-                    center = position,
-                    radius = 3000.0,
-                    strokeColor = Color.Green.copy(alpha = 0.5f),
-                    fillColor = Color.Green.copy(alpha = 0.1f),
-                    strokeWidth = 2f
-                )
-
-                Marker(
-                    state = MarkerState(position = position),
-                    title = market.name,
-                    snippet = "Click to see Detail",
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
-                    onClick = { marker ->
-                        marker.showInfoWindow()
-                        true
-                    },
-                    onInfoWindowClick = {
-                        navController.navigate("market/${market.id}")
-                    }
-                )
-            }
-        }
     }
 }
 
@@ -277,8 +279,8 @@ private fun setupGeofencing(context: Context, merchants: List<MerchantData>?, ma
     }
 
     markets?.forEach { market ->
-        val lat = market.longitude?.toDoubleOrNull()
-        val lng = market.latitude?.toDoubleOrNull()
+        val lat = market.latitude?.toDoubleOrNull()
+        val lng = market.longitude?.toDoubleOrNull()
 
         if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
             Log.d("Geofencing", "Setting up market geofence at lat: $lat, lng: $lng")

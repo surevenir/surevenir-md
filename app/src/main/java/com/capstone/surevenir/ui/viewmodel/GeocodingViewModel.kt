@@ -30,7 +30,7 @@ class GeocodingViewModel : ViewModel() {
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val latlng = "$lat,$lng"
+                val latlng = "$lng,$lat"
                 val response = RetrofitInstance.api.getAddress(latlng, apiKey).execute()
                 if (response.isSuccessful) {
                     val results = response.body()?.results ?: emptyList()
@@ -60,7 +60,7 @@ class GeocodingViewModel : ViewModel() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
-                    getSubDistrictFromCoordinates(location.latitude, location.longitude, apiKey, onResult)
+                    getSubDistrictFromCoordinates(location.longitude, location.latitude, apiKey, onResult)
                 } else {
                     onResult(null)
                 }

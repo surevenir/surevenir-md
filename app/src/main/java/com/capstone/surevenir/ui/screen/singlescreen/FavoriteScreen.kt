@@ -1,18 +1,262 @@
 package com.capstone.surevenir.ui.screen.singlescreen
 
+import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
+import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import com.capstone.surevenir.R
+import com.capstone.surevenir.data.network.response.FavoriteMapper
+import com.capstone.surevenir.data.network.response.ImageData
+import com.capstone.surevenir.data.network.response.ProductData
+import com.capstone.surevenir.data.network.response.ProductFavorite
+import com.capstone.surevenir.helper.formatPrice
+import com.capstone.surevenir.model.Product
+import com.capstone.surevenir.ui.components.ProductCard
+import com.capstone.surevenir.ui.screen.allscreen.ShopSectionAll
+import com.capstone.surevenir.ui.screen.navmenu.sfui_med
+import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.viewmodel.FavoriteViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 
 @Composable
 fun FavoriteScreen(
     navController: NavHostController,
-    tokenViewModel: TokenViewModel = hiltViewModel(),
-    favoriteViewModel: FavoriteViewModel = hiltViewModel()
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
+    tokenViewModel: TokenViewModel = hiltViewModel()
 ) {
+    val token by tokenViewModel.token.observeAsState()
+    val favoriteProducts by favoriteViewModel.favoriteProducts.collectAsState()
+    val isLoading by favoriteViewModel.isLoadingProducts.collectAsState()
+    val error by favoriteViewModel.error.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        tokenViewModel.fetchToken()
+    }
+
+    LaunchedEffect(token) {
+        token?.let {
+            favoriteViewModel.getFavoriteProducts(it)
+        } ?: Log.d("FavoriteScreen", "Token is null")
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE7E7E9))
+                        .clickable { navController.popBackStack() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrow),
+                        contentDescription = "Back",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Text(
+                    text = "Favorite",
+                    fontSize = 25.sp,
+                    fontFamily = sfui_semibold,
+                    color = Color(0xFFCC5B14)
+                )
+                // Spacer untuk menyeimbangkan layout
+                Spacer(modifier = Modifier.size(48.dp))
+            }
+
+            // Main Content
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFFCC5B14))
+                }
+            } else if (error != null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Error: $error",
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            } else if (favoriteProducts.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No favorite products yet",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Gunakan di LazyVerticalGrid:
+                    items(favoriteProducts.size) { index ->
+                        val favoriteItem = favoriteProducts[index]
+                        Log.d("FavoriteScreen", "Images for product ${favoriteItem.product.id}: ${favoriteItem.images}")
+
+                        val productFavorite = ProductFavorite(
+                            id = favoriteItem.product.id,
+                            slug = favoriteItem.product.slug,
+                            name = favoriteItem.product.name,
+                            description = favoriteItem.product.description,
+                            price = favoriteItem.product.price,
+                            merchant_id = favoriteItem.product.merchant_id,
+                            stock = favoriteItem.product.stock,
+                            createdAt = favoriteItem.product.createdAt,
+                            updatedAt = favoriteItem.product.updatedAt,
+                            categories = emptyList(),
+                            merchant = "",
+                            images = emptyList() // Gunakan empty list untuk menghindari null
+                        )
+
+                        val productData = FavoriteMapper.mapResponseToProductData(productFavorite)
+                        FavoriteProductCard(
+                            product = productData,
+                            images = favoriteItem.images ?: emptyList(),  // Tambahkan null check
+                            onProductClick = {
+                                navController.navigate("product/${productData.id}")
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
 
+@Composable
+fun FavoriteProductCard(
+    product: ProductData,  // Ubah dari FavoriteProduct ke ProductData
+    images: List<ImageData>,
+    onProductClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(265.dp)
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+            .clickable(onClick = onProductClick),
+        shape = RoundedCornerShape(16.dp),
+        backgroundColor = Color.White
+    ) {
+        Column {
+            AsyncImage(
+                model = if (images.isNotEmpty()) images[0].url else "https://via.placeholder.com/150",
+                contentDescription = product.name,  // Hapus tanda titik setelah product
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp),
+                contentScale = ContentScale.Crop
+            )
 
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = product.name,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = sfui_semibold
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Rp ${formatPrice(product.price)}",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = sfui_semibold,
+                        color = Color(0xFFCC5B14)
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Merchant #${product.merchant_id}",  // Gunakan merchant_id
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            fontFamily = sfui_med,
+                            color = Color.Gray
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
 }

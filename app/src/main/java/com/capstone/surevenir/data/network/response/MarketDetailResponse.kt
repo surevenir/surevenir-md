@@ -1,5 +1,7 @@
 package com.capstone.surevenir.data.network.response
 
+import com.capstone.surevenir.model.Image
+
 data class MarketDetailResponse(
     val success: Boolean,
     val status_code: Int,
@@ -17,5 +19,6 @@ data class MarketDetail(
     val latitude: String,
     val createdAt: String,
     val updatedAt: String,
-    val images: List<String>
+    val images: List<ImageData>,
+    
 )

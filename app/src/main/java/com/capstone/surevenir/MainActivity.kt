@@ -70,6 +70,7 @@
     import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
     import com.capstone.surevenir.ui.screen.profile.SettingsScreen
     import com.capstone.surevenir.ui.screen.singlescreen.FavoriteScreen
+    import com.capstone.surevenir.ui.screen.singlescreen.NotificationScreen
     import com.capstone.surevenir.ui.screen.singlescreen.SingleMarketScreen
     import com.capstone.surevenir.ui.screen.singlescreen.SurevenirAi
     import com.capstone.surevenir.ui.theme.MyAppTheme
@@ -407,6 +408,9 @@
                 composable("allMarket") {
                     AllMarket(navController)
                 }
+                composable("notification") {
+                     NotificationScreen(navController)
+                }
 
                 composable("preview") {
                     PreviewScreen(
@@ -462,6 +466,8 @@
             }
         }
     }
+
+
 
 
     @Preview(showBackground = true)
