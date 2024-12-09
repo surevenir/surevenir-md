@@ -2,6 +2,7 @@ package com.capstone.surevenir.ui.screen.transaction
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -101,7 +102,7 @@ fun DetailsCheckoutScreen(
             }
         },
         bottomBar = {
-            if (checkoutData.status == "PENDING") {
+            if (checkoutData.status == "COMPLETED") {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -157,7 +158,10 @@ fun DetailsCheckoutScreen(
                     ProductItem(
                         detail = detail,
                         showRateButton = checkoutData.status == "COMPLETED",
-                        onRateClick = { onRateClick(detail.productId) }
+                        onRateClick = { onRateClick(detail.productId) },
+                        onProductClick = { productId ->
+                            navController.navigate("product/$productId")
+                        }
                     )
 
                     if (items.indexOf(detail) != items.size - 1) {
@@ -256,14 +260,17 @@ private fun ProductItem(
     detail: CheckoutDetail,
     showRateButton: Boolean,
     reviewViewModel: ReviewsViewModel = hiltViewModel(),
-    onRateClick: () -> Unit
+    onRateClick: () -> Unit,
+    onProductClick: (String) -> Unit
 ) {
     val isRated by remember(detail.productId) {
         derivedStateOf { reviewViewModel.isProductRated(detail.productId) }
     }
 
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onProductClick(detail.productId.toString()) },
         color = Color.White
     ) {
         Row(

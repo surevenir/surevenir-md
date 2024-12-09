@@ -1,6 +1,5 @@
 package com.capstone.surevenir.ui.screen.navmenu
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,7 +10,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,7 +45,6 @@ fun TransactionScreen(
 
     var selectedItems by remember { mutableStateOf(setOf<Int>()) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var itemToDelete by remember { mutableStateOf<CartItem?>(null) }
 
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     var showTab by remember {
@@ -75,46 +75,70 @@ fun TransactionScreen(
         }
     }
 
-    if (showDeleteDialog && itemToDelete != null) {
+    if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Remove Item") },
-            text = { Text("Are you sure you want to remove ${itemToDelete?.product?.name} from your cart?") },
+            title = {
+                Text(
+                    text = "Remove Items",
+                    fontFamily = sfui_bold,
+                    fontSize = 18.sp,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Text(
+                    if (selectedItems.size == 1) {
+                        val item = cartData?.cart?.find { it.id == selectedItems.first() }
+                        "Are you sure you want to remove ${item?.product?.name} from your cart?"
+                    } else {
+                        "Are you sure you want to remove ${selectedItems.size} items from your cart?"
+                    },
+                    fontFamily = sfui_med,
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val currentItemToDelete = itemToDelete
-                        val currentToken = token
-
-                        if (currentToken != null && currentItemToDelete != null) {
+                        token?.let { currentToken ->
                             scope.launch {
-                                try {
+                                selectedItems.forEach { itemId ->
                                     cartViewModel.deleteCartItem(
                                         "Bearer $currentToken",
-                                        currentItemToDelete.id
+                                        itemId
                                     )
-                                } catch (e: Exception) {
-                                    Log.e("TransactionScreen", "Error launching delete", e)
                                 }
+                                selectedItems = emptySet()
                             }
                         }
                         showDeleteDialog = false
-                        itemToDelete = null
                     }
                 ) {
-                    Text("Remove")
+                    Text(
+                        text = "Remove",
+                        fontFamily = sfui_bold,
+                        fontSize = 14.sp,
+                        color = Color.Red
+                    )
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = {
-                        showDeleteDialog = false
-                        itemToDelete = null
-                    }
+                    onClick = { showDeleteDialog = false }
                 ) {
-                    Text("Cancel")
+                    Text(
+                        text = "Cancel",
+                        fontFamily = sfui_bold,
+                        fontSize = 14.sp,
+                        color = Color.Black
+                    )
                 }
-            }
+            },
+            containerColor = Color.White,
+            shape = MaterialTheme.shapes.medium,
         )
     }
 
@@ -134,7 +158,8 @@ fun TransactionScreen(
             Text(
                 text = "Transaction",
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                fontFamily = sfui_bold,
+                color = Color.Black
             )
         }
         CustomTabLayout(
@@ -166,27 +191,17 @@ fun TransactionScreen(
                             cartData = cartData,
                             selectedItems = selectedItems,
                             onSelectionChange = { selectedItems = it },
-                            onDeleteItems = { itemsToDelete ->
-                                itemsToDelete.forEach { id ->
-                                    val itemToRemove = cartData?.cart?.find { it.id == id }
-                                    itemToRemove?.let {
-                                        itemToDelete = it
-                                        showDeleteDialog = true
-                                    }
-                                }
+                            onDeleteItems = {
+                                showDeleteDialog = true
                             },
                             onUpdateQuantity = { cartItem, newQuantity ->
                                 token?.let { token ->
                                     scope.launch {
-                                        try {
-                                            cartViewModel.updateCartItemQuantity(
-                                                "Bearer $token",
-                                                cartItem.id,
-                                                newQuantity
-                                            )
-                                        } catch (e: Exception) {
-                                            Log.e("TransactionScreen", "Error updating quantity", e)
-                                        }
+                                        cartViewModel.updateCartItemQuantity(
+                                            "Bearer $token",
+                                            cartItem.id,
+                                            newQuantity
+                                        )
                                     }
                                 }
                             }
@@ -226,20 +241,23 @@ private fun CartTab(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                .padding(horizontal = 24.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = "${selectedItems.size} product selected",
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium
+                                fontFamily = sfui_med,
+                                color = Color.Black
                             )
                             TextButton(
                                 onClick = { onDeleteItems(selectedItems) }
                             ) {
                                 Text(
                                     text = "Delete",
+                                    fontSize = 14.sp,
+                                    fontFamily = sfui_semibold,
                                     color = Color.Red
                                 )
                             }
@@ -301,9 +319,20 @@ private fun CartTab(
                                     } else {
                                         onSelectionChange(emptySet())
                                     }
-                                }
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFFED8A00),
+                                    uncheckedColor = Color.Gray,
+                                    checkmarkColor = Color.White
+                                )
+
                             )
-                            Text("Select All")
+                            Text(
+                                text = "Select All",
+                                fontFamily = sfui_semibold,
+                                fontSize = 16.sp,
+                                color = if (selectedItems.isNotEmpty()) Color.Black else Color.Gray
+                            )
                         }
 
                         Button(
@@ -317,14 +346,23 @@ private fun CartTab(
                                 )
                                 navController.navigate("checkout")
                             },
-                            enabled = selectedItems.isNotEmpty()
+                            enabled = selectedItems.isNotEmpty(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (selectedItems.isNotEmpty()) Color(0xFFED8A00) else Color.LightGray,
+                                contentColor = if (selectedItems.isNotEmpty()) Color.White else Color.Gray
+                            )
                         ) {
                             Text(
                                 text = if (selectedItems.isEmpty()) {
                                     "Select items"
                                 } else {
                                     "Checkout (${selectedItems.size})"
-                                }
+                                },
+                                style = TextStyle(
+                                    fontFamily = sfui_semibold,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
                             )
                         }
                     }

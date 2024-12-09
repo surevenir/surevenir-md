@@ -29,6 +29,8 @@ import com.capstone.surevenir.R
 import com.capstone.surevenir.data.network.response.CartItem
 import com.capstone.surevenir.data.network.response.CheckoutData
 import com.capstone.surevenir.helper.DateConverter
+import com.capstone.surevenir.helper.formatCurrency
+import com.capstone.surevenir.ui.screen.navmenu.sfui_bold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 
@@ -91,7 +93,8 @@ fun CustomTab(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyLarge,
+            fontFamily = sfui_semibold,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Medium
         )
     }
@@ -176,12 +179,17 @@ fun CartItemCard(
                     Checkbox(
                         checked = isSelected,
                         onCheckedChange = onSelectionChange,
-                        modifier = Modifier.padding(start = 10.dp)
+                        modifier = Modifier.padding(start = 10.dp),
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = Color(0xFFED8A00),
+                            uncheckedColor = Color.Gray,
+                            checkmarkColor = Color.White
+                        )
                     )
                 }
 
                 Text(
-                    text = "Rp. ${cartItem.product.price}",
+                    text = formatCurrency(cartItem.product.price),
                     color = Color.Gray,
                     fontSize = 12.sp,
                     fontFamily = sfui_med
@@ -196,30 +204,30 @@ fun CartItemCard(
                     fontFamily = sfui_med
                 )
 
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Sub total:",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    fontFamily = sfui_med
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Sub total:",
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 12.sp,
-                            color = Color.Gray,
-                            fontFamily = sfui_med
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "${cartItem.subtotalPrice}",
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp,
-                            color = Color.Black,
-                            fontFamily = sfui_semibold
-                        )
-                    }
+                    Text(
+                        text = formatCurrency(cartItem.subtotalPrice),
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontFamily = sfui_semibold
+                    )
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically
@@ -341,7 +349,7 @@ fun CheckoutHistoryCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Rp. ${detail.productSubtotal.toInt()}",
+                            text = formatCurrency(detail.productSubtotal.toInt()),
                             fontFamily = sfui_semibold,
                             fontSize = 14.sp,
                             maxLines = 1,
@@ -400,7 +408,7 @@ fun CheckoutHistoryCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Rp. ${checkout.totalPrice}",
+                    text = formatCurrency(checkout.totalPrice),
                     fontFamily = sfui_semibold,
                     fontSize = 14.sp,
                     color = Color.Black,

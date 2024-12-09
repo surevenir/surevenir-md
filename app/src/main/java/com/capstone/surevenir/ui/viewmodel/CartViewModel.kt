@@ -81,42 +81,17 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    private val _isDeleting = MutableStateFlow(false)
-
     fun deleteCartItem(token: String, cartItemId: Int) {
-        Log.d("CartViewModel", "deleteCartItem started for ID: $cartItemId")
-
-        if (_isDeleting.value) {
-            Log.d("CartViewModel", "Delete already in progress, skipping")
-            return
-        }
-
         viewModelScope.launch {
-            _isDeleting.value = true
-            _isLoading.value = true
-            _errorMessage.value = null
-
             try {
-                Log.d("CartViewModel", "Calling repository.deleteCartItem")
                 val response = cartRepository.deleteCartItem(token, cartItemId)
-
-                Log.d("CartViewModel", "Delete response received: ${response.isSuccessful}")
-
                 if (response.isSuccessful) {
-                    Log.d("CartViewModel", "Delete successful, refreshing cart")
-                    getCart(token) // Refresh cart after successful deletion
+                    getCart(token)
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    Log.e("CartViewModel", "Delete failed with error: $errorBody")
                     _errorMessage.value = "Failed to delete item: ${response.message()}"
                 }
             } catch (e: Exception) {
-                Log.e("CartViewModel", "Exception during delete", e)
                 _errorMessage.value = "Error: ${e.message}"
-            } finally {
-                _isLoading.value = false
-                _isDeleting.value = false
-                Log.d("CartViewModel", "Delete operation completed")
             }
         }
     }
