@@ -1,7 +1,9 @@
 package com.capstone.surevenir.data.network.response
 
-import com.capstone.surevenir.model.Product
+import android.os.Parcelable
+import com.capstone.surevenir.model.ProductCheckout
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
 data class CheckoutGetResponse(
     @SerializedName("success")
@@ -14,6 +16,7 @@ data class CheckoutGetResponse(
     val data: List<CheckoutData>
 )
 
+@Parcelize
 data class CheckoutData(
     @SerializedName("id")
     val id: Int,
@@ -31,8 +34,9 @@ data class CheckoutData(
     val updatedAt: String,
     @SerializedName("checkout_details")
     val checkoutDetails: List<CheckoutDetail>
-)
+) : Parcelable
 
+@Parcelize
 data class CheckoutDetail(
     @SerializedName("id")
     val id: Int,
@@ -53,5 +57,5 @@ data class CheckoutDetail(
     @SerializedName("updatedAt")
     val updatedAt: String,
     @SerializedName("product")
-    val product: Product
-)
+    val product: ProductCheckout
+) : Parcelable

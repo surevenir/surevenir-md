@@ -1,6 +1,6 @@
 package com.capstone.surevenir.model
 
-import com.capstone.surevenir.data.network.response.Review
+import com.capstone.surevenir.data.network.response.ReviewData
 import java.util.Date
 
 data class User(
@@ -19,7 +19,7 @@ data class User(
     val createdAt: Date,
     val updatedAt: Date,
     val merchant: Merchant? = null,
-    val reviews: List<Review> = emptyList(),
+    val reviews: List<ReviewData> = emptyList(),
     val carts: List<Cart> = emptyList(),
     val checkouts: List<Checkout> = emptyList()
 )

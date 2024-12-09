@@ -190,7 +190,9 @@ fun TransactionScreen(
                                 }
                             }
                         )
-                        1 -> HistoryTab(checkoutViewModel = checkoutViewModel)
+                        1 -> HistoryTab(
+                            checkoutViewModel = checkoutViewModel,
+                            navController = navController)
                     }
                 }
             }
@@ -333,7 +335,8 @@ private fun CartTab(
 
 @Composable
 private fun HistoryTab(
-    checkoutViewModel: CheckoutViewModel
+    checkoutViewModel: CheckoutViewModel,
+    navController: NavController
 ) {
     val checkouts by checkoutViewModel.checkoutData.collectAsState()
     val isLoading by checkoutViewModel.isLoading.collectAsState()
@@ -369,7 +372,16 @@ private fun HistoryTab(
                     items = sortedCheckouts,
                     key = { it.id }
                 ) { checkout ->
-                    CheckoutHistoryCard(checkout = checkout)
+                    CheckoutHistoryCard(
+                        checkout = checkout,
+                        onClick = {
+                            navController.currentBackStackEntry?.savedStateHandle?.set(
+                                "checkout",
+                                checkout
+                            )
+                            navController.navigate("checkoutDetail")
+                        }
+                    )
                 }
             }
         }

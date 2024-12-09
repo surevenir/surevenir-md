@@ -1,4 +1,4 @@
-package com.capstone.surevenir.ui.screen
+package com.capstone.surevenir.ui.screen.transaction
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
@@ -41,11 +41,6 @@ fun CheckoutScreen(
 
     val totalPrice = selectedItems.sumOf { it.product.price * it.quantity }
 
-    LaunchedEffect(token) {
-        token?.let {
-            Log.d("CheckoutScreen", "Token retrieved successfully")
-        } ?: Log.e("CheckoutScreen", "Token is still null after fetch attempt")
-    }
 
     LaunchedEffect(Unit) {
         if (token == null) {
@@ -59,7 +54,6 @@ fun CheckoutScreen(
         if (checkoutSuccess) {
             Log.d("CheckoutScreen", "Checkout successful, navigating to transaction history")
             navController.navigate("transaction") {
-                // Pop up to transaction to avoid building up the back stack
                 popUpTo("transaction") { inclusive = true }
             }
             navController.currentBackStackEntry?.savedStateHandle?.set("selectedTab", 1)

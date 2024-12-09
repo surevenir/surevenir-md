@@ -77,7 +77,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import com.capstone.surevenir.data.network.response.ProductData
-import com.capstone.surevenir.data.network.response.Review
+import com.capstone.surevenir.data.network.response.ReviewData
 import com.capstone.surevenir.helper.formatPrice
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.Product
@@ -643,7 +643,7 @@ fun AddToCartDialog(
 fun ReviewsSection(
     averageRating: Double,
     totalReviews: Int,
-    reviews: List<Review>?,
+    reviews: List<ReviewData>?,
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -714,7 +714,7 @@ fun ReviewsSection(
 
 
 @Composable
-fun ReviewItem(review: Review) {
+fun ReviewItem(review: ReviewData) {
 
     val dateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
     val parsedDate = LocalDateTime.parse(review.createdAt, DateTimeFormatter.ISO_DATE_TIME)
@@ -729,20 +729,20 @@ fun ReviewItem(review: Review) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            AsyncImage(
-                model = review.user.profileImageUrl ?: "https://via.placeholder.com/150",
-                contentDescription = "${review.user.fullName}'s profile picture",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
+//            AsyncImage(
+//                model = review.user.profileImageUrl ?: "https://via.placeholder.com/150",
+//                contentDescription = "${review.user.fullName}'s profile picture",
+//                modifier = Modifier
+//                    .size(40.dp)
+//                    .clip(CircleShape),
+//                contentScale = ContentScale.Crop
+//            )
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Column {
                 Text(
-                    text = review.user.username ?: "https://via.placeholder.com/150",
+                    text = review.userId ?: "https://via.placeholder.com/150",
                     fontFamily = sfui_semibold,
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp

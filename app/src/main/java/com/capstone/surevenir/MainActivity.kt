@@ -30,12 +30,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.capstone.surevenir.data.network.response.CheckoutData
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.ui.camera.CameraScreen
 import com.capstone.surevenir.ui.camera.ImageCaptureVM
 import com.capstone.surevenir.ui.camera.PreviewScreen
-import com.capstone.surevenir.ui.screen.CheckoutScreen
+import com.capstone.surevenir.ui.screen.transaction.CheckoutScreen
 import com.capstone.surevenir.ui.screen.allscreen.AllCategoryScreen
 import com.capstone.surevenir.ui.screen.allscreen.AllHistory
 import com.capstone.surevenir.ui.screen.allscreen.AllProductScreen
@@ -62,6 +63,7 @@ import com.capstone.surevenir.ui.screen.navmenu.TransactionScreen
 import com.capstone.surevenir.ui.screen.profile.AccountCenterScreen
 import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
 import com.capstone.surevenir.ui.screen.profile.SettingsScreen
+import com.capstone.surevenir.ui.screen.transaction.DetailsCheckoutScreen
 import com.capstone.surevenir.ui.theme.MyAppTheme
 import com.capstone.surevenir.ui.viewmodel.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -199,7 +201,7 @@ private fun handleGoogleSignInResult(
 
 
 @Composable
-fun MainScreen(navController: NavHostController,     userPreferences: UserPreferences) {
+fun MainScreen(navController: NavHostController, userPreferences: UserPreferences) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val imageCaptureViewModel: ImageCaptureVM = viewModel()
@@ -358,6 +360,18 @@ fun MainScreen(navController: NavHostController,     userPreferences: UserPrefer
             ) { backStackEntry ->
                 val merchantId = backStackEntry.arguments?.getInt("merchantId") ?: 0
                 SingleShopScreen(merchantId, navController)
+            }
+            composable("checkoutDetail") {
+                val checkout = navController.previousBackStackEntry?.savedStateHandle?.get<CheckoutData>("checkout")
+                checkout?.let {
+                    DetailsCheckoutScreen(
+                        navController = navController,
+                        checkoutData = it,
+                        onRateClick = { productId ->
+                            // Handle rate click if needed
+                        }
+                    )
+                }
             }
         }
     }

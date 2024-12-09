@@ -255,12 +255,17 @@ fun CartItemCard(
 }
 
 @Composable
-fun CheckoutHistoryCard(checkout: CheckoutData) {
+fun CheckoutHistoryCard(
+    checkout: CheckoutData,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     val dateConverter = DateConverter()
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -329,7 +334,7 @@ fun CheckoutHistoryCard(checkout: CheckoutData) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = detail.productIdentity,
+                            text = detail.product.name,
                             fontFamily = sfui_semibold,
                             fontSize = 14.sp,
                             color = Color.Black,
@@ -355,8 +360,7 @@ fun CheckoutHistoryCard(checkout: CheckoutData) {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            //text = detail.product.merchant.name,
-                            text = detail.productIdentity,
+                            text = detail.product.merchant.name,
                             fontFamily = sfui_med,
                             fontSize = 12.sp,
                             color = Color.Gray

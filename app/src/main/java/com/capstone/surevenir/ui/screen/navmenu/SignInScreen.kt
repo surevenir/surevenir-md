@@ -315,3 +315,7 @@ val sfui_text = FontFamily(
 val sfui_med = FontFamily(
     Font(R.font.poppinsmedium, FontWeight.Medium)
 )
+
+val sfui_bold = FontFamily(
+    Font(R.font.poppinsbold, FontWeight.Bold)
+)
