@@ -2,9 +2,7 @@ package com.capstone.surevenir.data.repository
 
 import android.util.Log
 import com.capstone.surevenir.data.network.ApiService
-import com.capstone.surevenir.data.network.response.CartItem
 import com.capstone.surevenir.data.network.response.CartResponse
-import com.capstone.surevenir.data.network.response.CheckoutRequest
 import com.capstone.surevenir.data.network.response.DeleteCartResponse
 import com.capstone.surevenir.model.CreateCartRequest
 import com.capstone.surevenir.model.CreateCartResponse

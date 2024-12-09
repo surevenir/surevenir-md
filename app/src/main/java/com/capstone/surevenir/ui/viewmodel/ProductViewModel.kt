@@ -104,8 +104,4 @@ class ProductViewModel @Inject constructor(
             }
         }
     }
-
-//    fun getProductById(productId: Int): ProductData? {
-//        return productRepository.getProductById(productId)
-//    }
 }

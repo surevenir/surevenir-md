@@ -30,5 +30,14 @@ data class ProductCheckout(
     val stock: Int,
     val updatedAt: String,
     val createdAt: String,
-    val merchant: Merchant
+    val merchant: Merchant,
+    val images: List<ImageCheckout>
 ) : Parcelable
+
+@Parcelize
+data class ImageCheckout(
+    val id: Int,
+    val item_id: Int,
+    val url: String,
+    val type: String
+): Parcelable

@@ -51,11 +51,12 @@ fun TransactionScreen(
         mutableIntStateOf(savedStateHandle?.get<Int>("selectedTab") ?: 0)
     }
 
+    savedStateHandle?.set("selectedTab", showTab)
+
     LaunchedEffect(Unit) {
         if (token == null) {
             tokenViewModel.fetchToken()
         }
-        savedStateHandle?.remove<Int>("selectedTab")
     }
 
     LaunchedEffect(token) {

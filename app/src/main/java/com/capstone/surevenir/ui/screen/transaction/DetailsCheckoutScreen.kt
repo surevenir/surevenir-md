@@ -5,21 +5,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.capstone.surevenir.data.network.response.CheckoutData
 import com.capstone.surevenir.data.network.response.CheckoutDetail
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
@@ -44,6 +47,17 @@ fun DetailsCheckoutScreen(
             tokenViewModel.fetchToken()
         }
     }
+
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+
+    var selectedTab by remember {
+        mutableIntStateOf(savedStateHandle?.get<Int>("selectedTab") ?: 0)
+    }
+    LaunchedEffect(checkoutData.id) {
+        savedStateHandle?.set("selectedTab", 1)
+        selectedTab = 1
+    }
+
 
     val groupedDetails = checkoutData.checkoutDetails.groupBy { it.product.merchant.name }
 
@@ -87,7 +101,7 @@ fun DetailsCheckoutScreen(
             }
         },
         bottomBar = {
-            if (checkoutData.status == "COMPLETED") {
+            if (checkoutData.status == "PENDING") {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -95,7 +109,9 @@ fun DetailsCheckoutScreen(
                     shadowElevation = 8.dp,
                 ) {
                     Button(
-                        onClick = { /* Handle order again logic */ },
+                        onClick = {
+                            navController.navigate("shop")
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(24.dp),
@@ -133,7 +149,7 @@ fun DetailsCheckoutScreen(
                             thickness = 10.dp,
                             color = Color.LightGray
                         )
-                        MerchantHeader(merchantName = merchantName)
+                        MerchantHeader(merchantName = merchantName, detail = items.first())
                     }
                 }
 
@@ -143,13 +159,16 @@ fun DetailsCheckoutScreen(
                         showRateButton = checkoutData.status == "COMPLETED",
                         onRateClick = { onRateClick(detail.productId) }
                     )
-                }
 
-                item {
-                    MerchantTotal(
-                        total = items.sumOf { it.productSubtotal }.toInt(),
-                        merchantName = merchantName
-                    )
+                    if (items.indexOf(detail) != items.size - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .padding(horizontal = 24.dp, vertical = 4.dp)
+                                .fillMaxWidth(),
+                            thickness = 2.dp,
+                            color = Color.LightGray
+                        )
+                    }
                 }
             }
 
@@ -201,7 +220,7 @@ private fun StatusIndicator(status: String) {
 }
 
 @Composable
-private fun MerchantHeader(merchantName: String) {
+private fun MerchantHeader(merchantName: String, detail: CheckoutDetail) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = Color.White,
@@ -210,14 +229,16 @@ private fun MerchantHeader(merchantName: String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(top = 16.dp, start = 30.dp, end = 30.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Store,
-                contentDescription = null,
-                tint = Color.Gray,
-                modifier = Modifier.size(20.dp)
+            AsyncImage(
+                model = detail.product.merchant.profile_image_url,
+                contentDescription = "Store Avatar",
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
@@ -248,82 +269,102 @@ private fun ProductItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(horizontal = 30.dp, vertical = 24.dp)
+                .height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier.weight(1f)
+            // Product Image
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFF5F5F5))
             ) {
+                AsyncImage(
+                    model = detail.product.images.firstOrNull()?.url,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Product Details
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 16.dp)
+            ) {
+                // Product Name
                 Text(
                     text = detail.product.name,
                     fontFamily = sfui_semibold,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 16.sp,
+                    color = Color.Black,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                Text(
-                    text = "Rp ${detail.productPrice.toInt()}",
-                    fontFamily = sfui_med,
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-
-                Text(
-                    text = "${detail.productQuantity} items",
-                    fontFamily = sfui_med,
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-            }
-
-            if (showRateButton) {
-                Button(
-                    onClick = onRateClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRated) Color.Gray else Color(0xFFED8A00)
-                    ),
-                    enabled = !isRated,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.width(80.dp)
+                Row (
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isRated) "Rated" else "Rate",
-                        fontFamily = sfui_semibold,
-                        fontSize = 12.sp
+                        text = "Rp ${detail.productPrice.toInt()}",
+                        fontFamily = sfui_med,
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "(${detail.productQuantity} items)",
+                        fontFamily = sfui_med,
+                        fontSize = 14.sp,
+                        color = Color.Gray
                     )
                 }
-            }
-        }
-    }
-}
 
-@Composable
-private fun MerchantTotal(total: Int, merchantName: String) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = Color.White
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Subtotal $merchantName",
-                fontFamily = sfui_med,
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-            Text(
-                text = "Rp $total",
-                fontFamily = sfui_semibold,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Subtotal:",
+                    fontFamily = sfui_med,
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Rp ${detail.productSubtotal.toInt()}",
+                        fontFamily = sfui_semibold,
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    )
+
+                    if (showRateButton) {
+                        Button(
+                            onClick = onRateClick,
+                            enabled = !isRated,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isRated) Color.Gray else Color(0xFFED8A00)
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .height(36.dp)
+                                .width(80.dp)
+                        ) {
+                            Text(
+                                text = if (isRated) "Rated" else "Rate",
+                                fontFamily = sfui_semibold,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -336,12 +377,11 @@ private fun PaymentInformation(
 ) {
     Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
+            .fillMaxWidth(),
         color = Color.White
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(horizontal = 30.dp, vertical = 24.dp)
         ) {
             Text(
                 text = "Payment Information",

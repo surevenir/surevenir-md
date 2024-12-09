@@ -322,34 +322,39 @@ fun CheckoutHistoryCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // First Product Details
             checkout.checkoutDetails.firstOrNull()?.let { detail ->
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row (
+                    Text(
+                        text = detail.product.name,
+                        fontFamily = sfui_semibold,
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = detail.product.name,
-                            fontFamily = sfui_semibold,
-                            fontSize = 14.sp,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Text(
                             text = "Rp. ${detail.productSubtotal.toInt()}",
                             fontFamily = sfui_semibold,
                             fontSize = 14.sp,
+                            maxLines = 1,
                             color = Color.Black
+                        )
+                        Text(
+                            text = "x${detail.productQuantity}",
+                            fontFamily = sfui_semibold,
+                            fontSize = 12.sp,
+                            color = Color.Gray
                         )
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
@@ -362,13 +367,6 @@ fun CheckoutHistoryCard(
                         Text(
                             text = detail.product.merchant.name,
                             fontFamily = sfui_med,
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            text = "x${detail.productQuantity}",
-                            fontFamily = sfui_semibold,
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
