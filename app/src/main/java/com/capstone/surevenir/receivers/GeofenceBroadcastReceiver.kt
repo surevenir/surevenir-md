@@ -92,8 +92,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         Log.d("GeofenceReceiver", "Setting destination: $destination")
 
 
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
@@ -108,10 +106,8 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("navigate_to", destination)
             putExtra("from_notification", true)
-            putExtra("id", numericId)  // Save numeric ID
+            putExtra("id", numericId)
         }
-
-
 
         val pendingIntent = PendingIntent.getActivity(
             context,
@@ -122,7 +118,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.baseline_notifications_24)
+            .setSmallIcon(R.drawable.surevenir_logo_home)
             .setContentTitle(title)
             .setContentText(message)
             .setAutoCancel(true)
@@ -137,7 +133,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
         Log.d("GeofenceReceiver", "Notification shown: ID=$notificationId, Title=$title")
 
-        // Save notification to database
         CoroutineScope(Dispatchers.IO).launch {
             val database = Room.databaseBuilder(
                 context.applicationContext,

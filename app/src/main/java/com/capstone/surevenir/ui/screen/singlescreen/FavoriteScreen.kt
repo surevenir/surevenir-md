@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
@@ -36,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,7 +68,6 @@ fun FavoriteScreen(
     val favoriteProducts by favoriteViewModel.favoriteProducts.collectAsState()
     val isLoading by favoriteViewModel.isLoadingProducts.collectAsState()
     val error by favoriteViewModel.error.collectAsState()
-    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         tokenViewModel.fetchToken()
@@ -78,109 +79,108 @@ fun FavoriteScreen(
         } ?: Log.d("FavoriteScreen", "Token is null")
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Content
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE7E7E9))
+                    .clickable { navController.popBackStack() },
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFE7E7E9))
-                        .clickable { navController.popBackStack() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrow),
-                        contentDescription = "Back",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Text(
-                    text = "Favorite",
-                    fontSize = 25.sp,
-                    fontFamily = sfui_semibold,
-                    color = Color(0xFFCC5B14)
+                Icon(
+                    painter = painterResource(id = R.drawable.arrow),
+                    contentDescription = "Back",
+                    modifier = Modifier.size(24.dp)
                 )
-                // Spacer untuk menyeimbangkan layout
-                Spacer(modifier = Modifier.size(48.dp))
             }
 
-            // Main Content
-            if (isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color(0xFFCC5B14))
+            Spacer(modifier = Modifier.weight(1f))
+
+            Text(
+                text = "Favorite",
+                fontSize = 25.sp,
+                fontFamily = sfui_semibold,
+                color = Color(0xFFCC5B14)
+            )
+        }
+
+        // Content
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+        ) {
+            when {
+                isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color(0xFFCC5B14)
+                    )
                 }
-            } else if (error != null) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                error != null -> {
                     Text(
                         text = "Error: $error",
                         color = Color.Red,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
                     )
                 }
-            } else if (favoriteProducts.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                favoriteProducts.isEmpty() -> {
                     Text(
                         text = "No favorite products yet",
                         color = Color.Gray,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
                     )
                 }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // Gunakan di LazyVerticalGrid:
-                    items(favoriteProducts.size) { index ->
-                        val favoriteItem = favoriteProducts[index]
-                        Log.d("FavoriteScreen", "Images for product ${favoriteItem.product.id}: ${favoriteItem.images}")
+                else -> {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(favoriteProducts.size) { index ->
+                            val favoriteItem = favoriteProducts[index]
+                            val productFavorite = ProductFavorite(
+                                id = favoriteItem.product.id,
+                                slug = favoriteItem.product.slug,
+                                name = favoriteItem.product.name,
+                                description = favoriteItem.product.description,
+                                price = favoriteItem.product.price,
+                                merchant_id = favoriteItem.product.merchant_id,
+                                stock = favoriteItem.product.stock,
+                                createdAt = favoriteItem.product.createdAt,
+                                updatedAt = favoriteItem.product.updatedAt,
+                                categories = emptyList(),
+                                merchant = "",
+                                images = emptyList()
+                            )
 
-                        val productFavorite = ProductFavorite(
-                            id = favoriteItem.product.id,
-                            slug = favoriteItem.product.slug,
-                            name = favoriteItem.product.name,
-                            description = favoriteItem.product.description,
-                            price = favoriteItem.product.price,
-                            merchant_id = favoriteItem.product.merchant_id,
-                            stock = favoriteItem.product.stock,
-                            createdAt = favoriteItem.product.createdAt,
-                            updatedAt = favoriteItem.product.updatedAt,
-                            categories = emptyList(),
-                            merchant = "",
-                            images = emptyList() // Gunakan empty list untuk menghindari null
-                        )
-
-                        val productData = FavoriteMapper.mapResponseToProductData(productFavorite)
-                        FavoriteProductCard(
-                            product = productData,
-                            images = favoriteItem.images ?: emptyList(),  // Tambahkan null check
-                            onProductClick = {
-                                navController.navigate("product/${productData.id}")
-                            }
-                        )
+                            val productData = FavoriteMapper.mapResponseToProductData(productFavorite)
+                            FavoriteProductCard(
+                                product = productData,
+                                images = favoriteItem.images ?: emptyList(),
+                                onProductClick = {
+                                    navController.navigate("product/${productData.id}")
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -188,10 +188,9 @@ fun FavoriteScreen(
     }
 }
 
-
 @Composable
 fun FavoriteProductCard(
-    product: ProductData,  // Ubah dari FavoriteProduct ke ProductData
+    product: ProductData,
     images: List<ImageData>,
     onProductClick: () -> Unit
 ) {
@@ -207,7 +206,7 @@ fun FavoriteProductCard(
         Column {
             AsyncImage(
                 model = if (images.isNotEmpty()) images[0].url else "https://via.placeholder.com/150",
-                contentDescription = product.name,  // Hapus tanda titik setelah product
+                contentDescription = product.name,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp),
@@ -246,7 +245,7 @@ fun FavoriteProductCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Merchant #${product.merchant_id}",  // Gunakan merchant_id
+                        text = "Merchant #${product.merchant_id}",
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = sfui_med,

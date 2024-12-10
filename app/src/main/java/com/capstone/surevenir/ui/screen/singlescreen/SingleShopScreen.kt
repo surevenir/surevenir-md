@@ -227,7 +227,7 @@ fun SingleShopScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "${shopDataTemp?.value?.productsCount}",
+                                text = "${shopDataTemp?.value?.productsCount}" ,
                                 fontFamily = sfui_med,
                                 fontSize = 18.sp,
                                 color = Color.Black
