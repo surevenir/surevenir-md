@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.capstone.surevenir.data.network.response.ReviewData
-import com.capstone.surevenir.data.network.response.ReviewImage
 import com.capstone.surevenir.data.network.response.ReviewImageRequest
 import com.capstone.surevenir.data.network.response.ReviewRequest
 import com.capstone.surevenir.data.repository.ReviewsRepository
@@ -48,20 +47,31 @@ class ReviewsViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                val response = reviewsRepository.postReview(
-                    token, ReviewRequest(
-                        rating = rating,
-                        comment = comment,
-                        productId = productId,
-                        userId = userId,
-                        images = images
-                        )
+                val request = ReviewRequest(
+                    rating = rating.toString(),
+                    comment = comment,
+                    userId = userId,
+                    productId = productId.toString(),
+                    images = images
                 )
+                val response = reviewsRepository.postReview(token, request)
+
                 if (response.isSuccessful) {
-                    _userReviews.value += productId
+                    val reviewResponse = response.body()
+                    if (reviewResponse?.success == true) {
+                        Log.d("ReviewViewModel", "Review posted successfully")
+                    } else {
+                        // Handle API error
+                        _errorMessage.value = reviewResponse?.message ?: "Failed to post review"
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    _errorMessage.value = "Error: ${response.code()} - $errorBody"
+                    Log.e("ReviewViewModel", "Error posting review: $errorBody")
                 }
             } catch (e: Exception) {
-                Log.e("ReviewViewModel", "Error posting review", e)
+                Log.e("ReviewViewModel", "Exception posting review", e)
+                _errorMessage.value = "Error: ${e.message}"
             }
         }
     }

@@ -17,11 +17,11 @@ import com.capstone.surevenir.data.network.response.ProductDetailResponse
 import com.capstone.surevenir.data.network.response.ProductResponse
 import com.capstone.surevenir.data.network.response.ReviewRequest
 import com.capstone.surevenir.data.network.response.ReviewResponse
-import com.capstone.surevenir.data.network.response.UpdateUserRequest
 import com.capstone.surevenir.data.network.response.UserResponse
 import com.capstone.surevenir.model.CreateCartRequest
 import com.capstone.surevenir.model.CreateCartResponse
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -63,11 +63,16 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<UserResponse>
 
+    @Multipart
     @PATCH("users/{id}")
     suspend fun updateUser(
         @Path("id") userId: String,
         @Header("Authorization") token: String,
-        @Body request: UpdateUserRequest
+        @Part("full_name") fullName: RequestBody,
+        @Part("username") username: RequestBody,
+        @Part("phone") phone: RequestBody?,
+        @Part("address") address: RequestBody?,
+        @Part image: MultipartBody.Part?
     ): Response<UserResponse>
 
     @POST("carts")
@@ -94,6 +99,7 @@ interface ApiService {
         @Body quantity: Map<String, Int>
     ): Response<CartResponse>
 
+    @Multipart
     @POST("carts/checkout")
     suspend fun checkout(
         @Header("Authorization") token: String,

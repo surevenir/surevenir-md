@@ -17,13 +17,13 @@ data class ReviewData(
 	@SerializedName("id")
 	val id: Int,
 	@SerializedName("rating")
-	val rating: Int,
+	val rating: String,
 	@SerializedName("comment")
 	val comment: String,
 	@SerializedName("user_id")
 	val userId: String,
 	@SerializedName("product_id")
-	val productId: Int,
+	val productId: String,
 	@SerializedName("createdAt")
 	val createdAt: String,
 	@SerializedName("updatedAt")
@@ -43,13 +43,13 @@ data class ReviewImage(
 
 data class ReviewRequest(
 	@SerializedName("rating")
-	val rating: Int,
+	val rating: String,
 	@SerializedName("comment")
 	val comment: String,
 	@SerializedName("user_id")
 	val userId: String,
 	@SerializedName("product_id")
-	val productId: Int,
+	val productId: String,
 	@SerializedName("images")
 	val images: List<ReviewImageRequest>
 )

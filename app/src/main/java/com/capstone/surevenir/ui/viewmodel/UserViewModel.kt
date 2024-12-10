@@ -11,11 +11,11 @@ import com.capstone.surevenir.data.network.response.UserResponse
 import com.capstone.surevenir.data.repository.UserRepository
 import com.capstone.surevenir.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 import java.util.Date
 import javax.inject.Inject
 
@@ -59,11 +59,11 @@ class UserViewModel @Inject constructor(
         })
     }
 
-    fun updateUser(userId: String, token: String, request: UpdateUserRequest) {
+    fun updateUser(userId: String, token: String, request: UpdateUserRequest, imageFile: File?) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                val response = userRepository.updateUser(userId, token, request)
+                val response = userRepository.updateUser(userId, token, request, imageFile)
                 if (response.isSuccessful) {
                     _updateSuccess.value = true
                     _errorMessage.value = null

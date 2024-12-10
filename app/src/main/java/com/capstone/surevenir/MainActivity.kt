@@ -7,14 +7,18 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +37,7 @@ import androidx.navigation.navArgument
 import com.capstone.surevenir.data.network.response.CheckoutData
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.helper.UserPreferences
+import com.capstone.surevenir.model.ProductCheckout
 import com.capstone.surevenir.ui.camera.CameraScreen
 import com.capstone.surevenir.ui.camera.ImageCaptureVM
 import com.capstone.surevenir.ui.camera.PreviewScreen
@@ -64,6 +69,7 @@ import com.capstone.surevenir.ui.screen.profile.AccountCenterScreen
 import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
 import com.capstone.surevenir.ui.screen.profile.SettingsScreen
 import com.capstone.surevenir.ui.screen.transaction.DetailsCheckoutScreen
+import com.capstone.surevenir.ui.screen.transaction.ReviewScreen
 import com.capstone.surevenir.ui.theme.MyAppTheme
 import com.capstone.surevenir.ui.viewmodel.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -73,6 +79,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.MapsInitializer
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -368,9 +375,33 @@ fun MainScreen(navController: NavHostController, userPreferences: UserPreference
                         navController = navController,
                         checkoutData = it,
                         onRateClick = { productId ->
-                            // Handle rate click if needed
+                            navController.currentBackStackEntry?.savedStateHandle?.set(
+                                "reviewProduct",
+                                checkout.checkoutDetails.find { detail -> detail.productId == productId }?.product
+                            )
+                            navController.navigate("review/$productId") {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     )
+                }
+            }
+            composable(
+                route = "review/{productId}",
+                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+            ) {
+                val product = navController.previousBackStackEntry?.savedStateHandle?.get<ProductCheckout>("reviewProduct")
+
+                if (product != null) {
+                    ReviewScreen(
+                        navController = navController,
+                        product = product
+                    )
+                } else {
+                    LaunchedEffect(Unit) {
+                        navController.popBackStack()
+                    }
                 }
             }
         }

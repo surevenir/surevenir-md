@@ -752,7 +752,7 @@ fun ReviewItem(review: ReviewData) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            tint = if (index < review.rating) Color(0xFFFFA726) else Color.LightGray,
+                            //tint = if (index < review.rating) Color(0xFFFFA726) else Color.LightGray,
                             modifier = Modifier.size(16.dp)
                         )
                     }

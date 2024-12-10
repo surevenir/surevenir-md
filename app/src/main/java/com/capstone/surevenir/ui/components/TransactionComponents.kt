@@ -30,7 +30,6 @@ import com.capstone.surevenir.data.network.response.CartItem
 import com.capstone.surevenir.data.network.response.CheckoutData
 import com.capstone.surevenir.helper.DateConverter
 import com.capstone.surevenir.helper.formatCurrency
-import com.capstone.surevenir.ui.screen.navmenu.sfui_bold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 

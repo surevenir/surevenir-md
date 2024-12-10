@@ -44,7 +44,7 @@ import kotlin.coroutines.suspendCoroutine
 @Composable
 fun CameraScreen(
     navController: NavController,
-    imageCaptureViewModel: ImageCaptureVM,
+    imageCaptureViewModel: ImageCaptureVM = hiltViewModel(),
     executor: Executor,
     tokenViewModel: TokenViewModel = hiltViewModel()
 ) {

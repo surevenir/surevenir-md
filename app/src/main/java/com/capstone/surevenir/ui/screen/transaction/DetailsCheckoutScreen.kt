@@ -1,6 +1,5 @@
 package com.capstone.surevenir.ui.screen.transaction
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -44,11 +43,9 @@ fun DetailsCheckoutScreen(
     val token by tokenViewModel.token.observeAsState()
     LaunchedEffect(Unit) {
         if (token == null) {
-            Log.d("CheckoutScreen", "Fetching token...")
             tokenViewModel.fetchToken()
         }
     }
-
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
 
     var selectedTab by remember {
@@ -58,7 +55,6 @@ fun DetailsCheckoutScreen(
         savedStateHandle?.set("selectedTab", 1)
         selectedTab = 1
     }
-
 
     val groupedDetails = checkoutData.checkoutDetails.groupBy { it.product.merchant.name }
 
@@ -158,7 +154,7 @@ fun DetailsCheckoutScreen(
                     ProductItem(
                         detail = detail,
                         showRateButton = checkoutData.status == "COMPLETED",
-                        onRateClick = { onRateClick(detail.productId) },
+                        onRateClick = { onRateClick(detail.productId)},
                         onProductClick = { productId ->
                             navController.navigate("product/$productId")
                         }
@@ -353,7 +349,7 @@ private fun ProductItem(
 
                     if (showRateButton) {
                         Button(
-                            onClick = onRateClick,
+                            onClick = { onRateClick() },
                             enabled = !isRated,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (isRated) Color.Gray else Color(0xFFED8A00)
