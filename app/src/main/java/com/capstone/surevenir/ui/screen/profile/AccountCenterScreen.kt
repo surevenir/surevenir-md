@@ -98,7 +98,7 @@ fun AccountCenterScreen(
                     AccountField(
                         label = "Email",
                         value = userData?.email ?: "Loading...",
-                        onClick = { /* Email tidak bisa diedit */ }
+                        onClick = { }
                     )
                     HorizontalDivider()
                     AccountField(

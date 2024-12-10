@@ -3,7 +3,6 @@ package com.capstone.surevenir.ui.screen.navmenu
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -45,7 +44,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -71,7 +69,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.paging.compose.LazyPagingItems
@@ -83,16 +80,15 @@ import com.capstone.surevenir.helper.UserPreferences
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.model.BottomNavItem
 import com.capstone.surevenir.model.Market
-import com.capstone.surevenir.model.Product
-import com.capstone.surevenir.ui.camera.ComposeFileProvider
 import com.capstone.surevenir.ui.camera.ImageCaptureVM
 import com.capstone.surevenir.ui.camera.PermissionUtils
 import com.capstone.surevenir.ui.components.MarketCard
 import com.capstone.surevenir.ui.components.ScanHistoryCard
 import com.capstone.surevenir.ui.components.SectionHeader
-import com.capstone.surevenir.ui.components.isValidEmail
 import com.capstone.surevenir.ui.viewmodel.GeocodingViewModel
+import com.capstone.surevenir.ui.viewmodel.LeaderboardViewModel
 import com.capstone.surevenir.ui.viewmodel.MarketViewModel
+import com.capstone.surevenir.ui.viewmodel.NotificationViewModel
 import com.capstone.surevenir.ui.viewmodel.ProductViewModel
 import com.capstone.surevenir.ui.viewmodel.ScanHistoryViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
@@ -103,7 +99,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltViewModel(), marketViewModel: MarketViewModel = hiltViewModel(), geocodingViewModel: GeocodingViewModel = hiltViewModel(), productViewModel: ProductViewModel = hiltViewModel()) {
+fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltViewModel(), marketViewModel: MarketViewModel = hiltViewModel(), geocodingViewModel: GeocodingViewModel = hiltViewModel(), productViewModel: ProductViewModel = hiltViewModel(),     notificationViewModel: NotificationViewModel = hiltViewModel(), leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     val geocodingViewModel: GeocodingViewModel = hiltViewModel()
     var subDistrict by remember { mutableStateOf("Loading...") }
@@ -116,6 +113,10 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
     val markets = remember { mutableStateOf<List<Market>?>(null) }
     val scope = rememberCoroutineScope()
 
+    val unreadCount by notificationViewModel.unreadCount.observeAsState(0)
+    val notificationIcon = if (unreadCount > 0) R.drawable.notification_top_new else R.drawable.notification_top
+    val userPoints by leaderboardViewModel.currentUserPoints.collectAsState()
+
 
     val token by tokenViewModel.token.observeAsState()
 
@@ -126,6 +127,13 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
     LaunchedEffect(token) {
         token?.let { productViewModel.getProducts(it) }
     }
+
+    LaunchedEffect(token) {
+        token?.let {
+            leaderboardViewModel.fetchLeaderboard(it) // Fetch leaderboard data saat Home dibuka
+        }
+    }
+
 
     Scaffold(
     ) { padding ->
@@ -143,15 +151,12 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
 //            Sliding Username Text
 
             item {
-                Text(
-                    text = "Hello, ${username.value}!",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontFamily = sfui_semibold,
-                    color = Color(0xFF1E1E1E),
-                    fontSize = 24.sp
+                GamificationHeader(
+                    username = "${username.value}",
+                    points = userPoints, // Gunakan points dari leaderboard
+                    onLeaderboardClick = {
+                        navController.navigate("leaderboard")
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -240,6 +245,52 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
                 HomeProductsSection(navController, pagingProducts)
                 Spacer(modifier = Modifier.height(16.dp))
             }
+        }
+    }
+}
+
+@Composable
+fun GamificationHeader(
+    username: String,
+    points: Int,
+    onLeaderboardClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Hello, ${username}!",
+            style = MaterialTheme.typography.headlineMedium,
+            fontFamily = sfui_semibold,
+            color = Color(0xFF1E1E1E),
+            fontSize = 20.sp
+        )
+
+        Column(
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = "See Leaderboards",
+                modifier = Modifier
+                    .clickable(onClick = onLeaderboardClick)
+                    .padding(bottom = 2.dp),
+                style = MaterialTheme.typography.labelLarge,
+                color = Color(0xFFFF5524),
+                fontSize = 16.sp
+            )
+
+            Text(
+                text = "$points Points",
+                style = MaterialTheme.typography.titleMedium,
+                fontFamily = sfui_semibold,
+                color = Color(0xFF1E1E1E),
+                fontSize = 14.sp
+            )
         }
     }
 }
@@ -546,10 +597,15 @@ fun StickyTopBar(navController: NavController) {
 fun TopBar(
     geocodingViewModel: GeocodingViewModel = hiltViewModel(),
     navController: NavController,
+    notificationViewModel: NotificationViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     var subDistrict by remember { mutableStateOf<String?>(null) }
     var district by remember { mutableStateOf<String?>(null) }
+
+    val unreadCount by notificationViewModel.unreadCount.observeAsState(0)
+    val notificationIcon = if (unreadCount > 0) R.drawable.notification_top_new else R.drawable.notification_top
+
 
     LaunchedEffect(Unit) {
         geocodingViewModel.getCurrentLocationAndGetSubDistrict(
@@ -570,11 +626,13 @@ fun TopBar(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Image(
-            painter = painterResource(id = R.drawable.notification_top),
-            contentDescription = "Logo",
-            modifier = Modifier.size(32.dp)
+            painter = painterResource(id = notificationIcon),
+            contentDescription = "Notification Icon",
+            modifier = Modifier
+                .size(32.dp)
                 .clickable { navController.navigate("notification") }
         )
+
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -659,8 +717,6 @@ fun HeroSection(imageRes: Int) {
 }
 
 
-
-
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
@@ -677,7 +733,7 @@ fun BottomNavigationBar(navController: NavController) {
             route = "shop"
         ),
         BottomNavItem(
-            title = "Transaction",
+            title = "Cart",
             iconActive = R.drawable.ic_carts_selected,
             iconInactive = R.drawable.ic_carts,
             route = "carts"

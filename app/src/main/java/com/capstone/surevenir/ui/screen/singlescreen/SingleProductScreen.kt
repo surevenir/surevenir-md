@@ -127,7 +127,8 @@ fun SingleProductScreen(
     val addFavoriteResult by favoriteViewModel.addFavoriteResult.collectAsState()
     val deleteFavoriteResult by favoriteViewModel.deleteFavoriteResult.collectAsState()
     val favoriteProductsState = favoriteViewModel.favoriteProducts.collectAsState()
-
+    val averageRating by reviewsViewModel.averageRating.observeAsState(0.0)
+    val totalReviews by reviewsViewModel.totalReviews.observeAsState(0)
 
 
     LaunchedEffect(Unit) {
@@ -156,6 +157,12 @@ fun SingleProductScreen(
             favoriteViewModel.getFavoriteProducts(it)
         }
     }
+
+
+    LaunchedEffect(Unit) {
+        productViewModel.getAllProducts()
+    }
+
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -451,8 +458,8 @@ fun SingleProductScreen(
                         }
 
                         ReviewsSection(
-                            averageRating = 5.0,
-                            totalReviews = reviews?.size ?: 0,
+                            averageRating = averageRating,
+                            totalReviews = totalReviews,
                             reviews = reviews,
                             isLoading = false
                         )
@@ -485,7 +492,7 @@ fun SingleProductScreen(
                             LaunchedEffect(token) {
                                 if (token != null) {
                                     Log.d("TOKEN_CATE", "Using Token: $token")
-                                    productViewModel.getProducts("Bearer $token")
+                                    productViewModel.getProducts(token.toString())
                                 } else {
                                     Log.d("TOKEN_CATE", "Token belum tersedia")
                                     productViewModel.getAllProducts()

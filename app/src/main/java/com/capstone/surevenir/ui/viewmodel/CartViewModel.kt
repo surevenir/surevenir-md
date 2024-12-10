@@ -1,6 +1,5 @@
 package com.capstone.surevenir.ui.viewmodel
 
-
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,6 +26,8 @@ class CartViewModel @Inject constructor(
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> get() = _errorMessage
+
+    private val _isUpdating = MutableStateFlow(false)
 
     private val _createCartResult = MutableStateFlow<Result<CreateCartResponse>?>(null)
     val createCartResult: StateFlow<Result<CreateCartResponse>?> = _createCartResult
@@ -80,43 +81,55 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    private val _isDeleting = MutableStateFlow(false)
-    val isDeleting: StateFlow<Boolean> = _isDeleting
-
     fun deleteCartItem(token: String, cartItemId: Int) {
-        Log.d("CartViewModel", "deleteCartItem started for ID: $cartItemId")
+        viewModelScope.launch {
+            try {
+                val response = cartRepository.deleteCartItem(token, cartItemId)
+                if (response.isSuccessful) {
+                    getCart(token)
+                } else {
+                    _errorMessage.value = "Failed to delete item: ${response.message()}"
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error: ${e.message}"
+            }
+        }
+    }
 
-        if (_isDeleting.value) {
-            Log.d("CartViewModel", "Delete already in progress, skipping")
+    fun updateCartItemQuantity(token: String, cartItemId: Int, newQuantity: Int) {
+        Log.d("CartViewModel", "updateCartItemQuantity started for ID: $cartItemId with quantity: $newQuantity")
+
+        if (_isUpdating.value) {
+            Log.d("CartViewModel", "Update already in progress, skipping")
             return
         }
 
         viewModelScope.launch {
-            _isDeleting.value = true
+            _isUpdating.value = true
             _isLoading.value = true
             _errorMessage.value = null
 
             try {
-                Log.d("CartViewModel", "Calling repository.deleteCartItem")
-                val response = cartRepository.deleteCartItem(token, cartItemId)
+                Log.d("CartViewModel", "Calling repository.updateCartItemQuantity")
+                val response = cartRepository.updateCartItemQuantity(token, cartItemId, newQuantity)
 
-                Log.d("CartViewModel", "Delete response received: ${response.isSuccessful}")
+                Log.d("CartViewModel", "Update response received: ${response.isSuccessful}")
 
                 if (response.isSuccessful) {
-                    Log.d("CartViewModel", "Delete successful, refreshing cart")
-                    getCart(token) // Refresh cart after successful deletion
+                    Log.d("CartViewModel", "Update successful, refreshing cart")
+                    getCart(token)
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    Log.e("CartViewModel", "Delete failed with error: $errorBody")
-                    _errorMessage.value = "Failed to delete item: ${response.message()}"
+                    Log.e("CartViewModel", "Update failed with error: $errorBody")
+                    _errorMessage.value = "Failed to update item quantity: ${response.message()}"
                 }
             } catch (e: Exception) {
-                Log.e("CartViewModel", "Exception during delete", e)
+                Log.e("CartViewModel", "Exception during update", e)
                 _errorMessage.value = "Error: ${e.message}"
             } finally {
                 _isLoading.value = false
-                _isDeleting.value = false
-                Log.d("CartViewModel", "Delete operation completed")
+                _isUpdating.value = false
+                Log.d("CartViewModel", "Update operation completed")
             }
         }
     }

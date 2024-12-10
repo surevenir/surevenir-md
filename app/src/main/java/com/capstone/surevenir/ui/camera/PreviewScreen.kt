@@ -6,29 +6,36 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,24 +50,62 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.capstone.surevenir.R
+import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun PreviewScreen(
     navController: NavController,
-    imageCaptureViewModel: ImageCaptureVM
+    imageCaptureVM: ImageCaptureVM,
+    tokenViewModel: TokenViewModel = hiltViewModel()
 ) {
-    val imageUri = imageCaptureViewModel.currentImageUri
-    var showDialog by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val imageUri = imageCaptureVM.currentImageUri
+    var showDialog by remember { mutableStateOf(false) }
+    val isLoading by imageCaptureVM.isLoading.collectAsState()
+    val predictionResult by imageCaptureVM.predictionResult.collectAsState()
+    val token by tokenViewModel.token.observeAsState()
+
+    var showResultPopup by remember { mutableStateOf(false) }
+    var isResultSuccess by remember { mutableStateOf(false) }
+
+    LaunchedEffect(predictionResult) {
+        predictionResult?.fold(
+            onSuccess = {
+                isResultSuccess = true
+                showResultPopup = true
+                delay(2000)
+                navController.navigate("result") {
+                    popUpTo("preview") { inclusive = true }
+                }
+            },
+            onFailure = { error ->
+                isResultSuccess = false
+                showResultPopup = true
+                delay(2000)
+                Toast.makeText(
+                    context,
+                    error.message ?: "Prediction failed",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        if (token == null) {
+            tokenViewModel.fetchToken()
+        }
+    }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -80,7 +125,7 @@ fun PreviewScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            imageCaptureViewModel.setImageUri(it)
+            imageCaptureVM.setImageUri(it)
             scope.launch {
                 navController.navigate("preview") {
                     popUpTo("home") { saveState = true }
@@ -114,7 +159,7 @@ fun PreviewScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFFED8A00))
-                .padding(16.dp),
+                .padding(20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -130,6 +175,8 @@ fun PreviewScreen(
 
             Text(
                 text = "Image Preview",
+                fontSize = 24.sp,
+                fontFamily = sfui_semibold,
                 color = Color.White,
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
@@ -139,7 +186,9 @@ fun PreviewScreen(
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .size(30.dp),
                 colorFilter = ColorFilter.tint(Color.White)
             )
         }
@@ -152,9 +201,9 @@ fun PreviewScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.LightGray)
+                    .weight(1f)
+                    .clip(RoundedCornerShape(10.dp))
+                    .padding(top = 10.dp, bottom = 50.dp)
             ) {
                 AsyncImage(
                     model = imageUri,
@@ -164,28 +213,37 @@ fun PreviewScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
                     onClick = {
-                        isLoading = true
-                        navController.navigate("result") {
-                            popUpTo("preview") { inclusive = true }
+                        scope.launch {
+                            token?.let { currentToken ->
+                                imageCaptureVM.predictImage(currentToken, context)
+                            } ?: run {
+                                Toast.makeText(
+                                    context,
+                                    "Please wait, authenticating...",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00))
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         "Analyze",
                         modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        fontSize = 20.sp,
+                        fontFamily = sfui_semibold,
+                        fontWeight = FontWeight.ExtraBold
                     )
                 }
 
@@ -195,58 +253,163 @@ fun PreviewScreen(
                     onClick = { showDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         "Retake",
                         modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        fontSize = 20.sp,
+                        fontFamily = sfui_semibold,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0x80000000))
+                .clickable(enabled = false) { },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .padding(24.dp)
+                    .width(200.dp)
+                    .height(100.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp),
+                        color = Color(0xFFED8A00)
+                    )
+                    Text(
+                        text = "Analyzing image...",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontSize = 16.sp,
+                        fontFamily = sfui_semibold,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFFED8A00)
+                    )
+                }
+            }
+        }
+    }
+
+    if (showResultPopup) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0x80000000)),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        if (isResultSuccess) Color(0xFFED8A00)
+                        else Color.Red)
+                    .padding(24.dp)
+                    .width(200.dp)
+                    .height(100.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = if (isResultSuccess) "Analyze Success" else "Analyze Failed",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 24.sp,
+                        fontFamily = sfui_semibold,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
                         textAlign = TextAlign.Center
                     )
                 }
             }
         }
-
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0x80000000))
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(64.dp),
-                    color = Color.White
-                )
-            }
-        }
     }
 
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = {
-                Text(text = "Choose Image Source")
-            },
-            text = {
-                Column {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0x99000000))
+                .clickable(enabled = false) { },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(280.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = "Choose Image Source",
+                        color = Color(0xFFED8A00),
+                        fontSize = 18.sp,
+                        fontFamily = sfui_semibold,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(30.dp))
                     TextButton(
                         onClick = {
                             showDialog = false
                             if (PermissionUtils.hasRequiredPermissions(context)) {
                                 val uri = ComposeFileProvider.getImageUri(context)
-                                imageCaptureViewModel.setImageUri(uri)
+                                imageCaptureVM.setImageUri(uri)
                                 cameraLauncher.launch(uri)
                             } else {
                                 permissionLauncher.launch(PermissionUtils.getRequiredPermissions())
                             }
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text("Camera")
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CameraAlt,
+                                contentDescription = "Camera",
+                                tint = Color(0xFFED8A00),
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                "Camera",
+                                color = Color(0xFFED8A00),
+                                fontSize = 14.sp,
+                                fontFamily = sfui_semibold
+                            )
+                        }
                     }
-
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     TextButton(
                         onClick = {
                             showDialog = false
@@ -255,29 +418,46 @@ fun PreviewScreen(
                             } else {
                                 permissionLauncher.launch(PermissionUtils.getRequiredPermissions())
                             }
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text("Gallery")
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Image,
+                                contentDescription = "Gallery",
+                                tint = Color(0xFFED8A00),
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                "Gallery",
+                                color = Color(0xFFED8A00),
+                                fontSize = 14.sp,
+                                fontFamily = sfui_semibold
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(30.dp))
+                    TextButton(
+                        onClick = { showDialog = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+
+                    ) {
+                        Text(
+                            "Cancel",
+                            color = Color.Gray,
+                            fontSize = 16.sp,
+                            fontFamily = sfui_semibold,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
-                }
             }
-        )
+        }
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreviewScreenPreview() {
-    val navController = rememberNavController()
-    val imageCaptureViewModel = ImageCaptureVM()
-    PreviewScreen(
-        navController = navController,
-        imageCaptureViewModel = imageCaptureViewModel
-    )
 }

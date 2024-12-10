@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.SwitchCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,8 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.capstone.surevenir.R
+import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -40,8 +44,9 @@ import kotlin.coroutines.suspendCoroutine
 @Composable
 fun CameraScreen(
     navController: NavController,
-    imageCaptureViewModel: ImageCaptureVM,
-    executor: Executor
+    imageCaptureViewModel: ImageCaptureVM = hiltViewModel(),
+    executor: Executor,
+    tokenViewModel: TokenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
@@ -50,6 +55,13 @@ fun CameraScreen(
     val preview = Preview.Builder().build()
     val previewView = remember { PreviewView(context) }
     val imageCapture = remember { ImageCapture.Builder().build() }
+    val token by tokenViewModel.token.observeAsState()
+
+    LaunchedEffect(Unit) {
+        if (token == null) {
+            tokenViewModel.fetchToken()
+        }
+    }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -150,33 +162,41 @@ fun CameraScreen(
                 // Capture Button (remain unchanged)
                 IconButton(
                     onClick = {
-                        val uri = ComposeFileProvider.getImageUri(context)
-                        val contentValues = ContentValues().apply {
-                            put(MediaStore.Images.Media.DISPLAY_NAME, "selected_image_${System.currentTimeMillis()}.jpg")
-                            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-                        }
-                        val outputOptions = ImageCapture.OutputFileOptions.Builder(
-                            context.contentResolver,
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                            contentValues
-                        ).build()
+                        token?.let {
+                            val uri = ComposeFileProvider.getImageUri(context)
+                            val contentValues = ContentValues().apply {
+                                put(MediaStore.Images.Media.DISPLAY_NAME, "selected_image_${System.currentTimeMillis()}.jpg")
+                                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                            }
+                            val outputOptions = ImageCapture.OutputFileOptions.Builder(
+                                context.contentResolver,
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                contentValues
+                            ).build()
 
-                        imageCapture.takePicture(
-                            outputOptions,
-                            executor,
-                            object : ImageCapture.OnImageSavedCallback {
-                                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                    imageCaptureViewModel.setImageUri(output.savedUri ?: uri)
-                                    navController.navigate("preview") {
-                                        popUpTo("camera") { inclusive = true }
+                            imageCapture.takePicture(
+                                outputOptions,
+                                executor,
+                                object : ImageCapture.OnImageSavedCallback {
+                                    override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                        imageCaptureViewModel.setImageUri(output.savedUri ?: uri)
+                                        navController.navigate("preview") {
+                                            popUpTo("camera") { inclusive = true }
+                                        }
+                                    }
+
+                                    override fun onError(exception: ImageCaptureException) {
+                                        // Handle error
                                     }
                                 }
-
-                                override fun onError(exception: ImageCaptureException) {
-                                    // Handle error
-                                }
-                            }
-                        )
+                            )
+                        } ?: run {
+                            Toast.makeText(
+                                context,
+                                "Please wait, authenticating...",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     },
                     modifier = Modifier
                         .size(72.dp)

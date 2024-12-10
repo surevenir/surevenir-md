@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.capstone.surevenir.R
 import com.capstone.surevenir.model.Product
 import com.capstone.surevenir.ui.components.ProductCard
@@ -131,14 +132,12 @@ fun SingleCategoryScreen (
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.cat_art),
-                        contentDescription = "Art",
+                    AsyncImage(
+                        model = product.image_url ?: "https://via.placeholder.com/150",
+                        contentDescription = product.name,
                         modifier = Modifier
-                            .size(150.dp)
-                            .padding(5.dp)
-                            .clickable { navController.navigate("singleCategory") }
-                            .clip(RoundedCornerShape(8.dp))
+                            .size(80.dp)
+                            .clip(CircleShape)
                     )
                     Text(
                         text = "${product.name}",

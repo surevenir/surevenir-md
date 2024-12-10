@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 import java.util.Date
 import javax.inject.Inject
 
@@ -59,11 +60,11 @@ class UserViewModel @Inject constructor(
         })
     }
 
-    fun updateUser(userId: String, token: String, request: UpdateUserRequest) {
+    fun updateUser(userId: String, token: String, request: UpdateUserRequest, imageFile: File?) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                val response = userRepository.updateUser(userId, token, request)
+                val response = userRepository.updateUser(userId, token, request, imageFile)
                 if (response.isSuccessful) {
                     _updateSuccess.value = true
                     _errorMessage.value = null
@@ -79,6 +80,7 @@ class UserViewModel @Inject constructor(
             }
         }
     }
+
 
 
     fun getUsers(token: String, onComplete: (List<User>?) -> Unit) {

@@ -5,6 +5,8 @@ import com.capstone.surevenir.data.network.response.AllUserResponse
 import com.capstone.surevenir.data.network.response.CartResponse
 import com.capstone.surevenir.data.network.response.CategoryDetailResponse
 import com.capstone.surevenir.data.network.response.CategoryResponse
+import com.capstone.surevenir.data.network.response.CheckoutGetResponse
+import com.capstone.surevenir.data.network.response.CheckoutPostResponse
 import com.capstone.surevenir.data.network.response.CheckoutRequest
 import com.capstone.surevenir.data.network.response.CheckoutResponse
 import com.capstone.surevenir.data.network.response.CreateUserRequest
@@ -12,12 +14,16 @@ import com.capstone.surevenir.data.network.response.DeleteCartResponse
 import com.capstone.surevenir.data.network.response.DeleteFavoriteResponse
 import com.capstone.surevenir.data.network.response.FavoriteResponse
 import com.capstone.surevenir.data.network.response.GetFavoriteProductsResponse
+import com.capstone.surevenir.data.network.response.LeaderboardResponse
 import com.capstone.surevenir.data.network.response.MarketDetailResponse
 import com.capstone.surevenir.data.network.response.MarketResponse
 import com.capstone.surevenir.data.network.response.MerchantDetailResponse
 import com.capstone.surevenir.data.network.response.MerchantResponse
+import com.capstone.surevenir.data.network.response.PredictionResponse
 import com.capstone.surevenir.data.network.response.ProductDetailResponse
 import com.capstone.surevenir.data.network.response.ProductResponse
+import com.capstone.surevenir.data.network.response.ReviewRequest
+import com.capstone.surevenir.data.network.response.ReviewResponse
 import com.capstone.surevenir.data.network.response.ReviewsResponse
 import com.capstone.surevenir.data.network.response.ScanHistoryResponse
 import com.capstone.surevenir.data.network.response.UpdateUserRequest
@@ -30,6 +36,7 @@ import com.capstone.surevenir.model.Merchant
 import com.capstone.surevenir.model.Product
 import com.capstone.surevenir.model.User
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
@@ -94,11 +101,16 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<UserResponse>
 
+    @Multipart
     @PATCH("users/{id}")
     suspend fun updateUser(
         @Path("id") userId: String,
         @Header("Authorization") token: String,
-        @Body request: UpdateUserRequest
+        @Part("full_name") fullName: RequestBody,
+        @Part("username") username: RequestBody,
+        @Part("phone") phone: RequestBody?,
+        @Part("address") address: RequestBody?,
+        @Part image: MultipartBody.Part?
     ): Response<UserResponse>
 
     @GET("carts")
@@ -111,6 +123,14 @@ interface ApiService {
         @Header("Authorization") token: String
     ): GetFavoriteProductsResponse
 
+    @PATCH("carts/{id}")
+    suspend fun updateCartQuantity(
+        @Path("id") cartItemId: Int,
+        @Header("Authorization") token: String,
+        @Body quantity: Map<String, Int>
+    ): Response<CartResponse>
+
+
     @DELETE("carts/{id}")
     suspend fun deleteCartItem(
         @Path("id") cartItemId: Int,
@@ -121,12 +141,12 @@ interface ApiService {
     suspend fun checkout(
         @Header("Authorization") token: String,
         @Body request: CheckoutRequest
-    ): Response<CheckoutResponse>
+    ): Response<CheckoutPostResponse>
 
     @GET("carts/checkout")
     suspend fun getCheckouts(
         @Header("Authorization") token: String
-    ): Response<CheckoutResponse>
+    ): Response<CheckoutGetResponse>
 
     @DELETE("products/{productId}/favorites")
     suspend fun deleteFavorite(
@@ -180,5 +200,21 @@ interface ApiService {
 
 //    @GET("count")
 //    fun getStatistics(): Call<StatisticsResponse>
+
+    @Multipart
+    @POST("predict")
+    suspend fun predictImage(
+        @Header("Authorization") token: String,
+        @Part image: MultipartBody.Part
+    ): Response<PredictionResponse>
+
+    @POST("reviews")
+    suspend fun postReview(
+        @Header("Authorization") token: String,
+        @Body review: ReviewRequest
+    ): Response<ReviewResponse>
+
+    @GET("predict/top-scanner")
+    suspend fun getLeaderboard(@Header("Authorization") token: String): LeaderboardResponse
 
 }

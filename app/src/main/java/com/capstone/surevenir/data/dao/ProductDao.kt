@@ -1,10 +1,12 @@
 package com.capstone.surevenir.data.dao
 
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.capstone.surevenir.data.entity.ProductDatabase
 
@@ -53,6 +55,23 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE categories LIKE '%' || :categoryId || '%'")
     fun getProductsByCategoryId(categoryId: Int): List<ProductDatabase>
 
+
+    @Query("SELECT COUNT(*) FROM products")
+    fun getProductCount(): Int
+
+
+
+    @Transaction
+    fun debugInsert(product: ProductDatabase) {
+        try {
+            insert(product)
+            val count = getProductCount()
+            Log.d("ProductDao", "Successfully inserted product. Total count: $count")
+        } catch (e: Exception) {
+            Log.e("ProductDao", "Error inserting product", e)
+            throw e
+        }
+    }
 
 }
 

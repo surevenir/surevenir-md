@@ -14,6 +14,7 @@ data class CheckoutResponse(
     val data: List<CheckoutData>
 )
 
+/*
 data class CheckoutData(
     @SerializedName("id")
     val id: Int,
@@ -58,4 +59,4 @@ data class CheckoutDetail(
 
 data class CheckoutRequest(
     val cartItemIds: List<Int>
-)
+)*/

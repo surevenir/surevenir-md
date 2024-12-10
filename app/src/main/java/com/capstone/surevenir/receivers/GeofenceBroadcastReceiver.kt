@@ -9,10 +9,17 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.room.Room
 import com.capstone.surevenir.MainActivity
 import com.capstone.surevenir.R
+import com.capstone.surevenir.data.database.AppDatabase
+import com.capstone.surevenir.data.entity.NotificationDatabase
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.Date
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     companion object {
@@ -129,6 +136,36 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         notificationManager.notify(notificationId, notification)
 
         Log.d("GeofenceReceiver", "Notification shown: ID=$notificationId, Title=$title")
+
+        // Save notification to database
+        CoroutineScope(Dispatchers.IO).launch {
+            val database = Room.databaseBuilder(
+                context.applicationContext,
+                AppDatabase::class.java,
+                "surevenir-database"
+            ).build()
+
+            val notificationDao = database.notificationDao()
+
+            val numericId = geofenceId.substringAfter("_").toIntOrNull() ?: return@launch
+            val locationType = when {
+                geofenceId.startsWith("merchant_") -> "merchant"
+                geofenceId.startsWith("market_") -> "market"
+                else -> "unknown"
+            }
+
+            val notification = NotificationDatabase(
+                title = title,
+                message = message,
+                locationId = geofenceId,
+                locationType = locationType,
+                numericId = numericId,
+                timestamp = Date(),
+                isRead = false
+            )
+
+            notificationDao.insertNotification(notification)
+        }
     }
 
     private fun getErrorString(errorCode: Int): String {

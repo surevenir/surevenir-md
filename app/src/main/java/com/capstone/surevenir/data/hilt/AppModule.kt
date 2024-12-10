@@ -3,6 +3,7 @@ package com.capstone.surevenir.data.hilt
 import android.content.Context
 import androidx.room.Room
 import com.capstone.surevenir.data.dao.MerchantDao
+import com.capstone.surevenir.data.dao.NotificationDao
 import com.capstone.surevenir.data.dao.ProductDao
 import com.capstone.surevenir.data.database.AppDatabase
 import dagger.Module
@@ -22,7 +23,9 @@ object AppModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java, "surevenir-database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
@@ -35,5 +38,12 @@ object AppModule {
     @Singleton
     fun provideMerchantDao(appDatabase: AppDatabase): MerchantDao {
         return appDatabase.merchantDao()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideNotificationDao(appDatabase: AppDatabase): NotificationDao {
+        return appDatabase.notificationDao()
     }
 }

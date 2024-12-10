@@ -15,6 +15,8 @@ data class CategoryData(
 	val description: String? = null,
 	@SerializedName("range_price")
 	val rangePrice: String? = null,
+	@SerializedName("image_url")
+	val image_url: Any? = null,
 	val id: Int? = null,
 	val updatedAt: String? = null
 )

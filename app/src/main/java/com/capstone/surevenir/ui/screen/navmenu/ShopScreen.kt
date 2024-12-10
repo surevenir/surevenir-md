@@ -108,6 +108,11 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
         token?.let { productViewModel.getProducts(it) }
     }
 
+    LaunchedEffect(Unit) {
+        productViewModel.getAllProducts()
+    }
+
+
     LaunchedEffect(productViewModel.minPriceFilter, productViewModel.maxPriceFilter, productViewModel.minStockFilter, productViewModel.startDateFilter, productViewModel.endDateFilter) {
         // Jika semua filter bernilai null, mungkin tidak perlu apply
         // Tapi jika salah satu berubah atau user baru saja set filter, panggil applyFilter

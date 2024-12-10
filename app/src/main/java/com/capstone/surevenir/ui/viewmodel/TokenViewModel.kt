@@ -21,11 +21,15 @@ class TokenViewModel @Inject constructor(
     private val _token = MutableLiveData<String?>()
     val token: LiveData<String?> = _token
 
+    private val _userId = MutableLiveData<String>()
+    val userId: LiveData<String> = _userId
+
     fun fetchToken() {
         viewModelScope.launch {
             userPreferences.userToken.collect { tokenValue ->
                 _token.value = tokenValue
                 Log.d("TokenViewModel", "Token fetched: $tokenValue")
+
             }
         }
     }

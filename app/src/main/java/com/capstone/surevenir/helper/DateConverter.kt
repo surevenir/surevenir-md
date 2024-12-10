@@ -1,7 +1,9 @@
 package com.capstone.surevenir.helper
 
 import androidx.room.TypeConverter
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 
 class DateConverter {
@@ -13,5 +15,18 @@ class DateConverter {
     @TypeConverter
     fun dateToTimestamp(date: Date?): Long? {
         return date?.time
+    }
+
+
+    fun formatDateString(dateString: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val date = inputFormat.parse(dateString)
+
+            val outputFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+            outputFormat.format(date ?: Date())
+        } catch (e: Exception) {
+            dateString
+        }
     }
 }

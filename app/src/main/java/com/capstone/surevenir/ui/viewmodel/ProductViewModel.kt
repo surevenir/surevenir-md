@@ -81,7 +81,13 @@ class ProductViewModel @Inject constructor(
                     enablePlaceholders = false,
                     initialLoadSize = 20
                 ),
-                pagingSourceFactory = { ProductPagingSource(apiService, token) }
+                pagingSourceFactory = {
+                    ProductPagingSource(
+                        apiService,
+                        "Bearer ${token}",
+                        productRepository // Pass repository ke PagingSource
+                    )
+                }
             ).flow.cachedIn(viewModelScope).collect {
                 _productPagingFlow.value = it
             }
@@ -95,13 +101,23 @@ class ProductViewModel @Inject constructor(
                 _searchResults.value = emptyList()
                 return@launch
             }
-            val filteredProducts = _products.value!!.filter { product ->
-                product.name.contains(query, ignoreCase = true) ||
-                        product.description.contains(query, ignoreCase = true)
+
+            val currentProducts = _products.value
+            if (currentProducts != null) {
+                val filteredProducts = currentProducts.filter { product ->
+                    product.name.contains(query, ignoreCase = true) ||
+                            product.description.contains(query, ignoreCase = true)
+                }
+                _searchResults.value = filteredProducts
+            } else {
+                Log.e("ProductViewModel", "searchProducts called but _products is null")
+                _searchResults.value = emptyList()
             }
-            _searchResults.value = filteredProducts
         }
     }
+
+
+
     fun getProductsByMerchantId(merchantId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             val products = productRepository.getProductsByMerchantId(merchantId)

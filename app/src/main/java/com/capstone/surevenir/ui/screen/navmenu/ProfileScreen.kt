@@ -1,7 +1,6 @@
 package com.capstone.surevenir.ui.screen.navmenu
 
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,12 +31,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,10 +49,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.capstone.surevenir.R
@@ -69,6 +72,7 @@ fun ProfileScreen(
     val scope = rememberCoroutineScope()
     val userPreferences = remember { UserPreferences(context) }
 
+    var showLogoutDialog by remember { mutableStateOf(false) }
     val userData by userViewModel.currentUser.observeAsState()
     val isLoading by userViewModel.isLoading.observeAsState(initial = false)
     val errorMessage by userViewModel.errorMessage.observeAsState()
@@ -83,7 +87,6 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        modifier = Modifier.background(Color.White),
         content = { paddingValues ->
             if (isLoading) {
                 Box(
@@ -96,7 +99,6 @@ fun ProfileScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.White)
                         .padding(paddingValues)
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -107,7 +109,7 @@ fun ProfileScreen(
                             .height(200.dp)
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.onboard_1),
+                            painter = painterResource(id = R.drawable.header),
                             contentDescription = "Profile Background",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -162,13 +164,16 @@ fun ProfileScreen(
                         text = "Account Center",
                         onClick = { navController.navigate("accountCenter") }
                     )
+
                     Spacer(modifier = Modifier.height(6.dp))
+
                     MenuButton(
                         icon = Icons.Default.Person,
                         text = "Edit Profile",
                         onClick = { navController.navigate("editProfile") }
                     )
                     Spacer(modifier = Modifier.height(6.dp))
+
                     MenuButton(
                         icon = Icons.Default.Settings,
                         text = "Settings",
@@ -176,19 +181,68 @@ fun ProfileScreen(
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
+
                     MenuButton(
                         icon = Icons.AutoMirrored.Filled.ExitToApp,
                         text = "Log Out",
-                        onClick = {
-                            scope.launch {
-                                userPreferences.clearLoginData()
-                                navController.navigate("signIn") {
-                                    popUpTo("profile") { inclusive = true }
-                                }
-                            }
-                        }
+                        onClick = { showLogoutDialog = true }
                     )
+
                     Spacer(modifier = Modifier.height(50.dp))
+
+                    if (showLogoutDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showLogoutDialog = false },
+                            title = {
+                                Text(
+                                    text = "Log Out",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Center
+                                )
+                            },
+                            text = {
+                                Text(
+                                    text = "Are you sure you want to log out?",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        scope.launch {
+                                            userPreferences.clearLoginData()
+                                            navController.navigate("signIn") {
+                                                popUpTo("profile") { inclusive = true }
+                                            }
+                                        }
+                                        showLogoutDialog = false
+                                    }
+                                ) {
+                                    Text(
+                                        text = "Log Out",
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Red
+                                    )
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = { showLogoutDialog = false }
+                                ) {
+                                    Text(
+                                        text = "Cancel",
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black
+                                    )
+                                }
+                            },
+                            containerColor = Color.White,
+                            shape = MaterialTheme.shapes.medium
+                        )
+                    }
                 }
             }
 
