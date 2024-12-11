@@ -15,7 +15,6 @@ import com.capstone.surevenir.data.network.response.MerchantResponse
 import com.capstone.surevenir.data.network.response.PredictionResponse
 import com.capstone.surevenir.data.network.response.ProductDetailResponse
 import com.capstone.surevenir.data.network.response.ProductResponse
-import com.capstone.surevenir.data.network.response.ReviewRequest
 import com.capstone.surevenir.data.network.response.ReviewResponse
 import com.capstone.surevenir.data.network.response.UserResponse
 import com.capstone.surevenir.model.CreateCartRequest
@@ -99,7 +98,6 @@ interface ApiService {
         @Body quantity: Map<String, Int>
     ): Response<CartResponse>
 
-    @Multipart
     @POST("carts/checkout")
     suspend fun checkout(
         @Header("Authorization") token: String,
@@ -123,10 +121,14 @@ interface ApiService {
         @Header("Authorization") token: String
     ): ProductDetailResponse
 
+    @Multipart
     @POST("reviews")
     suspend fun postReview(
         @Header("Authorization") token: String,
-        @Body review: ReviewRequest
+        @Part("rating") rating: RequestBody,
+        @Part("comment") comment: RequestBody,
+        @Part("product_id") productId: RequestBody,
+        @Part images: List<MultipartBody.Part>
     ): Response<ReviewResponse>
 
     @GET("categories/{id}")

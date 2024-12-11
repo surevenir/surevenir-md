@@ -312,11 +312,16 @@ fun MainScreen(navController: NavHostController, userPreferences: UserPreference
             composable("allMarket") {
                 AllMarket(navController)
             }
-            composable("camera") {
+            composable(
+                route = "camera?previousScreen={previousScreen}",
+                arguments = listOf(navArgument("previousScreen") { defaultValue = "" })
+            ) { navBackStackEntry ->
+                val previousScreen = navBackStackEntry.arguments?.getString("previousScreen") ?: ""
                 CameraScreen(
                     navController = navController,
                     imageCaptureViewModel = imageCaptureViewModel,
-                    executor = cameraExecutor
+                    executor = cameraExecutor,
+                    previousScreen = previousScreen
                 )
             }
             composable("preview") {

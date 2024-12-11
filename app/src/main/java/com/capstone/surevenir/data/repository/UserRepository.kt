@@ -5,7 +5,6 @@ import com.capstone.surevenir.data.network.response.AllUserResponse
 import com.capstone.surevenir.data.network.response.CreateUserRequest
 import com.capstone.surevenir.data.network.response.UpdateUserRequest
 import com.capstone.surevenir.data.network.response.UserResponse
-import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody

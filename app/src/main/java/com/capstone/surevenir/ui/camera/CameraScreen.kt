@@ -18,8 +18,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.SwitchCamera
+import androidx.compose.material.icons.filled.Cameraswitch
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -29,13 +30,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.capstone.surevenir.R
+import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
@@ -46,7 +48,8 @@ fun CameraScreen(
     navController: NavController,
     imageCaptureViewModel: ImageCaptureVM = hiltViewModel(),
     executor: Executor,
-    tokenViewModel: TokenViewModel = hiltViewModel()
+    tokenViewModel: TokenViewModel = hiltViewModel(),
+    previousScreen: String
 ) {
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
@@ -92,12 +95,11 @@ fun CameraScreen(
             modifier = Modifier.fillMaxSize(),
         )
 
-        // Top Bar with back button and logo
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFFED8A00))
-                .padding(16.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -114,9 +116,8 @@ fun CameraScreen(
             Text(
                 text = "SureCam",
                 color = Color.White,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
-                )
+                fontFamily = sfui_semibold,
+                fontSize = 26.sp
             )
 
             Image(
@@ -131,13 +132,13 @@ fun CameraScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp),
+                .padding(bottom = 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -149,11 +150,11 @@ fun CameraScreen(
                         galleryLauncher.launch(intent)
                     },
                     modifier = Modifier
-                        .size(48.dp)
-                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                        .size(60.dp)
+                        .background(Color.Gray, CircleShape)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PhotoLibrary,
+                        imageVector = Icons.Default.Image,
                         contentDescription = "Gallery",
                         tint = Color.White
                     )
@@ -199,14 +200,14 @@ fun CameraScreen(
                         }
                     },
                     modifier = Modifier
-                        .size(72.dp)
+                        .size(85.dp)
                         .background(Color(0xFFED8A00), CircleShape)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_scan),
+                        imageVector = Icons.Default.PhotoCamera,
                         contentDescription = "Take Photo",
                         tint = Color.White,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(45.dp)
                     )
                 }
 
@@ -220,11 +221,11 @@ fun CameraScreen(
                         }
                     },
                     modifier = Modifier
-                        .size(48.dp)
-                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                        .size(60.dp)
+                        .background(Color.Gray, CircleShape)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.SwitchCamera,
+                        imageVector = Icons.Default.Cameraswitch,
                         contentDescription = "Switch Camera",
                         tint = Color.White
                     )

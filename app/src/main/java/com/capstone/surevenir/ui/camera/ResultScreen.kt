@@ -1,6 +1,6 @@
 package com.capstone.surevenir.ui.camera
 
-import androidx.compose.foundation.background
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,11 +17,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material.icons.Icons
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,17 +36,20 @@ fun ResultScreen(
     imageCaptureViewModel: ImageCaptureVM
 ) {
     val predictionResult = imageCaptureViewModel.predictionResult.collectAsState()
+    val imageUri = imageCaptureViewModel.currentImageUri
 
     predictionResult.value?.fold(
         onSuccess = { response ->
             val data = response.data
-            ResultScreenContent(
-                navController = navController,
-                imageUrl = data.imageUrl,
-                prediction = data.prediction,
-                category = data.category,
-                relatedProducts = data.relatedProducts
-            )
+            imageUri?.let {
+                ResultScreenContent(
+                    navController = navController,
+                    imageUri = it,
+                    prediction = data.prediction,
+                    category = data.category,
+                    relatedProducts = data.relatedProducts
+                )
+            }
         },
         onFailure = {
             Column(
@@ -65,7 +66,7 @@ fun ResultScreen(
 @Composable
 private fun ResultScreenContent(
     navController: NavController,
-    imageUrl: String,
+    imageUri: Uri,
     prediction: Prediction,
     category: CategoryPrediction,
     relatedProducts: List<RelatedProduct>
@@ -95,32 +96,13 @@ private fun ResultScreenContent(
                 .clip(RoundedCornerShape(16.dp))
         ) {
             AsyncImage(
-                model = imageUrl,
+                model = imageUri,
                 contentDescription = "Identified Souvenir",
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop
             )
-
-            IconButton(
-                onClick = { /* Bookmark functionality */ },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(12.dp)
-                    .size(50.dp)
-                    .background(
-                        color = Color(0xFFFF8C00),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-            ) {
-                Icon(
-                    Icons.Default.BookmarkBorder,
-                    contentDescription = "Bookmark",
-                    tint = Color.White,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

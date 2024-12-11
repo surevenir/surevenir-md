@@ -22,6 +22,8 @@ android {
         buildConfigField("String", "BASE_URL", "\"https://surevenir-backend-30505862512.us-central1.run.app/api/\"")
         buildConfigField("String", "MAPS_API_KEY", "\"AIzaSyD85fB5qwbsbMAAMu-7rhm52Ywtdy5WJvQ\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -32,7 +34,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+
     }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
     }
@@ -60,6 +64,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation (libs.androidx.camera.camera2)
+    implementation(libs.firebase.messaging.ktx)
     val coroutines_version = "1.7.3"
     val hilt_version = "2.52"
     implementation ("androidx.room:room-runtime:2.5.0")

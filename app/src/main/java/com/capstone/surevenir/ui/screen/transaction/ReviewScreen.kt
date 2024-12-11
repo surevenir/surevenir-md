@@ -1,5 +1,6 @@
 package com.capstone.surevenir.ui.screen.transaction
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,8 +28,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.capstone.surevenir.R
-import com.capstone.surevenir.data.network.response.ReviewImageRequest
-import com.capstone.surevenir.data.network.response.ReviewRequest
 import com.capstone.surevenir.helper.formatCurrency
 import com.capstone.surevenir.model.ProductCheckout
 import com.capstone.surevenir.ui.components.ImagePickerDialog
@@ -47,6 +46,7 @@ fun ReviewScreen(
     var review by remember { mutableStateOf("") }
     var selectedImages by remember { mutableStateOf<List<String>>(emptyList()) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
+    val reviewState by reviewsViewModel.reviewState.observeAsState()
 
     val token by tokenViewModel.token.observeAsState()
 
@@ -56,8 +56,30 @@ fun ReviewScreen(
         }
     }
 
+    LaunchedEffect(token) {
+        token?.let {
+            Log.d("ReviewScreen", "Current token: $it")
+        }
+    }
+
     BackHandler {
         navController.popBackStack()
+    }
+
+    LaunchedEffect(reviewState) {
+        when (reviewState) {
+            is ReviewsViewModel.ReviewState.Success -> {
+                navController.previousBackStackEntry?.savedStateHandle?.set("reviewSubmitted", true)
+                reviewsViewModel.resetReviewState()
+                navController.popBackStack()
+            }
+            is ReviewsViewModel.ReviewState.Error -> {
+                if ((reviewState as ReviewsViewModel.ReviewState.Error).message.contains("already reviewed")) {
+                    navController.popBackStack()
+                }
+            }
+            else -> {}
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -224,40 +246,36 @@ fun ReviewScreen(
                 Button(
                     onClick = {
                         token?.let { tokenValue ->
-                            val reviewRequest = ReviewRequest(
-                                rating = rating.toString(),
-                                comment = review,
-                                userId = tokenValue,
-                                productId = product.id.toString(),
-                                images = selectedImages.map {
-                                    ReviewImageRequest(url = it, type = "review")
-                                }
-                            )
                             reviewsViewModel.postReview(
-                                token = "Bearer $tokenValue",
+                                token = tokenValue,
                                 rating = rating,
                                 comment = review,
-                                userId = tokenValue,
                                 productId = product.id,
-                                images = reviewRequest.images
+                                imageUris = selectedImages
                             )
-                            navController.popBackStack()
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp),
-                    enabled = rating > 0 && review.isNotBlank() && token != null,
+                    enabled = rating > 0 && review.isNotBlank() && selectedImages.isNotEmpty() && token != null,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFED8A00)
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(
-                        text = "SEND REVIEW",
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        fontFamily = sfui_semibold
-                    )
+                    if (reviewsViewModel.isLoading.value == true) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White
+                        )
+                    } else {
+                        Text(
+                            text = "SEND REVIEW",
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            fontFamily = sfui_semibold
+                        )
+                    }
                 }
             }
         }

@@ -28,6 +28,7 @@ import com.capstone.surevenir.data.network.response.CheckoutDetail
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.helper.DateConverter
+import com.capstone.surevenir.helper.formatCurrency
 import com.capstone.surevenir.ui.screen.navmenu.sfui_bold
 import com.capstone.surevenir.ui.viewmodel.ReviewsViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
@@ -266,7 +267,7 @@ private fun ProductItem(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onProductClick(detail.productId.toString()) },
+            .clickable(enabled = showRateButton && !isRated) { onProductClick(detail.productId.toString()) },
         color = Color.White
     ) {
         Row(
@@ -276,7 +277,6 @@ private fun ProductItem(
                 .height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Product Image
             Box(
                 modifier = Modifier
                     .size(100.dp)
@@ -291,13 +291,11 @@ private fun ProductItem(
                 )
             }
 
-            // Product Details
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 16.dp)
             ) {
-                // Product Name
                 Text(
                     text = detail.product.name,
                     fontFamily = sfui_semibold,
@@ -313,7 +311,7 @@ private fun ProductItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Rp ${detail.productPrice.toInt()}",
+                        text = formatCurrency(detail.productPrice.toInt()),
                         fontFamily = sfui_med,
                         fontSize = 14.sp,
                         color = Color.Gray
@@ -341,7 +339,7 @@ private fun ProductItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Rp ${detail.productSubtotal.toInt()}",
+                        text = formatCurrency(detail.productSubtotal.toInt()),
                         fontFamily = sfui_semibold,
                         fontSize = 16.sp,
                         color = Color.Black
@@ -349,10 +347,11 @@ private fun ProductItem(
 
                     if (showRateButton) {
                         Button(
-                            onClick = { onRateClick() },
+                            onClick = { if (!isRated) onRateClick() },
                             enabled = !isRated,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isRated) Color.Gray else Color(0xFFED8A00)
+                                containerColor = if (isRated) Color.Gray else Color(0xFFED8A00),
+                                disabledContainerColor = Color(0xFFED8A00).copy(alpha = 0.5f)
                             ),
                             shape = RoundedCornerShape(16.dp),
                             modifier = Modifier
@@ -362,7 +361,8 @@ private fun ProductItem(
                             Text(
                                 text = if (isRated) "Rated" else "Rate",
                                 fontFamily = sfui_semibold,
-                                fontSize = 12.sp
+                                fontSize = 12.sp,
+                                color = if (isRated) Color.White else LocalContentColor.current
                             )
                         }
                     }
@@ -409,7 +409,7 @@ private fun PaymentInformation(
                         color = Color.Gray
                     )
                     Text(
-                        text = "Rp $total",
+                        text = formatCurrency(total),
                         fontFamily = sfui_med,
                         fontSize = 14.sp
                     )
@@ -441,7 +441,7 @@ private fun PaymentInformation(
                     )
                 }
                 Text(
-                    text = "Rp $totalAmount",
+                    text = formatCurrency(totalAmount),
                     fontFamily = sfui_semibold,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,

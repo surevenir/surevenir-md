@@ -107,20 +107,6 @@ fun PreviewScreen(
         }
     }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            scope.launch {
-                navController.navigate("preview") {
-                    popUpTo("home") { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }
-        }
-    }
-
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -379,13 +365,7 @@ fun PreviewScreen(
                     TextButton(
                         onClick = {
                             showDialog = false
-                            if (PermissionUtils.hasRequiredPermissions(context)) {
-                                val uri = ComposeFileProvider.getImageUri(context)
-                                imageCaptureVM.setImageUri(uri)
-                                cameraLauncher.launch(uri)
-                            } else {
-                                permissionLauncher.launch(PermissionUtils.getRequiredPermissions())
-                            }
+                            navController.navigate("camera?previousScreen=preview")
                         },
                         modifier = Modifier.fillMaxWidth(),
                     ) {

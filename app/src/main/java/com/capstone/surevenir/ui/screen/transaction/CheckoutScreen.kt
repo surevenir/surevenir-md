@@ -1,6 +1,5 @@
 package com.capstone.surevenir.ui.screen.transaction
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,8 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -24,18 +26,18 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.capstone.surevenir.R
 import com.capstone.surevenir.data.network.response.CartItem
-import com.capstone.surevenir.ui.components.TopBar
+import com.capstone.surevenir.helper.formatCurrency
+import com.capstone.surevenir.ui.screen.navmenu.sfui_bold
+import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.viewmodel.CheckoutViewModel
 import com.capstone.surevenir.ui.viewmodel.TokenViewModel
-import java.text.NumberFormat
-import java.util.*
 
 @Composable
 fun CheckoutScreen(
     navController: NavController,
     checkoutViewModel: CheckoutViewModel = hiltViewModel(),
-    tokenViewModel: TokenViewModel = hiltViewModel()
+    tokenViewModel: TokenViewModel = hiltViewModel(),
 ) {
     val isLoading by checkoutViewModel.isLoading.collectAsState()
     val error by checkoutViewModel.error.collectAsState()
@@ -47,11 +49,11 @@ fun CheckoutScreen(
         ?.get<List<CartItem>>("selectedItems") ?: emptyList()
 
     val totalPrice = selectedItems.sumOf { it.product.price * it.quantity }
+    var showOrderDialog by remember { mutableStateOf(false) }
 
 
     LaunchedEffect(Unit) {
         if (token == null) {
-            Log.d("CheckoutScreen", "Fetching token...")
             tokenViewModel.fetchToken()
         }
     }
@@ -59,21 +61,12 @@ fun CheckoutScreen(
 
     LaunchedEffect(checkoutSuccess) {
         if (checkoutSuccess) {
-            Log.d("CheckoutScreen", "Checkout successful, navigating to transaction history")
             navController.navigate("transaction") {
                 popUpTo("transaction") { inclusive = true }
             }
             navController.currentBackStackEntry?.savedStateHandle?.set("selectedTab", 1)
         }
     }
-
-    LaunchedEffect(error) {
-        error?.let { errorMessage ->
-            Log.e("CheckoutScreen", "Checkout error: $errorMessage")
-            // Handle error state
-        }
-    }
-
 
     Scaffold(
         topBar = {
@@ -130,7 +123,6 @@ fun CheckoutScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Total Payment Section
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
@@ -145,48 +137,115 @@ fun CheckoutScreen(
                         ) {
                             Text(
                                 text = "Total Payment",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                fontFamily = sfui_semibold,
+                                fontSize = 16.sp,
                             )
                             Text(
-                                text = formatPrice(totalPrice),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                text = formatCurrency(totalPrice),
+                                fontFamily = sfui_semibold,
+                                fontSize = 18.sp,
+                                color = Color(0xFFED8A00)
                             )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
-                            onClick = {
-                                token?.let { tokenValue ->
-                                    Log.d("CheckoutScreen", "Order button clicked")
-                                    Log.d("CheckoutScreen", "Selected items: ${selectedItems.size}")
-                                    checkoutViewModel.checkout("Bearer $tokenValue", selectedItems)
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = !isLoading
+                            onClick = { showOrderDialog = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp),
+                            enabled = !isLoading,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFED8A00)
+                            ),
+                            shape = RoundedCornerShape(10.dp)
                         ) {
                             if (isLoading) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(24.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary
+                                    color = Color.White
                                 )
                             } else {
-                                Text("Order")
+                                Text(
+                                    text = "ORDER",
+                                    fontFamily = sfui_semibold,
+                                    color = Color.White,
+                                    fontSize = 20.sp
+                                )
                             }
                         }
                     }
                 }
             }
 
+            if (showOrderDialog) {
+                AlertDialog(
+                    onDismissRequest = { showOrderDialog = false },
+                    title = {
+                        Text(
+                            text = "Confirm Order",
+                            fontFamily = sfui_bold,
+                            fontSize = 18.sp,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center
+                        )
+                    },
+                    text = {
+                        val message = if (selectedItems.size == 1) {
+                            val item = selectedItems.first()
+                            "Are you sure you want to place the order for ${item.product.name}?"
+                        } else {
+                            "Are you sure you want to place the order for ${selectedItems.size} products?"
+                        }
+                        Text(
+                            text = message,
+                            fontFamily = sfui_med,
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                token?.let { tokenValue ->
+                                    checkoutViewModel.checkout("Bearer $tokenValue", selectedItems)
+                                }
+                                showOrderDialog = false
+                            }
+                        ) {
+                            Text(
+                                text = "Confirm",
+                                fontFamily = sfui_semibold,
+                                fontSize = 14.sp,
+                                color = Color.Black
+                            )
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showOrderDialog = false }
+                        ) {
+                            Text(
+                                text = "Cancel",
+                                fontFamily = sfui_semibold,
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    },
+                    containerColor = Color.White,
+                    shape = MaterialTheme.shapes.medium,
+                )
+            }
+
             if (error != null) {
                 AlertDialog(
                     onDismissRequest = { checkoutViewModel.clearError() },
                     title = { Text("Error") },
-                    text = { Text(error ?: "An unknown error occurred") },
+                    text = {
+                        Text(error ?: "An unknown error occurred")
+                    },
                     confirmButton = {
                         TextButton(onClick = { checkoutViewModel.clearError() }) {
                             Text("OK")
@@ -201,51 +260,66 @@ fun CheckoutScreen(
 @Composable
 private fun CheckoutItemCard(item: CartItem) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 20.dp, vertical = 20.dp)
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             if (item.product.images.isNotEmpty()) {
                 AsyncImage(
                     model = item.product.images.first(),
                     contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(4.dp))
+                        .size(120.dp)
+                        .clip(RoundedCornerShape(6.dp))
                 )
             }
 
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(start = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
                     text = item.product.name,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontFamily = sfui_semibold,
+                    fontSize = 16.sp,
+                    color = Color.Black,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = formatPrice(item.product.price),
-                    color = Color.Gray
+                    text = formatCurrency(item.product.price),
+                    color = Color.Gray,
+                    fontSize = 12.sp,
+                    fontFamily = sfui_med
                 )
                 Text(
                     text = "${item.quantity} items",
-                    color = Color.Gray
+                    color = Color.Gray,
+                    fontSize = 12.sp,
+                    fontFamily = sfui_med
                 )
                 Text(
-                    text = "Subtotal: ${formatPrice(item.product.price * item.quantity)}",
-                    fontWeight = FontWeight.Medium
+                    text = "Subtotal: ${formatCurrency(item.product.price * item.quantity)}",
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    fontFamily = sfui_med
                 )
             }
         }
     }
-}
-
-private fun formatPrice(price: Int): String {
-    return NumberFormat.getCurrencyInstance(Locale("id", "ID")).format(price)
 }

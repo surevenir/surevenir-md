@@ -707,7 +707,7 @@ fun FloatingButtonWithIntent(
                         isExtended = false
                         if (PermissionUtils.hasRequiredPermissions(context)) {
                             scope.launch {
-                                navController.navigate("camera")
+                                navController.navigate("camera?previousScreen=home")
                             }
                         } else {
                             permissionLauncher.launch(PermissionUtils.getRequiredPermissions())

@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.capstone.surevenir.data.dao.ProductDao
 import com.capstone.surevenir.data.database.AppDatabase
+import com.capstone.surevenir.data.network.ApiService
+import com.capstone.surevenir.data.repository.ReviewsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,5 +30,14 @@ object AppModule {
     @Singleton
     fun provideProductDao(appDatabase: AppDatabase): ProductDao {
         return appDatabase.productDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideReviewsRepository(
+        apiService: ApiService,
+        @ApplicationContext context: Context
+    ): ReviewsRepository {
+        return ReviewsRepository(apiService, context)
     }
 }

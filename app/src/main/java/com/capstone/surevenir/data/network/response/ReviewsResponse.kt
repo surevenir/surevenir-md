@@ -40,23 +40,3 @@ data class ReviewImage(
 	@SerializedName("type")
 	val type: String
 )
-
-data class ReviewRequest(
-	@SerializedName("rating")
-	val rating: String,
-	@SerializedName("comment")
-	val comment: String,
-	@SerializedName("user_id")
-	val userId: String,
-	@SerializedName("product_id")
-	val productId: String,
-	@SerializedName("images")
-	val images: List<ReviewImageRequest>
-)
-
-data class ReviewImageRequest(
-	@SerializedName("url")
-	val url: String,
-	@SerializedName("type")
-	val type: String
-)
