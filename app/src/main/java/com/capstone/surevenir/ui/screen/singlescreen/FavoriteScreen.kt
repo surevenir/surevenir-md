@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -169,7 +170,7 @@ fun FavoriteScreen(
                                 updatedAt = favoriteItem.product.updatedAt,
                                 categories = emptyList(),
                                 merchant = "",
-                                images = emptyList()
+                                images = favoriteItem.images ?: emptyList(),
                             )
 
                             val productData = FavoriteMapper.mapResponseToProductData(productFavorite)
@@ -178,7 +179,8 @@ fun FavoriteScreen(
                                 images = favoriteItem.images ?: emptyList(),
                                 onProductClick = {
                                     navController.navigate("product/${productData.id}")
-                                }
+                                },
+                                favoriteViewModel
                             )
                         }
                     }
@@ -192,7 +194,8 @@ fun FavoriteScreen(
 fun FavoriteProductCard(
     product: ProductData,
     images: List<ImageData>,
-    onProductClick: () -> Unit
+    onProductClick: () -> Unit,
+    favoriteViewModel: FavoriteViewModel
 ) {
     Card(
         modifier = Modifier
@@ -203,9 +206,12 @@ fun FavoriteProductCard(
         shape = RoundedCornerShape(16.dp),
         backgroundColor = Color.White
     ) {
+
+        val productImage by favoriteViewModel.getProductImage(product.id).observeAsState()
+
         Column {
             AsyncImage(
-                model = if (images.isNotEmpty()) images[0].url else "https://via.placeholder.com/150",
+                model = productImage,
                 contentDescription = product.name,
                 modifier = Modifier
                     .fillMaxWidth()

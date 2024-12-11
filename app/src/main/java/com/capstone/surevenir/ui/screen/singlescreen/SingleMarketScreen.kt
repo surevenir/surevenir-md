@@ -70,7 +70,6 @@ import com.capstone.surevenir.model.Product
 import com.capstone.surevenir.model.ShopData
 import com.capstone.surevenir.ui.components.ProductCard
 import com.capstone.surevenir.ui.components.ShopCard
-import com.capstone.surevenir.ui.screen.navmenu.ProductsSection
 import com.capstone.surevenir.ui.screen.navmenu.sfui_med
 import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 import com.capstone.surevenir.ui.screen.navmenu.sfui_text

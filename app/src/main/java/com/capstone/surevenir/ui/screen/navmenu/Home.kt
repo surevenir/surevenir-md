@@ -6,6 +6,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -65,6 +67,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -256,40 +261,76 @@ fun GamificationHeader(
     onLeaderboardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 16.dp, horizontal = 5.dp)
     ) {
-        Text(
-            text = "Hello, ${username}!",
-            style = MaterialTheme.typography.headlineMedium,
-            fontFamily = sfui_semibold,
-            color = Color(0xFF1E1E1E),
-            fontSize = 20.sp
-        )
-
-        Column(
-            horizontalAlignment = Alignment.End
+        // First Row: Greeting and Leaderboard
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Greeting Text
+            Text(
+                text = "Hello, $username!",
+                style = MaterialTheme.typography.headlineMedium,
+                fontFamily = sfui_semibold,
+                color = Color(0xFF1E1E1E),
+                fontSize = 20.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            // Leaderboard Text
             Text(
                 text = "See Leaderboards",
                 modifier = Modifier
                     .clickable(onClick = onLeaderboardClick)
-                    .padding(bottom = 2.dp),
+                    .padding(bottom = 2.dp)
+                    .semantics { contentDescription = "Navigate to Leaderboards" },
                 style = MaterialTheme.typography.labelLarge,
                 color = Color(0xFFFF5524),
-                fontSize = 16.sp
+                fontSize = 18.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp)) // Space between rows
+
+        // Second Row: Animated Informational Text and Points
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Informational Text: Animated
+            AnimatedHighlightText(
+                phrases = listOf(
+                    "Get 100 Points per Scan You Make",
+                    "Find nearby market or shop in Your Location",
+                    "Having a question? Ask on our SurevenirGenAi",
+                    "Click on market to see best shop",
+                    "Click love icon to add your product to favorites"
+                ),
+                modifier = Modifier.weight(1f),
+                highlightColor = Color(0xFFFFCC00), // Customize as needed
+                normalColor = Color(0xFF1E1E1E),
+                wordHighlightDuration = 500,       // Highlight duration per word
+                phraseDisplayDuration = 3000       // Total display duration per phrase
             )
 
+            // Points Text
             Text(
                 text = "$points Points",
                 style = MaterialTheme.typography.titleMedium,
                 fontFamily = sfui_semibold,
                 color = Color(0xFF1E1E1E),
-                fontSize = 14.sp
+                fontSize = 16.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -325,23 +366,51 @@ fun HomeProductsSection(
 }
 
 @Composable
-fun ProductsSection(products: MutableState<List<ProductData>?>, navController: NavController) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        products.value?.take(5)?.let { productList ->
-            items(productList.filter { it.images.isNotEmpty() && it.name != null }) { product ->
-                ProductCard(
-                    product = product,
-                    modifier = Modifier
-                        .width(200.dp)
-                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
-                        .clickable {
-                            navController.navigate("product/${product.id}")
-                        }
-                )
-            }
+fun AnimatedHighlightText(
+    phrases: List<String>,
+    modifier: Modifier = Modifier,
+    highlightColor: Color = Color(0xFFFFCC00), // Yellow highlight
+    normalColor: Color = Color(0xFF1E1E1E),    // Dark Gray normal text
+    wordHighlightDuration: Long = 500,        // Duration each word is highlighted (ms)
+    phraseDisplayDuration: Long = 3000        // Total duration each phrase is displayed (ms)
+) {
+    // State to keep track of the current phrase index
+    var currentPhraseIndex by remember { mutableStateOf(0) }
+    // State to keep track of the current word index (-1 means no word is highlighted)
+    var currentWordIndex by remember { mutableStateOf(-1) }
+
+    val currentPhrase = phrases[currentPhraseIndex]
+    val words = currentPhrase.split(" ")
+
+    LaunchedEffect(currentPhraseIndex) {
+        // Highlight each word in the current phrase sequentially
+        for (i in words.indices) {
+            currentWordIndex = i
+            delay(wordHighlightDuration)
+        }
+        // Reset highlight
+        currentWordIndex = -1
+        // Wait for the remaining time before switching to the next phrase
+        delay(phraseDisplayDuration - wordHighlightDuration * words.size)
+        // Move to the next phrase in the list
+        currentPhraseIndex = (currentPhraseIndex + 1) % phrases.size
+    }
+
+    Row(modifier = modifier) {
+        words.forEachIndexed { index, word ->
+            // Animate the color change for highlighting
+            val color by animateColorAsState(
+                targetValue = if (index == currentWordIndex) highlightColor else normalColor,
+                animationSpec = tween(durationMillis = 300) // Fade duration
+            )
+            Text(
+                text = word,
+                color = color,
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.width(4.dp)) // Space between words
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.capstone.surevenir.data.dao
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -59,7 +60,8 @@ interface ProductDao {
     @Query("SELECT COUNT(*) FROM products")
     fun getProductCount(): Int
 
-
+    @Query("SELECT images FROM products WHERE id = :productId")
+    fun getProductImageById(productId: Int): LiveData<String?>
 
     @Transaction
     fun debugInsert(product: ProductDatabase) {

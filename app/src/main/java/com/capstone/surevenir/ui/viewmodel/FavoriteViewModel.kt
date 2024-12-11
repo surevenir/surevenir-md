@@ -1,6 +1,8 @@
 package com.capstone.surevenir.ui.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.capstone.surevenir.data.network.response.DeleteFavoriteResponse
@@ -87,5 +89,10 @@ class FavoriteViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
+    }
+
+
+    fun getProductImage(productId: Int): LiveData<String?> {
+        return favoriteRepository.getProductImageById(productId)
     }
 }
