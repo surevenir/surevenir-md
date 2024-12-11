@@ -924,7 +924,7 @@ fun FloatingButtonWithIntent(
                         isExtended = false
                         if (PermissionUtils.hasRequiredPermissions(context)) {
                             scope.launch {
-                                navController.navigate("camera")
+                                navController.navigate("camera?previousScreen=home")
                             }
                         } else {
                             permissionLauncher.launch(PermissionUtils.getRequiredPermissions())
@@ -996,6 +996,7 @@ fun FloatingButtonWithIntent(
 }
 
 
+
 @Composable
 fun ProductDetailSkeleton() {
     LazyColumn(
@@ -1004,7 +1005,6 @@ fun ProductDetailSkeleton() {
             .background(Color.White)
             .padding(bottom = 80.dp)
     ) {
-        // Header
         item {
             Row(
                 modifier = Modifier

@@ -72,7 +72,6 @@ fun NotificationScreen(
 
 
         if (notifications.isEmpty()) {
-            // Empty state
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -84,7 +83,7 @@ fun NotificationScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_notifications_24), // Ganti dengan icon notifikasi yang sesuai
+                        painter = painterResource(id = R.drawable.baseline_notifications_24),
                         contentDescription = "No notifications",
                         modifier = Modifier.size(64.dp),
                         tint = Color.Gray

@@ -37,7 +37,7 @@ class FirebaseMessaging : FirebaseMessagingService() {
         val title = remoteMessage.notification?.title ?: "No Title"
         val body = remoteMessage.notification?.body ?: "No Body"
 
-        val type = remoteMessage.data["type"] ?: "general" // default ke "general" jika tidak ada type
+        val type = remoteMessage.data["type"] ?: "general"
         val locationId = remoteMessage.data["locationId"]
         val numericId = remoteMessage.data["numericId"]?.toIntOrNull()
 
@@ -48,7 +48,6 @@ class FirebaseMessaging : FirebaseMessagingService() {
         }
         createNotificationChannel()
         showNotification(title, body, navigationRoute)
-
 
 
         saveNotificationToDatabase(
@@ -62,16 +61,16 @@ class FirebaseMessaging : FirebaseMessagingService() {
 
     @SuppressLint("MissingPermission")
     private fun showNotification(title: String, body: String, navigationRoute: String?) {
-
-        // Buat Intent untuk navigasi
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("navigate_to", navigationRoute)
         }
 
+        val requestCode = System.currentTimeMillis().toInt()
+
         val pendingIntent = PendingIntent.getActivity(
             this,
-            navigationRoute?.hashCode() ?: 0,
+            requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -82,11 +81,18 @@ class FirebaseMessaging : FirebaseMessagingService() {
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
 
         with(NotificationManagerCompat.from(this)) {
-            notify(System.currentTimeMillis().toInt(), builder.build())
+            notify(requestCode, builder.build())
         }
+
+        Log.d(TAG, "Showing notification with route: $navigationRoute")
     }
+
 
     private fun saveNotificationToDatabase(
         title: String,

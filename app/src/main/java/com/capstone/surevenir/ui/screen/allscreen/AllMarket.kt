@@ -199,7 +199,7 @@ fun MarketSectionDown(
                         marketLocation = market.marketLocation ?: "No Location",
                         marketDescription = market.description ?: "No description available",
                         modifier = Modifier
-                            .height(225.dp)
+                            .height(250.dp)
                             .fillMaxWidth()
                             .padding(8.dp)
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))

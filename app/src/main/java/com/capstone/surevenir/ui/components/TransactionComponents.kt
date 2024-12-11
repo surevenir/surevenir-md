@@ -237,7 +237,8 @@ fun CartItemCard(
                                     onQuantityChange(cartItem.quantity - 1)
                                 }
                             },
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
+                            enabled = cartItem.quantity > 1
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Remove,
@@ -246,12 +247,21 @@ fun CartItemCard(
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         IconButton(
-                            onClick = { onQuantityChange(cartItem.quantity + 1) },
-                            modifier = Modifier.size(24.dp)
+                            onClick = {
+                                if (cartItem.quantity < cartItem.product.stock) {
+                                    onQuantityChange(cartItem.quantity + 1)
+                                }
+                            },
+                            modifier = Modifier.size(24.dp),
+                            enabled = cartItem.quantity < cartItem.product.stock
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = "Increase quantity"
+                                contentDescription = "Increase quantity",
+                                tint = if (cartItem.quantity < cartItem.product.stock)
+                                    LocalContentColor.current
+                                else
+                                    Color.Gray.copy(alpha = 0.5f)
                             )
                         }
                     }
@@ -415,7 +425,7 @@ fun CheckoutHistoryCard(
                 Spacer(modifier = Modifier.weight(1f))
                 if (checkout.status == "COMPLETED") {
                     Button(
-                        onClick = { /* Handle rate action */ },
+                        onClick = onClick,
                         modifier = Modifier
                             .width(100.dp),
                         shape = RoundedCornerShape(16.dp),

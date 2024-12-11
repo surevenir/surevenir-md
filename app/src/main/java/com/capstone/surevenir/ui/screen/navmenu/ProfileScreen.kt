@@ -87,11 +87,15 @@ fun ProfileScreen(
     }
 
     Scaffold(
+        modifier = Modifier
+            .background(Color.White),
         content = { paddingValues ->
             if (isLoading) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
+                        .background(Color.White),
                     contentAlignment = Alignment.Center
+
                 ) {
                     CircularProgressIndicator(color = Color(0xFFED8A00))
                 }
@@ -99,6 +103,7 @@ fun ProfileScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.White)
                         .padding(paddingValues)
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -106,6 +111,7 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .background(Color.White)
                             .height(200.dp)
                     ) {
                         Image(

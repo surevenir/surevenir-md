@@ -112,7 +112,6 @@ fun OnBoardingScreen(
                         }
                     }
                 } else {
-                    // Navigate to next page
                     scope.launch {
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
@@ -140,11 +139,10 @@ fun OnboardingPageScreen(page: OnboardingPage) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp) // Added horizontal padding for better readability
+            .padding(horizontal = 16.dp)
     ) {
         Spacer(Modifier.height(20.dp))
 
-        // Title with Highlighted Text
         Text(
             text = buildAnnotatedString {
                 append(page.title)
@@ -156,7 +154,7 @@ fun OnboardingPageScreen(page: OnboardingPage) {
             style = MaterialTheme.typography.headlineMedium,
             color = Color.Black,
             fontSize = 20.sp,
-            maxLines = 2, // Prevents text from expanding indefinitely
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .fillMaxWidth()
@@ -165,25 +163,23 @@ fun OnboardingPageScreen(page: OnboardingPage) {
 
         Spacer(Modifier.height(20.dp))
 
-        // Responsive Image with Aspect Ratio
         Image(
             painter = painterResource(id = page.imageRes),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1.5f) // Maintains a consistent aspect ratio
+                .aspectRatio(1.5f)
         )
 
         Spacer(Modifier.height(20.dp))
 
-        // Below Text
         Text(
             text = page.belowText,
             fontFamily = sfui_med,
             style = MaterialTheme.typography.headlineSmall,
             color = Color.Black,
-            fontSize = 18.sp, // Adjusted font size for consistency
-            maxLines = 1, // Prevents text from expanding indefinitely
+            fontSize = 18.sp,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .fillMaxWidth()
@@ -192,17 +188,16 @@ fun OnboardingPageScreen(page: OnboardingPage) {
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        // Description Text
         Text(
             fontFamily = sfui_text,
             text = page.description,
-            style = MaterialTheme.typography.bodyMedium, // Changed to bodyMedium for better scalability
+            style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray,
             lineHeight = 24.sp,
-            fontSize = 16.sp, // Reduced font size to prevent overflow
+            fontSize = 16.sp,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp) // Ensures text doesn't touch screen edges
+                .padding(horizontal = 16.dp)
         )
     }
 }

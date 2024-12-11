@@ -145,12 +145,13 @@ fun TransactionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
+            .background(Color.White)
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(Color.White)
                 .padding(start = 24.dp, end = 24.dp, top = 10.dp, bottom = 5.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -302,6 +303,7 @@ private fun CartTab(
                 ) {
                     Row(
                         modifier = Modifier
+                            .background(Color.White)
                             .fillMaxSize()
                             .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -309,7 +311,8 @@ private fun CartTab(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
                         ) {
                             Checkbox(
                                 checked = selectedItems.size == cartData.cart.size,

@@ -128,19 +128,17 @@
                 permissions.entries.forEach { (permission, isGranted) ->
                     if (isGranted) {
                         Log.d("Permission", "Granted: $permission")
+                        if (permission in listOf(
+                                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                                android.Manifest.permission.ACCESS_COARSE_LOCATION
+                            )) {
+                            checkBackgroundLocation()
+                        }
                     } else {
                         Log.e("Permission", "Denied: $permission")
-                        if (permission == android.Manifest.permission.POST_NOTIFICATIONS) {
-                            Toast.makeText(
-                                this,
-                                "Notification permission is required for geofence alerts.",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
                     }
                 }
             }
-
 
             checkAndRequestPermissions()
 
@@ -169,38 +167,90 @@
         }
 
         private fun checkAndRequestPermissions() {
-            val permissions = mutableListOf(
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
-            )
+            val permissionsToRequest = mutableListOf<String>()
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionsToRequest.add(android.Manifest.permission.ACCESS_FINE_LOCATION)
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                permissions.add(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionsToRequest.add(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissionsToRequest.add(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                permissions.add(android.Manifest.permission.FOREGROUND_SERVICE_LOCATION)
-            }
-
-            val permissionsToRequest = permissions.filter {
-                ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        android.Manifest.permission.FOREGROUND_SERVICE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissionsToRequest.add(android.Manifest.permission.FOREGROUND_SERVICE_LOCATION)
+                }
             }
 
             if (permissionsToRequest.isNotEmpty()) {
                 Log.d("MainActivity", "Requesting permissions: $permissionsToRequest")
-                ActivityCompat.requestPermissions(
-                    this,
-                    permissionsToRequest.toTypedArray(),
-                    1001
-                )
+                requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
             } else {
-                Log.d("MainActivity", "All permissions already granted")
+                checkBackgroundLocation()
             }
         }
+
+        private fun checkBackgroundLocation() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    if (shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                        showBackgroundLocationRationale()
+                    } else {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                            1002
+                        )
+                    }
+                }
+            }
+        }
+
+        private fun showBackgroundLocationRationale() {
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Background Location Required")
+                .setMessage("This app needs background location access to notify you about nearby shops and markets even when the app is closed.")
+                .setPositiveButton("Grant Permission") { _, _ ->
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                        1002
+                    )
+                }
+                .setNegativeButton("Not Now") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
+        }
+
 
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -231,7 +281,6 @@
         try {
             val account = task.getResult(ApiException::class.java)
             if (account != null) {
-                // Tambahkan proses Firebase Authentication
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                 FirebaseAuth.getInstance().signInWithCredential(credential)
                     .addOnCompleteListener { authTask ->
@@ -321,12 +370,12 @@
 
         Scaffold(
             topBar = {
-                if (currentRoute in listOf("home", "shop", "scan", "carts", "profile", "myLocation")) {
+                if (currentRoute in listOf("home", "shop", "scan", "carts", "profile", "myLocation", "transaction")) {
                     StickyTopBar(navController)
                 }
             },
             bottomBar = {
-                if (currentRoute in listOf("home", "shop", "scan", "carts", "profile")) {
+                if (currentRoute in listOf("home", "shop", "scan", "carts", "profile", "transaction")) {
                     BottomNavigationBar(navController)
                 }
             },
@@ -488,11 +537,16 @@
                     )
                 }
 
-                composable("camera") {
+                composable(
+                    route = "camera?previousScreen={previousScreen}",
+                    arguments = listOf(navArgument("previousScreen") { defaultValue = "" })
+                ) { navBackStackEntry ->
+                    val previousScreen = navBackStackEntry.arguments?.getString("previousScreen") ?: ""
                     CameraScreen(
                         navController = navController,
                         imageCaptureViewModel = imageCaptureViewModel,
-                        executor = cameraExecutor
+                        executor = cameraExecutor,
+                        previousScreen = previousScreen
                     )
                 }
 

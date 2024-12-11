@@ -38,13 +38,12 @@ class MerchantViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 Log.d("MerchantViewModel", "Fetching merchants...")
-                val response = merchantRepository.fetchMerchantsFromApi("Bearer $token") // Tambahkan "Bearer"
+                val response = merchantRepository.fetchMerchantsFromApi("Bearer $token")
                 _isLoading.value = false
                 if (response.isSuccessful) {
                     val merchantList = response.body()?.data
                     _merchantResponse.value = response.body()
 
-                    // Simpan ke database
                     merchantList?.let { merchants ->
                         Log.d("MerchantViewModel", "Saving ${merchants.size} merchants to database")
                         merchantRepository.updateLocalMerchants(
@@ -77,7 +76,7 @@ class MerchantViewModel @Inject constructor(
                 _isLoading.value = false
                 _errorMessage.value = "Failed: ${e.message}"
                 Log.e("MerchantViewModel", "Exception: ${e.message}")
-                e.printStackTrace() // Tambahkan stack trace untuk debugging
+                e.printStackTrace()
                 onComplete(null)
             }
         }

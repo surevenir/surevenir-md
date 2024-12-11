@@ -43,6 +43,9 @@ class ReviewsViewModel @Inject constructor(
     private val _userReviews = MutableStateFlow<Set<Int>>(emptySet())
     val userReviews: StateFlow<Set<Int>> = _userReviews.asStateFlow()
 
+    private val _reviewState = MutableLiveData<ReviewState>(ReviewState.Initial)
+    val reviewState: LiveData<ReviewState> = _reviewState
+
     fun isProductRated(productId: Int): Boolean {
         return _userReviews.value.contains(productId)
     }
@@ -51,41 +54,42 @@ class ReviewsViewModel @Inject constructor(
         token: String,
         rating: Int,
         comment: String,
-        userId: String,
         productId: Int,
-        images: List<ReviewImageRequest>
+        imageUris: List<String>
     ) {
         viewModelScope.launch {
             try {
-                val request = ReviewRequest(
-                    rating = rating.toString(),
-                    comment = comment,
-                    userId = userId,
-                    productId = productId.toString(),
-                    images = images
-                )
-                val response = reviewsRepository.postReview(token, request)
+                _isLoading.value = true
 
-                if (response.isSuccessful) {
-                    val reviewResponse = response.body()
-                    if (reviewResponse?.success == true) {
-                        Log.d("ReviewViewModel", "Review posted successfully")
-                    } else {
-                        // Handle API error
-                        _errorMessage.value = reviewResponse?.message ?: "Failed to post review"
-                    }
+                Log.d("ReviewsViewModel", "Posting review with token: $token")
+
+                val response = reviewsRepository.postReview(
+                    token = token,
+                    rating = rating,
+                    comment = comment,
+                    productId = productId,
+                    imageUris = imageUris
+                )
+
+                if (response.isSuccessful && response.body()?.success == true) {
+                    _userReviews.value += productId
+                    _reviewState.value = ReviewState.Success
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    _errorMessage.value = "Error: ${response.code()} - $errorBody"
-                    Log.e("ReviewViewModel", "Error posting review: $errorBody")
+                    val errorMessage = if (response.errorBody()?.string()?.contains("already reviewed") == true) {
+                        _userReviews.value += productId
+                        "You have already reviewed this product"
+                    } else {
+                        response.errorBody()?.string() ?: "Unknown error occurred"
+                    }
+                    _reviewState.value = ReviewState.Error(errorMessage)
                 }
             } catch (e: Exception) {
-                Log.e("ReviewViewModel", "Exception posting review", e)
-                _errorMessage.value = "Error: ${e.message}"
+                _reviewState.value = ReviewState.Error(e.message ?: "Unknown error occurred")
+            } finally {
+                _isLoading.value = false
             }
         }
     }
-
 
     fun getReviews(productId: Int, token: String) {
         _isLoading.value = true
@@ -131,5 +135,15 @@ class ReviewsViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
+    }
+
+    fun resetReviewState() {
+        _reviewState.value = ReviewState.Initial
+    }
+
+    sealed class ReviewState {
+        data object Initial : ReviewState()
+        data object Success : ReviewState()
+        data class Error(val message: String) : ReviewState()
     }
 }

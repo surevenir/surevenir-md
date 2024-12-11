@@ -208,10 +208,14 @@ interface ApiService {
         @Part image: MultipartBody.Part
     ): Response<PredictionResponse>
 
+    @Multipart
     @POST("reviews")
     suspend fun postReview(
         @Header("Authorization") token: String,
-        @Body review: ReviewRequest
+        @Part("rating") rating: RequestBody,
+        @Part("comment") comment: RequestBody,
+        @Part("product_id") productId: RequestBody,
+        @Part images: List<MultipartBody.Part>
     ): Response<ReviewResponse>
 
     @GET("predict/top-scanner")
