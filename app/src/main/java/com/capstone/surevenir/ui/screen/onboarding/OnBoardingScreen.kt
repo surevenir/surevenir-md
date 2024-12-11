@@ -4,10 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,16 +46,16 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun OnBoardingScreen(navController: NavController,
-                     userPreferences: UserPreferences
+fun OnBoardingScreen(
+    navController: NavController,
+    userPreferences: UserPreferences
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
     val pages = listOf(
         OnboardingPage(
             imageRes = R.drawable.onboard_1,
-            title = "Discover Your " +
-                    "",
+            title = "Discover Your ",
             description = "Use your phone's camera to instantly detect and recognize Bali souvenirs. Access rich cultural insights on each item with just one click!",
             highlightText = "Bali Souvenir!",
             belowText = "Unforgettable Experience"
@@ -108,6 +111,11 @@ fun OnBoardingScreen(navController: NavController,
                             popUpTo(0) { inclusive = true }
                         }
                     }
+                } else {
+                    // Navigate to next page
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
                 }
             },
             modifier = Modifier
@@ -117,7 +125,7 @@ fun OnBoardingScreen(navController: NavController,
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (pagerState.currentPage == pages.size - 1) Color(0xFFED8A00) else Color.Gray
             ),
-            enabled = pagerState.currentPage == pages.size - 1
+            enabled = pagerState.currentPage == pages.size - 1 || pagerState.currentPage < pages.size - 1
         ) {
             Text(
                 text = if (pagerState.currentPage == pages.size - 1) "Get Started" else "Next",
@@ -128,60 +136,77 @@ fun OnBoardingScreen(navController: NavController,
 }
 
 @Composable
-fun OnboardingPageScreen (page: OnboardingPage){
-    Column (
+fun OnboardingPageScreen(page: OnboardingPage) {
+    Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(horizontal = 16.dp) // Added horizontal padding for better readability
     ) {
         Spacer(Modifier.height(20.dp))
+
+        // Title with Highlighted Text
         Text(
             text = buildAnnotatedString {
                 append(page.title)
-                withStyle(style = SpanStyle(Color(0xFFFFA726))){
-                    append("${page.highlightText}")
+                withStyle(style = SpanStyle(Color(0xFFFFA726))) {
+                    append(" ${page.highlightText}")
                 }
             },
             fontFamily = sfui_semibold,
             style = MaterialTheme.typography.headlineMedium,
             color = Color.Black,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            fontSize = 20.sp,
+            maxLines = 2, // Prevents text from expanding indefinitely
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.CenterHorizontally)
         )
 
         Spacer(Modifier.height(20.dp))
 
+        // Responsive Image with Aspect Ratio
         Image(
             painter = painterResource(id = page.imageRes),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(420.dp)
+                .aspectRatio(1.5f) // Maintains a consistent aspect ratio
         )
 
         Spacer(Modifier.height(20.dp))
 
+        // Below Text
         Text(
-            text = buildAnnotatedString {
-                append(page.belowText)
-            },
+            text = page.belowText,
             fontFamily = sfui_med,
             style = MaterialTheme.typography.headlineSmall,
             color = Color.Black,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            fontSize = 18.sp, // Adjusted font size for consistency
+            maxLines = 1, // Prevents text from expanding indefinitely
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.height(15.dp))
 
+        // Description Text
         Text(
             fontFamily = sfui_text,
             text = page.description,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.bodyMedium, // Changed to bodyMedium for better scalability
             color = Color.Gray,
             lineHeight = 24.sp,
-            fontSize = 19.sp,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            fontSize = 16.sp, // Reduced font size to prevent overflow
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp) // Ensures text doesn't touch screen edges
         )
-
     }
 }
+
+
 
 

@@ -24,6 +24,7 @@
     import androidx.compose.runtime.getValue
     import androidx.compose.runtime.remember
     import androidx.compose.ui.Modifier
+    import androidx.compose.ui.platform.LocalContext
     import androidx.compose.ui.tooling.preview.Preview
     import androidx.core.app.ActivityCompat
     import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
@@ -43,8 +44,10 @@
     import com.capstone.surevenir.data.network.response.CreateUserRequest
     import com.capstone.surevenir.helper.UserPreferences
     import com.capstone.surevenir.model.ProductCheckout
+    import com.capstone.surevenir.ui.camera.CameraScreen
     import com.capstone.surevenir.ui.camera.ImageCaptureVM
     import com.capstone.surevenir.ui.camera.PreviewScreen
+    import com.capstone.surevenir.ui.camera.ResultScreen
     import com.capstone.surevenir.ui.screen.allscreen.AllCategoryScreen
     import com.capstone.surevenir.ui.screen.allscreen.AllHistory
     import com.capstone.surevenir.ui.screen.allscreen.AllProductScreen
@@ -53,9 +56,7 @@
     import com.capstone.surevenir.ui.screen.navmenu.FloatingButtonWithIntent
     import com.capstone.surevenir.ui.screen.forgotpassword.ForgotPassword
     import com.capstone.surevenir.ui.screen.navmenu.Home
-    import com.capstone.surevenir.ui.screen.onboarding.OnBoardingScreen
     import com.capstone.surevenir.ui.screen.navmenu.ProfileScreen
-    import com.capstone.surevenir.ui.screen.ResultScreen
     import com.capstone.surevenir.ui.screen.allscreen.AllMarket
     import com.capstone.surevenir.ui.screen.mylocation.MyLocationScreen
     import com.capstone.surevenir.ui.screen.navmenu.ScanScreen
@@ -68,6 +69,7 @@
     import com.capstone.surevenir.ui.screen.splash.SplashScreen
     import com.capstone.surevenir.ui.screen.navmenu.StickyTopBar
     import com.capstone.surevenir.ui.screen.navmenu.TransactionScreen
+    import com.capstone.surevenir.ui.screen.onboarding.OnBoardingScreen
     import com.capstone.surevenir.ui.screen.profile.AccountCenterScreen
     import com.capstone.surevenir.ui.screen.profile.EditProfileScreen
     import com.capstone.surevenir.ui.screen.profile.SettingsScreen
@@ -301,6 +303,9 @@
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         val imageCaptureViewModel: ImageCaptureVM = viewModel()
+        val context = LocalContext.current
+        val cameraExecutor = remember { ContextCompat.getMainExecutor(context) }
+
 
         LaunchedEffect(Unit) {
             initialRoute?.let { route ->
@@ -480,6 +485,14 @@
                 composable("checkout") {
                     CheckoutScreen(
                         navController = navController
+                    )
+                }
+
+                composable("camera") {
+                    CameraScreen(
+                        navController = navController,
+                        imageCaptureViewModel = imageCaptureViewModel,
+                        executor = cameraExecutor
                     )
                 }
 

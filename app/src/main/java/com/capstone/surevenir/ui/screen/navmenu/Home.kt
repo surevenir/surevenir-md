@@ -264,7 +264,7 @@ fun GamificationHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 5.dp)
+            .padding(vertical = 5.dp, horizontal = 5.dp)
     ) {
         // First Row: Greeting and Leaderboard
         Row(
@@ -278,7 +278,7 @@ fun GamificationHeader(
                 style = MaterialTheme.typography.headlineMedium,
                 fontFamily = sfui_semibold,
                 color = Color(0xFF1E1E1E),
-                fontSize = 20.sp,
+                fontSize = 17.sp, // Consider using responsiveFontSize if needed
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -292,7 +292,7 @@ fun GamificationHeader(
                     .semantics { contentDescription = "Navigate to Leaderboards" },
                 style = MaterialTheme.typography.labelLarge,
                 color = Color(0xFFFF5524),
-                fontSize = 18.sp,
+                fontSize = 15.sp, // Consider using responsiveFontSize if needed
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -304,7 +304,7 @@ fun GamificationHeader(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top // Align to Top to accommodate multi-line text
         ) {
             // Informational Text: Animated
             AnimatedHighlightText(
@@ -322,19 +322,22 @@ fun GamificationHeader(
                 phraseDisplayDuration = 3000       // Total display duration per phrase
             )
 
+            Spacer(modifier = Modifier.width(8.dp)) // Space between AnimatedHighlightText and Points Text
+
             // Points Text
             Text(
                 text = "$points Points",
                 style = MaterialTheme.typography.titleMedium,
                 fontFamily = sfui_semibold,
                 color = Color(0xFF1E1E1E),
-                fontSize = 16.sp,
+                fontSize = 16.sp, // Consider using responsiveFontSize if needed
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
+
 
 @Composable
 fun HomeProductsSection(
@@ -406,7 +409,7 @@ fun AnimatedHighlightText(
             Text(
                 text = word,
                 color = color,
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

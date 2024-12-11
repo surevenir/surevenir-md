@@ -13,6 +13,18 @@ android {
     namespace = "com.capstone.surevenir"
     compileSdk = 34
 
+    android {
+        buildTypes {
+            debug {
+                buildConfigField ("boolean", "RESET_DATA_ON_LAUNCH", "true")
+            }
+            release {
+                buildConfigField ("boolean", "RESET_DATA_ON_LAUNCH", "false")
+            }
+        }
+    }
+
+
     defaultConfig {
         applicationId = "com.capstone.surevenir"
         minSdk = 26
@@ -65,6 +77,7 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.firebase.messaging.ktx)
+    implementation(libs.androidx.foundation.layout.android)
     val coroutines_version = "1.7.3"
     val hilt_version = "2.52"
     implementation ("androidx.room:room-runtime:2.5.0")

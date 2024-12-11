@@ -70,23 +70,54 @@ fun NotificationScreen(
             )
         }
 
-        if (notifications.any { !it.isRead }) {
-            Spacer(modifier = Modifier.height(15.dp))
-            Text(
-                text = "Mark All As Read",
-                fontSize = 20.sp,
-                color = Color(0xFFCC5B14),
-                fontFamily = sfui_semibold,
+
+        if (notifications.isEmpty()) {
+            // Empty state
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                    .clickable {
-                        notificationViewModel.markAllAsRead()
-                    }
-            )
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_notifications_24), // Ganti dengan icon notifikasi yang sesuai
+                        contentDescription = "No notifications",
+                        modifier = Modifier.size(64.dp),
+                        tint = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "No notifications yet",
+                        fontSize = 18.sp,
+                        fontFamily = sfui_med,
+                        color = Color.Gray
+                    )
+                }
+            }
+        } else {
+            if (notifications.any { !it.isRead }) {
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "Mark All As Read",
+                    fontSize = 20.sp,
+                    color = Color(0xFFCC5B14),
+                    fontFamily = sfui_semibold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .clickable {
+                            notificationViewModel.markAllAsRead()
+                        }
+                )
+            }
         }
 
-        LazyColumn(
+
+            LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)

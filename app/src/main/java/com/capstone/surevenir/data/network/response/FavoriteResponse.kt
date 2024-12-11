@@ -50,7 +50,7 @@ data class FavoriteProductItem(
     val createdAt: String,
     val updatedAt: String,
     val product: Product,
-    val images: List<ImageData>
+    val images: List<String>
 )
 
 data class ProductFavorite(
@@ -65,12 +65,12 @@ data class ProductFavorite(
     val updatedAt: String,
     val merchant: String,
     val categories: List<ProductCategory>,
-    val images: List<ImageData>  // Tambahkan images
+    val images: List<String>  // Tambahkan images
 )
 
 object FavoriteMapper {
-    fun mapResponseToProductData(response: ProductFavorite): ProductData {
-        return ProductData(
+    fun mapResponseToProductData(response: ProductFavorite): ProductFavorite {
+        return ProductFavorite(
             id = response.id,
             slug = response.slug,
             name = response.name,
@@ -80,8 +80,9 @@ object FavoriteMapper {
             stock = response.stock,
             createdAt = response.createdAt,
             updatedAt = response.updatedAt,
-            product_categories = response.categories,  // Sesuaikan dengan categories
-            images = emptyList()  // Karena di ProductFavorite tidak ada images, kita beri empty list
+            categories = response.categories,  // Sesuaikan dengan categories
+            merchant = response.merchant,
+            images = response.images
         )
     }
 }

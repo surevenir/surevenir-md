@@ -140,13 +140,30 @@ fun FavoriteScreen(
                     )
                 }
                 favoriteProducts.isEmpty() -> {
-                    Text(
-                        text = "No favorite products yet",
-                        color = Color.Gray,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp)
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_notifications_24),
+                                contentDescription = "No favorites added yet.",
+                                modifier = Modifier.size(64.dp),
+                                tint = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "No favorites added yet",
+                                fontSize = 18.sp,
+                                fontFamily = sfui_med,
+                                color = Color.Gray
+                            )
+                        }
+                    }
                 }
                 else -> {
                     LazyVerticalGrid(
@@ -176,7 +193,7 @@ fun FavoriteScreen(
                             val productData = FavoriteMapper.mapResponseToProductData(productFavorite)
                             FavoriteProductCard(
                                 product = productData,
-                                images = favoriteItem.images ?: emptyList(),
+                                images = favoriteItem.images,
                                 onProductClick = {
                                     navController.navigate("product/${productData.id}")
                                 },
@@ -192,8 +209,8 @@ fun FavoriteScreen(
 
 @Composable
 fun FavoriteProductCard(
-    product: ProductData,
-    images: List<ImageData>,
+    product: ProductFavorite,
+    images: List<String>,
     onProductClick: () -> Unit,
     favoriteViewModel: FavoriteViewModel
 ) {
@@ -207,11 +224,10 @@ fun FavoriteProductCard(
         backgroundColor = Color.White
     ) {
 
-        val productImage by favoriteViewModel.getProductImage(product.id).observeAsState()
 
         Column {
             AsyncImage(
-                model = productImage,
+                model = images[0] ?: "https://via.placeholder.com/150",
                 contentDescription = product.name,
                 modifier = Modifier
                     .fillMaxWidth()
