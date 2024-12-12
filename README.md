@@ -44,3 +44,22 @@
 ### 12. **CameraX**
    - A framework for camera integration on Android.
    - **Usage:** Allows users to take photos or scan items to find related souvenirs.
+
+## Requirements
+
+- **Compile SDK:** 34
+- **Minimum SDK:** 21 (Android 5.0 Lollipop)
+- **Target SDK:** 34
+- **Build Tools Version:** 34.0.0
+- **Kotlin Version:** 1.8.10 or later
+- **Gradle Version:** 8.0.0 or later
+
+---
+
+## Additional Notes
+
+- Ensure the Google Maps API Key is correctly configured in the `AndroidManifest.xml` or via `local.properties`.
+- Add the `google-services.json` file in the `app/` directory for Firebase integration.
+- Use Android Studio Electric Eel or later for full compatibility.
+- Internet access is required for API calls, Firebase, and Maps functionalities.
+- Grant necessary permissions like location, camera, and storage to ensure smooth operation of features.
