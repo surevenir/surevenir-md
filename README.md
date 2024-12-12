@@ -21,8 +21,8 @@ With Surevenir, users can scan items to uncover their significance, authenticity
 
 ## App ScreenShot
 
-![App Screenshot]()  
-*See more screenshots [here]().*
+![App Screenshot](https://drive.google.com/file/d/1wEwPGXnZpjNWCX8oIrq8IK_XnJ68mlm6/view?usp=sharing)  
+*See more screenshots [here](https://drive.google.com/drive/folders/11eHSSGwNUmTrK9dH8kqzp9DlHTFRnKzW?usp=drive_link).*
 
 ## Demo Video
 
