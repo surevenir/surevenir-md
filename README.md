@@ -1,18 +1,43 @@
 ## About Surevenir Android App
 
+Inspired by observing tourists in Bali struggling with language barriers and unreliable information when buying souvenirs, we developed **Surevenir**. This app serves as a bridge between travelers and Balinese craftsmanship, ensuring informed, meaningful, and fairly priced purchases. 
+
+With Surevenir, users can scan items to uncover their significance, authenticity, and the impact on supporting local artisans. Our mission is to enhance travel experiences, promote ethical shopping, support the local economy, and preserve Balinese cultural heritage for future generations.
+
+---
+
 ## Features
+
+- **Firebase Authentication**: Secure login with Google Sign-In.
+- **Product Favorites**: Save your favorite souvenirs for quick access.
+- **Interactive Maps**: Explore marked shops and markets with detailed information and directions.
+- **Notification Screen**: View a history of notifications triggered by geofencing or Firebase Cloud Messaging (FCM).
+- **FCM Notifications**: Receive updates and alerts about offers and cultural events.
+- **Geofencing**: Get notified when within 1 km of a nearby market or shop.
+- **Souvenir Scanning**: Discover details of a souvenir by scanning its image.
+- **Scan History**: Keep track of all scanned items for future reference.
+- **Cart and Checkout**: Add items to the cart and seamlessly proceed with checkout.
+- **Gamification**: Leaderboard points system to reward users who scan the most souvenirs.
 
 ## App ScreenShot
 
+![App Screenshot]()  
+*See more screenshots [here]().*
+
 ## Demo Video
+
+We have both on-device and live-action demo videos. Check them out below!
 
 ### On Device
 
+
 ### Live Action
+
+[![On Device Demo](https://img.youtube.com/vi/<VIDEO_ID>/0.jpg)](https://www.youtube.com/watch?v=<VIDEO_ID>)
 
 Click the link below to download the latest release:
 
-[![Download Surevenir v1.0](https://img.shields.io/badge/Download-Surevenir--v1.0-blue?style=for-the-badge&logo=android)](https://github.com/surevenir/surevenir-md/releases/download/v1.0/Surevenir-v1.0)
+[![Live Action Demo](https://img.youtube.com/vi/FlkcaorMKwc/0.jpg)](https://www.youtube.com/watch?v=FlkcaorMKwc)
 
 ## Tools, Integration, and Libraries
 
