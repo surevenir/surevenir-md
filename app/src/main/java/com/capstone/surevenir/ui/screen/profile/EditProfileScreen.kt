@@ -131,7 +131,6 @@ fun EditProfileScreen(
                     }
                 }
             )
-            // Profile Image Section with modified onClick
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -176,7 +175,6 @@ fun EditProfileScreen(
                 }
             }
 
-            // Form Fields
             ProfileField(
                 label = "Full Name",
                 value = fullName,

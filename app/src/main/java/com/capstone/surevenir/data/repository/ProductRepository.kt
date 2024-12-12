@@ -1,6 +1,5 @@
 package com.capstone.surevenir.data.repository
 
-//import com.capstone.surevenir.data.dao.ProductDao
 import android.util.Log
 import com.capstone.surevenir.data.entity.ProductDatabase
 import com.capstone.surevenir.data.dao.ProductDao
@@ -39,11 +38,6 @@ class ProductRepository @Inject constructor(
             minStock
         )
     }
-
-
-//    suspend fun getProducts(token: String): Response<ProductResponse> {
-//        return apiService.getProducts(token)
-//    }
 
     suspend fun getProductDetail(productId: Int, token: String): ProductDetailResponse {
         return apiService.getProductDetail(productId, "Bearer $token")
@@ -89,14 +83,6 @@ class ProductRepository @Inject constructor(
     }
 
 
-//    fun getProductById(productId: Int): ProductData? {
-//        return productDao.getProductById(productId)?.let { productDatabaseToProduct(it) }
-//    }
-//
-//     suspend fun getProductById(productId: Int): ProductData? {
-//        val productDb = productDao.getProductById(productId)
-//        return productDb?.let { productDatabaseToProduct(it) }
-//    }
 private fun productToProductDatabase(product: ProductData): ProductDatabase {
     val categoryIds = product.product_categories.mapNotNull { it.category.id }.joinToString(",")
 
@@ -133,10 +119,9 @@ private fun productToProductDatabase(product: ProductData): ProductDatabase {
         )
     }
 
-    // Di ProductRepository atau ViewModel
     suspend fun debugProductInsertion() {
         val testProduct = ProductDatabase(
-            id = 1,  // Karena ini PrimaryKey dan tidak autoGenerate
+            id = 1,
             slug = "test-product",
             name = "Test Product",
             description = "Test Description",
@@ -144,9 +129,9 @@ private fun productToProductDatabase(product: ProductData): ProductDatabase {
             stock = 10,
             merchantId = 1,
             categories = "1",
-            createdAt = System.currentTimeMillis().toString(), // Convert to String karena di entity typenya String
+            createdAt = System.currentTimeMillis().toString(),
             updatedAt = System.currentTimeMillis().toString(),
-            images = "" // Kosong atau berikan string URL gambar
+            images = ""
         )
 
         try {

@@ -196,14 +196,6 @@ private fun GoogleMapContent(
 
             if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
                 val position = LatLng(lat, lng)
-//
-//                Circle(
-//                    center = position,
-//                    radius = 3000.0,
-//                    strokeColor = Color.Green.copy(alpha = 0.5f),
-//                    fillColor = Color.Green.copy(alpha = 0.1f),
-//                    strokeWidth = 2f
-//                )
 
                 Marker(
                     state = MarkerState(position = position),
@@ -228,13 +220,6 @@ private fun GoogleMapContent(
             if (lat != null && lng != null && lat in -90.0..90.0 && lng in -180.0..180.0) {
                 val position = LatLng(lat, lng)
 
-//                Circle(
-//                    center = position,
-//                    radius = 3000.0,
-//                    strokeColor = Color.Blue.copy(alpha = 0.5f),
-//                    fillColor = Color.Blue.copy(alpha = 0.1f),
-//                    strokeWidth = 2f
-//                )
 
                 Marker(
                     state = MarkerState(position = position),

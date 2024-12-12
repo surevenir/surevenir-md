@@ -140,7 +140,6 @@ fun PreviewScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // App Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()

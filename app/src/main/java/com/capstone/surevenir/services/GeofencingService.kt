@@ -26,14 +26,13 @@ class GeofencingService : Service() {
     override fun onCreate() {
         super.onCreate()
         geofencingClient = LocationServices.getGeofencingClient(this)
-        Log.d("GeofencingService", "Service Created")  // Tambahkan log ini
+        Log.d("GeofencingService", "Service Created")
 
-        // Wajib untuk Android O+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "geofence_service",
                 "Geofence Service",
-                NotificationManager.IMPORTANCE_HIGH  // Ubah ke HIGH
+                NotificationManager.IMPORTANCE_HIGH
             )
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
@@ -42,19 +41,17 @@ class GeofencingService : Service() {
                 .setContentTitle("Location Service Active")
                 .setContentText("Monitoring nearby locations")
                 .setSmallIcon(R.drawable.baseline_notifications_24)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)  // Tambahkan ini
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build()
 
-            Log.d("GeofencingService", "Starting foreground service")  // Tambahkan log ini
+            Log.d("GeofencingService", "Starting foreground service")
             startForeground(1, notification)
         }
     }
 
     private fun addGeofence(id: String, latitude: Double, longitude: Double, radius: Float = 1000f) {
-        // Debug log
         Log.d("GeofencingService", "Starting addGeofence for $id at $latitude, $longitude")
 
-        // Check permissions
         if (!hasRequiredPermissions()) {
             Log.e("GeofencingService", "Missing required permissions")
             return
@@ -66,7 +63,7 @@ class GeofencingService : Service() {
                 .setCircularRegion(latitude, longitude, radius)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-                .setNotificationResponsiveness(1000) // 1 second
+                .setNotificationResponsiveness(1000)
                 .build()
 
             val geofencingRequest = GeofencingRequest.Builder()
@@ -76,10 +73,8 @@ class GeofencingService : Service() {
 
             val pendingIntent = getGeofencePendingIntent()
 
-            // Remove existing geofences first
             geofencingClient.removeGeofences(pendingIntent)
                 .addOnCompleteListener {
-                    // Add new geofence
                     geofencingClient.addGeofences(geofencingRequest, pendingIntent)
                         .addOnSuccessListener {
                             Log.d("GeofencingService", "Successfully added geofence: $id")

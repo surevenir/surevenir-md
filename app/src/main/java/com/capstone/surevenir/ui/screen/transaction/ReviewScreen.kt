@@ -242,7 +242,6 @@ fun ReviewScreen(
                     shape = RoundedCornerShape(8.dp)
                 )
 
-                // Submit Button
                 Button(
                     onClick = {
                         token?.let { tokenValue ->

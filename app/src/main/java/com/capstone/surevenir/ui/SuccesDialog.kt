@@ -12,6 +12,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.capstone.surevenir.R
+import com.capstone.surevenir.ui.screen.navmenu.sfui_semibold
 
 @Composable
 fun SuccessDialog(navController: NavController, showDialog: MutableState<Boolean>) {
@@ -36,6 +44,20 @@ fun SuccessDialog(navController: NavController, showDialog: MutableState<Boolean
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.successlotie))
+                    val progress by animateLottieCompositionAsState(
+                        composition = composition,
+                        iterations = LottieConstants.IterateForever
+                    )
+
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier.size(150.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     Text(
                         text = "Sign Up Successful!",
                         fontSize = 18.sp,
@@ -56,3 +78,4 @@ fun SuccessDialog(navController: NavController, showDialog: MutableState<Boolean
         }
     }
 }
+

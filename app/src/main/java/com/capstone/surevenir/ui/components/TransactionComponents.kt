@@ -135,7 +135,6 @@ fun CartItemCard(
                 )
             }
 
-            // Product Details
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -292,7 +291,6 @@ fun CheckoutHistoryCard(
                 .padding(24.dp)
                 .fillMaxWidth()
         ) {
-            // Date and Status Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -391,7 +389,6 @@ fun CheckoutHistoryCard(
                 }
             }
 
-            // Additional Products Count
             if (checkout.checkoutDetails.size > 1) {
                 Text(
                     text = "+${checkout.checkoutDetails.size - 1} Other Products",
@@ -404,7 +401,6 @@ fun CheckoutHistoryCard(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp))
 
-            // Grand Total
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically

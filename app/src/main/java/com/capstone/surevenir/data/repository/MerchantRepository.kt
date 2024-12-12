@@ -16,7 +16,6 @@ class MerchantRepository @Inject constructor(
     private val apiService: ApiService,
     private val merchantDao: MerchantDao
 ) {
-    // Remote data
     suspend fun fetchMerchantsFromApi(token: String): Response<MerchantResponse> {
         return apiService.getMerchants(token)
     }
@@ -25,14 +24,13 @@ class MerchantRepository @Inject constructor(
         return apiService.getMerchantDetail(merchantId, "Bearer $token")
     }
 
-    // Local data
     fun getAllMerchants(): Flow<List<MerchantDatabase>> {
         return merchantDao.getAllMerchants()
     }
 
 
     suspend fun updateLocalMerchants(merchants: List<MerchantDatabase>) {
-        withContext(Dispatchers.IO) {  // Tambahkan ini
+        withContext(Dispatchers.IO) {
             merchantDao.updateMerchants(merchants)
 
         }
@@ -42,9 +40,8 @@ class MerchantRepository @Inject constructor(
         return merchantDao.getMerchantsByMarketId(marketId)
     }
 
-    // Function to fetch and cache merchants
     suspend fun refreshMerchants(token: String) {
-        withContext(Dispatchers.IO) {  // Tambahkan ini
+        withContext(Dispatchers.IO) {
             try {
                 val response = fetchMerchantsFromApi(token)
                 if (response.isSuccessful) {
@@ -59,13 +56,12 @@ class MerchantRepository @Inject constructor(
     }
 
     private suspend fun insertMerchants(merchants: List<MerchantDatabase>) {
-        withContext(Dispatchers.IO) {  // Tambahkan ini
+        withContext(Dispatchers.IO) {
             merchantDao.insertMerchants(merchants)
         }
     }
 
 
-    // Function to map API data to database entity
     private fun MerchantData.toMerchantDatabase() = MerchantDatabase(
         id = id,
         name = name,

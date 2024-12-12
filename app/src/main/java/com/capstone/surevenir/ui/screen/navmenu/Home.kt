@@ -107,19 +107,13 @@ import kotlinx.coroutines.launch
 fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltViewModel(), marketViewModel: MarketViewModel = hiltViewModel(), geocodingViewModel: GeocodingViewModel = hiltViewModel(), productViewModel: ProductViewModel = hiltViewModel(),     notificationViewModel: NotificationViewModel = hiltViewModel(), leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val geocodingViewModel: GeocodingViewModel = hiltViewModel()
-    var subDistrict by remember { mutableStateOf("Loading...") }
-    val productList = remember { mutableStateOf<List<ProductData>?>(null) }
     val pagingProducts = productViewModel.productPagingFlow.collectAsLazyPagingItems()
 
     val userPreferences = remember { UserPreferences(context) }
     val username = userPreferences.userName.collectAsState(initial = "User")
 
     val markets = remember { mutableStateOf<List<Market>?>(null) }
-    val scope = rememberCoroutineScope()
 
-    val unreadCount by notificationViewModel.unreadCount.observeAsState(0)
-    val notificationIcon = if (unreadCount > 0) R.drawable.notification_top_new else R.drawable.notification_top
     val userPoints by leaderboardViewModel.currentUserPoints.collectAsState()
 
 
@@ -135,7 +129,7 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
 
     LaunchedEffect(token) {
         token?.let {
-            leaderboardViewModel.fetchLeaderboard(it) // Fetch leaderboard data saat Home dibuka
+            leaderboardViewModel.fetchLeaderboard(it)
         }
     }
 
@@ -153,12 +147,11 @@ fun Home(navController: NavController, tokenViewModel: TokenViewModel = hiltView
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
 
-//            Sliding Username Text
 
             item {
                 GamificationHeader(
                     username = "${username.value}",
-                    points = userPoints, // Gunakan points dari leaderboard
+                    points = userPoints,
                     onLeaderboardClick = {
                         navController.navigate("leaderboard")
                     }
@@ -266,24 +259,21 @@ fun GamificationHeader(
             .fillMaxWidth()
             .padding(vertical = 5.dp, horizontal = 5.dp)
     ) {
-        // First Row: Greeting and Leaderboard
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Greeting Text
             Text(
                 text = "Hello, $username!",
                 style = MaterialTheme.typography.headlineMedium,
                 fontFamily = sfui_semibold,
                 color = Color(0xFF1E1E1E),
-                fontSize = 17.sp, // Consider using responsiveFontSize if needed
+                fontSize = 17.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
-            // Leaderboard Text
             Text(
                 text = "See Leaderboards",
                 modifier = Modifier
@@ -292,21 +282,19 @@ fun GamificationHeader(
                     .semantics { contentDescription = "Navigate to Leaderboards" },
                 style = MaterialTheme.typography.labelLarge,
                 color = Color(0xFFFF5524),
-                fontSize = 15.sp, // Consider using responsiveFontSize if needed
+                fontSize = 15.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
 
-        Spacer(modifier = Modifier.height(4.dp)) // Space between rows
+        Spacer(modifier = Modifier.height(4.dp))
 
-        // Second Row: Animated Informational Text and Points
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top // Align to Top to accommodate multi-line text
+            verticalAlignment = Alignment.Top
         ) {
-            // Informational Text: Animated
             AnimatedHighlightText(
                 phrases = listOf(
                     "Get 100 Points per Scan You Make",
@@ -316,21 +304,20 @@ fun GamificationHeader(
                     "Click love icon to add your product to favorites"
                 ),
                 modifier = Modifier.weight(1f),
-                highlightColor = Color(0xFFFFCC00), // Customize as needed
+                highlightColor = Color(0xFFFFCC00),
                 normalColor = Color(0xFF1E1E1E),
-                wordHighlightDuration = 500,       // Highlight duration per word
-                phraseDisplayDuration = 3000       // Total display duration per phrase
+                wordHighlightDuration = 500,
+                phraseDisplayDuration = 3000
             )
 
-            Spacer(modifier = Modifier.width(8.dp)) // Space between AnimatedHighlightText and Points Text
+            Spacer(modifier = Modifier.width(8.dp))
 
-            // Points Text
             Text(
                 text = "$points Points",
                 style = MaterialTheme.typography.titleMedium,
                 fontFamily = sfui_semibold,
                 color = Color(0xFF1E1E1E),
-                fontSize = 16.sp, // Consider using responsiveFontSize if needed
+                fontSize = 16.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -372,39 +359,32 @@ fun HomeProductsSection(
 fun AnimatedHighlightText(
     phrases: List<String>,
     modifier: Modifier = Modifier,
-    highlightColor: Color = Color(0xFFFFCC00), // Yellow highlight
-    normalColor: Color = Color(0xFF1E1E1E),    // Dark Gray normal text
-    wordHighlightDuration: Long = 500,        // Duration each word is highlighted (ms)
-    phraseDisplayDuration: Long = 3000        // Total duration each phrase is displayed (ms)
+    highlightColor: Color = Color(0xFFFFCC00),
+    normalColor: Color = Color(0xFF1E1E1E),
+    wordHighlightDuration: Long = 500,
+    phraseDisplayDuration: Long = 3000
 ) {
-    // State to keep track of the current phrase index
     var currentPhraseIndex by remember { mutableStateOf(0) }
-    // State to keep track of the current word index (-1 means no word is highlighted)
     var currentWordIndex by remember { mutableStateOf(-1) }
 
     val currentPhrase = phrases[currentPhraseIndex]
     val words = currentPhrase.split(" ")
 
     LaunchedEffect(currentPhraseIndex) {
-        // Highlight each word in the current phrase sequentially
         for (i in words.indices) {
             currentWordIndex = i
             delay(wordHighlightDuration)
         }
-        // Reset highlight
         currentWordIndex = -1
-        // Wait for the remaining time before switching to the next phrase
         delay(phraseDisplayDuration - wordHighlightDuration * words.size)
-        // Move to the next phrase in the list
         currentPhraseIndex = (currentPhraseIndex + 1) % phrases.size
     }
 
     Row(modifier = modifier) {
         words.forEachIndexed { index, word ->
-            // Animate the color change for highlighting
             val color by animateColorAsState(
                 targetValue = if (index == currentWordIndex) highlightColor else normalColor,
-                animationSpec = tween(durationMillis = 300) // Fade duration
+                animationSpec = tween(durationMillis = 300)
             )
             Text(
                 text = word,
@@ -413,7 +393,7 @@ fun AnimatedHighlightText(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.width(4.dp)) // Space between words
+            Spacer(modifier = Modifier.width(4.dp))
         }
     }
 }
@@ -1065,7 +1045,6 @@ fun ProductDetailSkeleton() {
             }
         }
 
-        // Details section
         item {
             Column(
                 modifier = Modifier.padding(16.dp)

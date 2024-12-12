@@ -30,7 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductViewModel @Inject constructor(
     private val productRepository: ProductRepository,
-    private val apiService: ApiService  // Add this
+    private val apiService: ApiService
 ) : ViewModel() {
 
     private val _filteredProducts = MutableStateFlow<List<ProductData>>(emptyList())
@@ -85,7 +85,7 @@ class ProductViewModel @Inject constructor(
                     ProductPagingSource(
                         apiService,
                         "Bearer ${token}",
-                        productRepository // Pass repository ke PagingSource
+                        productRepository
                     )
                 }
             ).flow.cachedIn(viewModelScope).collect {

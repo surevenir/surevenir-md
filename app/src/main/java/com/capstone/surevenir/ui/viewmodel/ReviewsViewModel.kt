@@ -117,7 +117,6 @@ class ReviewsViewModel @Inject constructor(
                     _reviewsResponse.value = reviews
                     _totalReviews.value = reviews.size
 
-                    // Hitung rata-rata rating
                     val totalRating = reviews.sumOf { it.rating }
                     _averageRating.value = if (reviews.isNotEmpty()) {
                         totalRating.toDouble() / reviews.size

@@ -1,6 +1,5 @@
 package com.capstone.surevenir.data.network.response
 
-// Data/LeaderboardResponse.kt
 data class LeaderboardResponse(
     val success: Boolean,
     val status_code: Int,

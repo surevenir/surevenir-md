@@ -9,7 +9,7 @@ import com.capstone.surevenir.data.repository.ProductRepository
 class ProductPagingSource(
     private val apiService: ApiService,
     private val token: String,
-    private val productRepository: ProductRepository // Tambahkan ini
+    private val productRepository: ProductRepository
 ) : PagingSource<Int, ProductData>() {
 
     override fun getRefreshKey(state: PagingState<Int, ProductData>): Int? {
@@ -25,7 +25,6 @@ class ProductPagingSource(
             val response = apiService.getProducts(token, page, params.loadSize)
 
             if (response.isSuccessful && response.body() != null) {
-                // Insert data ke database
                 response.body()?.data?.forEach { product ->
                     productRepository.insertProduct(product)
                 }

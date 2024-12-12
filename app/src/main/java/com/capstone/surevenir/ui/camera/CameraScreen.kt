@@ -128,7 +128,6 @@ fun CameraScreen(
             )
         }
 
-        // Bottom controls
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -142,7 +141,6 @@ fun CameraScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Gallery Button to open the full gallery
                 IconButton(
                     onClick = {
                         val intent = Intent(Intent.ACTION_PICK)
@@ -160,7 +158,6 @@ fun CameraScreen(
                     )
                 }
 
-                // Capture Button (remain unchanged)
                 IconButton(
                     onClick = {
                         token?.let {
@@ -187,7 +184,6 @@ fun CameraScreen(
                                     }
 
                                     override fun onError(exception: ImageCaptureException) {
-                                        // Handle error
                                     }
                                 }
                             )
@@ -211,7 +207,6 @@ fun CameraScreen(
                     )
                 }
 
-                // Flip Camera Button (remain unchanged)
                 IconButton(
                     onClick = {
                         lensFacing = if (lensFacing == CameraSelector.DEFAULT_BACK_CAMERA) {

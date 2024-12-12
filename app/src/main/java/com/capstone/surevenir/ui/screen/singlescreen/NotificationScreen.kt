@@ -39,7 +39,6 @@ fun NotificationScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Bagian header
         Row(
             modifier = Modifier
                 .fillMaxWidth()

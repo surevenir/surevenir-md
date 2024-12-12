@@ -114,8 +114,6 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
 
 
     LaunchedEffect(productViewModel.minPriceFilter, productViewModel.maxPriceFilter, productViewModel.minStockFilter, productViewModel.startDateFilter, productViewModel.endDateFilter) {
-        // Jika semua filter bernilai null, mungkin tidak perlu apply
-        // Tapi jika salah satu berubah atau user baru saja set filter, panggil applyFilter
         if (productViewModel.minPriceFilter != null || productViewModel.maxPriceFilter != null || productViewModel.minStockFilter != null || productViewModel.startDateFilter != null || productViewModel.endDateFilter != null) {
             productViewModel.applyFilter()
         }
@@ -187,7 +185,7 @@ fun ShopScreen(navController: NavHostController, tokenViewModel: TokenViewModel 
                 item {
                     if (token != null) {
                         LaunchedEffect(token) {
-                            merchantViewModel.getMerchants(token!!) { merchantList ->  // Hapus "Bearer " karena sudah ditangani di ViewModel
+                            merchantViewModel.getMerchants(token!!) { merchantList ->
                                 merchants.value = merchantList
                             }
                         }
@@ -538,7 +536,7 @@ fun FilterBottomSheet(
     var maxPrice by remember { mutableStateOf("") }
     var minStock by remember { mutableStateOf("") }
 
-    var startDate by remember { mutableStateOf("") } // date dalam string, nanti convert ke long
+    var startDate by remember { mutableStateOf("") }
     var endDate by remember { mutableStateOf("") }
 
     var selectedPriceOption by remember { mutableStateOf<String?>(null) }

@@ -10,9 +10,9 @@ data class NotificationDatabase(
     val id: Long = 0,
     val title: String,
     val message: String,
-    val locationId: String,  // merchant_id or market_id
-    val locationType: String, // "merchant" or "market"
-    val numericId: Int,      // The actual ID of merchant or market
+    val locationId: String,
+    val locationType: String,
+    val numericId: Int,
     val timestamp: Date,
     val isRead: Boolean = false
 )

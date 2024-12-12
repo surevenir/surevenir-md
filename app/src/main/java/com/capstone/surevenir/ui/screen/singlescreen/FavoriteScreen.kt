@@ -117,7 +117,6 @@ fun FavoriteScreen(
             )
         }
 
-        // Content
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -217,7 +216,7 @@ fun FavoriteProductCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(265.dp)
+            .height(245.dp)
             .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
             .clickable(onClick = onProductClick),
         shape = RoundedCornerShape(16.dp),
@@ -263,21 +262,7 @@ fun FavoriteProductCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Merchant #${product.merchant_id}",
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontFamily = sfui_med,
-                            color = Color.Gray
-                        ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
                 }
-            }
         }
     }
 }

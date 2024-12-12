@@ -153,7 +153,6 @@ fun SingleProductScreen(
 
     LaunchedEffect(token) {
         token?.let {
-            // Ambil daftar favorit saat token sudah siap
             favoriteViewModel.getFavoriteProducts(it)
         }
     }
@@ -601,11 +600,11 @@ fun AddToCartDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
     productName: String,
-    price: Int,  // Ubah dari Double ke Int karena product.price bertipe Int
+    price: Int,
     maxQuantity: Int,
     onConfirm: (Int) -> Unit
 ) {
-    var quantity by remember { mutableStateOf(1) }  // Tambahkan ini
+    var quantity by remember { mutableStateOf(1) }
 
     if (showDialog) {
         Dialog(onDismissRequest = onDismiss) {
@@ -694,7 +693,7 @@ fun AddToCartDialog(
                         Button(
                             onClick = {
                                 onConfirm(quantity)
-                                quantity = 1  // Reset quantity
+                                quantity = 1
                                 onDismiss()
                             },
                             colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFED8A00)),

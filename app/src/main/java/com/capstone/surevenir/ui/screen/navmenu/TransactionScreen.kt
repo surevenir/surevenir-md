@@ -237,7 +237,6 @@ private fun CartTab(
                         .fillMaxSize()
                         .padding(bottom = 80.dp)
                 ) {
-                    // Selection header
                     if (selectedItems.isNotEmpty()) {
                         Row(
                             modifier = Modifier
@@ -292,7 +291,6 @@ private fun CartTab(
                     }
                 }
 
-                // Bottom Bar with Select All and Checkout Button
                 Surface(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
