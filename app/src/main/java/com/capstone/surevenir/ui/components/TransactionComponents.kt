@@ -301,7 +301,7 @@ fun CheckoutHistoryCard(
                 Text(
                     text = "ORDER",
                     fontFamily = sfui_semibold,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     color = Color.Black,
                     fontWeight = FontWeight.ExtraBold
 

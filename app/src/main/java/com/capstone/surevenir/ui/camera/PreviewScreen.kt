@@ -170,12 +170,11 @@ fun PreviewScreen(
             )
 
             Image(
-                painter = painterResource(id = R.drawable.logo),
+                painter = painterResource(id = R.drawable.surevenir_logo_home),
                 contentDescription = "Logo",
                 modifier = Modifier
                     .padding(end = 10.dp)
-                    .size(30.dp),
-                colorFilter = ColorFilter.tint(Color.White)
+                    .size(30.dp)
             )
         }
 

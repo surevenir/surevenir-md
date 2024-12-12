@@ -426,6 +426,7 @@
                     )
                 }
                 composable("home") {
+                    imageCaptureViewModel.clearPredictionResult()
                     Home(navController = navController)
                 }
                 composable("favorite") {
