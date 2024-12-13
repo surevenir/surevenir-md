@@ -2,7 +2,7 @@
 
 Inspired by observing tourists in Bali struggling with language barriers and unreliable information when buying souvenirs, we developed **Surevenir**. This app serves as a bridge between travelers and Balinese craftsmanship, ensuring informed, meaningful, and fairly priced purchases. 
 
-With Surevenir, users can scan items to uncover their significance, authenticity, and the impact on supporting local artisans. Our mission is to enhance travel experiences, promote ethical shopping, support the local economy, and preserve Balinese cultural heritage for future generations.
+With Surevenir, users can scan items to uncover their details with price range and the impact on supporting local artisans. Our mission is to enhance travel experiences, promote ethical shopping, support the local economy.
 
 ---
 
