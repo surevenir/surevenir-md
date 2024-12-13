@@ -34,12 +34,9 @@ We have both on-device and live-action demo videos. Check them out below!
 
 ### On Device
 
+[![On Device Live Action Demo](https://img.youtube.com/vi/FlkcaorMKwc/0.jpg)](https://www.youtube.com/watch?v=FlkcaorMKwc)
 
 ### Live Action
-
-[![On Device Demo](https://img.youtube.com/vi/<VIDEO_ID>/0.jpg)](https://www.youtube.com/watch?v=<VIDEO_ID>)
-
-Click the link below to download the latest release:
 
 [![Live Action Demo](https://img.youtube.com/vi/FlkcaorMKwc/0.jpg)](https://www.youtube.com/watch?v=FlkcaorMKwc)
 
