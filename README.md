@@ -102,7 +102,7 @@ We have both on-device and live-action demo videos. Check them out below!
 
 ## Additional Notes
 
-- Ensure the Google Maps API Key is correctly configured in the `AndroidManifest.xml` or via `local.properties`.
+- Ensure the MAPS API KEY and API ENDPOINT (https://surevenir-backend-30505862512.us-central1.run.app/api/) in BuildConfig Gradle is Setup.
 - Add the `google-services.json` file in the `app/` directory for Firebase integration.
 - Use Android Studio Electric Eel or later for full compatibility.
 - Internet access is required for API calls, Firebase, and Maps functionalities.
