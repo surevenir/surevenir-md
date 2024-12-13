@@ -25,7 +25,9 @@ Click the link below to download the latest release:
 
 ## App ScreenShot
 
-![App Screenshot](https://drive.google.com/file/d/1wEwPGXnZpjNWCX8oIrq8IK_XnJ68mlm6/view?usp=sharing)  
+![App Screenshot](https://github.com/surevenir/surevenir-md/releases/download/v1.0/1.png)
+![App Screenshot](https://github.com/surevenir/surevenir-md/releases/download/v1.0/2.png)
+![App Screenshot](https://github.com/surevenir/surevenir-md/releases/download/v1.0/3.png)
 *See more screenshots [here](https://drive.google.com/drive/folders/11eHSSGwNUmTrK9dH8kqzp9DlHTFRnKzW?usp=drive_link).*
 
 ## Demo Video
