@@ -6,6 +6,9 @@ With Surevenir, users can scan items to uncover their significance, authenticity
 
 ---
 
+Click the link below to download the latest release:
+[![Download Surevenir v1.0](https://img.shields.io/badge/Download-Surevenir--v1.0-blue?style=for-the-badge&logo=android)](https://github.com/surevenir/surevenir-md/releases/download/v1.0/Surevenir-v1.0)
+
 ## Features
 
 - **Firebase Authentication**: Secure login with Google Sign-In.
